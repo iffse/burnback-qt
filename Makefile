@@ -10,10 +10,10 @@ release: ./target/release/burnback-qt
 qmakefile:
 	qmake -makefile -o qmakefile
 
-./target/debug/burnback-qt: qmakefile
+./target/debug/burnback-qt: ./src ./src-qml qmakefile
 	make -f qmakefile debug
 
-./target/release/burnback-qt: qmakefile
+./target/release/burnback-qt: ./src ./src-qml qmakefile
 	make -f qmakefile release
 
 clean:
