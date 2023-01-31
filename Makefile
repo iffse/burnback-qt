@@ -7,14 +7,17 @@ debug: ./target/debug/burnback-qt
 
 release: ./target/release/burnback-qt
 
-qmakefile:
-	qmake -makefile -o qmakefile
+./.qmake-debug:
+	qmake -makefile -o .qmake-debug CONFIG+=debug
 
-./target/debug/burnback-qt: ./src ./src-qml qmakefile
-	make -f qmakefile debug
+./.qmake-release:
+	qmake -makefile -o .qmake-release CONFIG+=release
 
-./target/release/burnback-qt: ./src ./src-qml qmakefile
-	make -f qmakefile release
+./target/debug/burnback-qt: ./src ./src-qml ./.qmake-debug
+	make -f .qmake-debug
+
+./target/release/burnback-qt: ./src ./src-qml ./.qmake-release
+	make -f .qmake-release
 
 clean:
-	rm -rf ./debug ./release/ ./qmakefile* ./target/ ./.qmake.stash ./.cache
+	rm -rf ./.qmake-debug ./.qmake-release ./target/ ./..qmake.stash ./.cache

@@ -1,13 +1,16 @@
 QT += qml
-CONFIG += \
-	c++17 \
-	debug_and_release
+CONFIG += c++17
 
 CONFIG(debug, debug|release) {
 	DESTDIR = target/debug
 } else {
 	DESTDIR = target/release
 }
+
+OBJECTS_DIR = $$DESTDIR/objects
+MOC_DIR = $$DESTDIR/moc
+RCC_DIR = $$DESTDIR/qrc
+UI_DIR = $$DESTDIR/ui
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 

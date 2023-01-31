@@ -1,8 +1,7 @@
 .cache
-.qmake.stash
+.qmake*
 target
 burnback-qt.pro.user
 compile_commands.json
 release
 debug
-qmakefile*
