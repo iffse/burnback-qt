@@ -1,0 +1,8 @@
+.cache
+.qmake.stash
+target
+burnback-qt.pro.user
+compile_commands.json
+release
+debug
+qmakefile*
