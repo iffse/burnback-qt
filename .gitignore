@@ -5,3 +5,5 @@ burnback-qt.pro.user
 compile_commands.json
 release
 debug
+docs/doxygen
+include/
