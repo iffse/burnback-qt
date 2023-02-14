@@ -1,5 +1,12 @@
 <RCC>
 	<qresource prefix="/">
+		<file>qtquickcontrols2.conf</file>
 		<file>main.qml</file>
+		<file>AplicationMenu.qml</file>
+		<file>Tabs.qml</file>
+		<file>InputBox.qml</file>
+		<file>OutputBox.qml</file>
+		<file>PlotArea.qml</file>
+		<file>Output.qml</file>
 	</qresource>
 </RCC>

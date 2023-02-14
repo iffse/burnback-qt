@@ -1,4 +1,5 @@
-QT += qml
+# QT += qml
+QT += quick
 CONFIG += c++17
 
 CONFIG(debug, debug|release) {
@@ -14,7 +15,11 @@ UI_DIR = $$DESTDIR/ui
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
-# HEADERS +=
+# Include dependencies
+INCLUDEPATH += $$PWD/include/eigen/
+
+HEADERS += \
+	src/headers/reader.h
 SOURCES += \
 	src/main.cpp
 RESOURCES += \
