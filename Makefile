@@ -1,11 +1,31 @@
 .DEFAULT_GOAL := run
 
-run: ./target/debug/burnback-qt
-	./target/debug/burnback-qt
+EXECUTABLE := burnback-qt
+DEBUG := target/debug
+RELEASE := target/release
 
-debug: ./target/debug/burnback-qt
+ifeq ($(OS),Windows_NT)
+	EXECUTABLE := $(EXECUTABLE).exe
+	DEBUG := $(DEBUG)/$(EXECUTABLE)
+	RELEASE := $(RELEASE)/$(EXECUTABLE)
+else
+	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Linux)
+		DEBUG := $(DEBUG)/$(EXECUTABLE)
+		RELEASE := $(RELEASE)/$(EXECUTABLE)
+	endif
+	ifeq ($(UNAME_S),Darwin)
+		DEBUG := $(DEBUG)/$(EXECUTABLE)
+		RELEASE := $(RELEASE)/$(EXECUTABLE)
+	endif
+endif
 
-release: ./target/release/burnback-qt
+run: $(DEBUG)
+	$(DEBUG)
+
+debug: $(DEBUG)
+
+release: $(RELEASE)
 
 ./.qmake-debug:
 	qmake -makefile -o .qmake-debug CONFIG+=debug
@@ -13,10 +33,10 @@ release: ./target/release/burnback-qt
 ./.qmake-release:
 	qmake -makefile -o .qmake-release CONFIG+=release
 
-./target/debug/burnback-qt: ./src ./src-qml ./.qmake-debug
+$(DEBUG): ./src ./src-qml ./.qmake-debug
 	make -f .qmake-debug
 
-./target/release/burnback-qt: ./src ./src-qml ./.qmake-release
+$(RELEASE): ./src ./src-qml ./.qmake-release
 	make -f .qmake-release
 
 clean:
