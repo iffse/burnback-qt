@@ -2,10 +2,17 @@ import QtQuick 2.15
 import QtQuick.Controls 2.12
 
 Item {
-		GroupBox {
-			id: output
-			title: qsTr("Output")
+	GroupBox {
+		id: output
+		title: qsTr("Output")
+		anchors.fill: parent
+
+		ScrollView {
+			clip: true
+			id: scrollView
 			anchors.fill: parent
+			objectName: "outputScroll"
+
 			TextArea {
 				id: textArea
 				text: ""
@@ -14,6 +21,11 @@ Item {
 
 				selectByMouse: true
 				readOnly: true
+				objectName: "output"
+				onTextChanged: {
+					cursorPosition = length-1
+				}
 			}
 		}
+	}
 }

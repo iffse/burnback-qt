@@ -19,9 +19,12 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 INCLUDEPATH += $$PWD/include/eigen/
 
 HEADERS += \
-	src/headers/reader.h
+	src/headers/globals.h \
+	src/headers/reader.h \
+	src/headers/interface.h
 SOURCES += \
-	src/main.cpp
+	src/main.cpp \
+	src/interface.cpp
 RESOURCES += \
 	src-qml/qml.qrc
 
