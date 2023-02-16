@@ -11,9 +11,11 @@ ApplicationWindow {
 	title: qsTr("Burnback")
 
 	menuBar: AplicationMenu {}
-	RowLayout {
+
+	contentData: RowLayout {
 		anchors.fill: parent
 		anchors.margins: 10
+		spacing: 10
 
 		Tabs {
 			Layout.preferredWidth: 250
@@ -33,4 +35,5 @@ ApplicationWindow {
 		}
 	}
 
+	footer: Footer {}
 }
