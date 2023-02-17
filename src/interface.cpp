@@ -1,8 +1,10 @@
 #include <QDebug>
+#include <QFile>
 #include <chrono>
 #include <thread>
 
 #include <src/headers/interface.h>
+#include <src/headers/reader.h>
 #include <src/headers/globals.h>
 
 Actions::Actions(QObject *parent) : QObject(parent)
@@ -13,21 +15,67 @@ Actions::Actions(QObject *parent) : QObject(parent)
 void Actions::appendOutput(QString text) {
 	QObject *output = root->findChild<QObject*>("output");
 	auto currentText = output->property("text").toString();
-	currentText.append(text);
-	output->setProperty("text", currentText);
-}
+	auto setText = currentText + text + "\n";
 
-
-void Actions::worker() {
-	for (int i = 0; i < 100; ++i) {
-		emit newOutput(QString::number(i) + "\n");
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	// limit the number of lines
+	auto maxLines = 100;
+	auto lines = setText.count("\n");
+	if (lines < maxLines) {
+		output->setProperty("text", setText);
+		return;
 	}
+
+	auto indexRemove = 0;
+	if (lines > 2 * maxLines) {
+		for (int i = 0; i < maxLines; ++ i) {
+			indexRemove = setText.lastIndexOf("\n", indexRemove - 2);
+		}
+	} else {
+		for (int i = 0; i < lines - maxLines; ++ i) {
+			indexRemove = setText.indexOf("\n", indexRemove + 2);
+		}
+	}
+
+	setText.remove(0, indexRemove);
+	output->setProperty("text", setText);
 }
 
 void Actions::run()
 {
-	std::thread t1(&Actions::worker, this);
-	t1.detach();
+	appendOutput("--> Reading inputs");
+	if (!Reader::readInput()) {
+		emit newOutput("Error when reading inputs");
+		return;
+	}
+	std::thread thread(&Actions::worker, this);
+	thread.detach();
+}
+
+void Actions::afterWorker() {
+}
+
+void Actions::worker() {
+	QObject *output = root->findChild<QObject*>("fileDialog");
+	auto filePath = output->property("fileUrl").toString();
+	if (filePath.isEmpty()) {
+		emit newOutput("Error: No file selected");
+		return;
+	}
+	QString substring = "file://";
+	if (filePath.startsWith(substring))
+		filePath.remove(0, substring.length());
+
+	emit newOutput("--> Reading mesh");
+	if (!Reader::readMesh(filePath)) {
+		emit newOutput("Error: Could not open mesh file");
+		emit finished();
+		return;
+	}
+
+	// auto clock = std::chrono::system_clock::now();
+	// 	auto now = std::chrono::system_clock::now();
+	// 	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
+	// 	}
+	// }
 }
 

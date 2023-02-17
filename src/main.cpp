@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QFontDatabase>
 
 #include "src/headers/interface.h"
 #include "src/headers/globals.h"
@@ -24,6 +25,11 @@ int main(int argc, char *argv[])
 
 	// Get the root object in order to access children properties
 	root = engine.rootObjects().first();
+
+	// Use monospaced font for output
+	const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+	QObject *output = root->findChild<QObject*>("output");
+	output->setProperty("font", fixedFont);
 
 	// Set the context property to access the class from QML
 	QQmlContext *rootContext = engine.rootContext();

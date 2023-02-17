@@ -1,34 +1,46 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.15
+import QtQuick.Dialogs 1.3
 
 ScrollView {
-	id: scroller
 	clip: true
 	Column {
-		id: column
 		spacing: 10
 		width: parent.width
 
 		GroupBox {
-			id: groupBox
 			title: qsTr("Mesh data")
 			width: parent.width
 
 			Column {
-				id: row2
 				width: parent.width
 
 				Label {
-					id: label2
+					id: meshLabel
 					text: qsTr("Click \"import\" and select a mesh file (*.dat)")
 					width: parent.width
 					wrapMode: Text.Wrap
 				}
 
 				Button {
-					id: importMesh
 					text: qsTr("Import")
+					onClicked: fileDialog.open()
+				}
+				FileDialog {
+					id: fileDialog
+					objectName: "fileDialog"
+					selectExisting: true
+					selectFolder: false
+					folder: ""
+					nameFilters: ["Mesh files (*.dat)"]
+					onAccepted: {
+						meshLabel.text = ("Current selection:\n" + basename(fileUrl.toString()))
+					}
+					function basename(path) {
+						path.slice(path.lastIndexOf("\\") + 1)
+						return path.slice(path.lastIndexOf("/") + 1)
+					}
 				}
 			}
 		}
@@ -36,40 +48,20 @@ ScrollView {
 		GroupBox {
 			width: parent.width
 			visible: true
-			id: model
 			title: qsTr("Model data")
 
 			Column {
-				id: column1
 
-				Label {
-					id: label
-					text: qsTr("Number of segments")
-					property string toolTipText: "Number of segments used to draw the geometry of the solution"
-					ToolTip.text: toolTipText
-					ToolTip.visible: toolTipText ? mouseArea.containsMouse : false
-					ToolTip.delay: 500
-
-					MouseArea {
-						id: mouseArea
-						anchors.fill: parent
-						hoverEnabled: true
-					}
-				}
-
-				TextField {
-					id: textField1
-					placeholderText: qsTr("Enter a number")
-					selectByMouse: true
-					validator: DoubleValidator {
-						bottom: 0
-						top: 999999999
-						decimals: 9
-					}
+				LabelInput {
+					text: "Number of areas"
+					placeholderText: "Enter a number"
+					toolTipText: "Influence the number of segments used to draw the geometry of the solution"
+					objName: "areas"
+					decimals: true
 				}
 
 				CheckBox {
-					id: axisymmetric
+					objectName: "axisymmetric"
 					text: qsTr("Axisymmetric")
 					ToolTip.text: qsTr("Mark this checkbox if the model considered is axisymmetric")
 					ToolTip.visible: hovered
@@ -78,7 +70,7 @@ ScrollView {
 				}
 
 				CheckBox {
-					id: resume
+					objectName: "resume"
 					text: qsTr("Resume")
 					ToolTip.text: qsTr("Mark this checkbox if the calculation is a continuation of a previous computation")
 					ToolTip.visible: hovered
@@ -89,139 +81,48 @@ ScrollView {
 		}
 
 		GroupBox {
-			id: calculation
 			title: qsTr("Computation data")
 			width: parent.width
 
 			Column {
-				id: column2
+				spacing: 5
 
-				Label {
-					id: label1
-					text: qsTr("CFL")
-					property string toolTipText: "Adimensional time. (CFL = c * dt / dx = Speed of sound / Element size)"
-					ToolTip.text: toolTipText
-					ToolTip.visible: toolTipText ? cflMA.containsMouse : false
-					ToolTip.delay: 500
-
-					MouseArea {
-						id: cflMA
-						anchors.fill: parent
-						hoverEnabled: true
-					}
+				LabelInput {
+					text: "CFL"
+					placeholderText: "Enter a number"
+					toolTipText: "Adimensional time. (CFL = c * dt / dx = Speed of sound / Element size)"
+					objName: "cfl"
+					decimals: true
 				}
 
-				TextField {
-					id: textField
-					placeholderText: qsTr("Enter a number")
-					selectByMouse: true
-					validator: DoubleValidator {
-						bottom: 0
-						top: 999999999
-						decimals: 9
-					}
+				LabelInput {
+					text: "Minimum iterations"
+					placeholderText: "Enter a number"
+					toolTipText: "Minimum number of iterations for the computation"
+					objName: "minIter"
 				}
 
-				Label {
-					id: label3
-					text: qsTr("Minimum iterations")
-					property string toolTipText: "Minimum number of iterations for the computation"
-					ToolTip.text: toolTipText
-					ToolTip.visible: toolTipText ? minIterMA.containsMouse : false
-					ToolTip.delay: 500
-
-					MouseArea {
-						id: minIterMA
-						anchors.fill: parent
-						hoverEnabled: true
-					}
+				LabelInput {
+					text: "Maximum iterations"
+					placeholderText: "Enter a number"
+					toolTipText: "Maximum number of iterations for the computation"
+					objName: "maxIter"
 				}
 
-				TextField {
-					id: textField2
-					placeholderText: qsTr("Enter a number")
-					selectByMouse: true
-					validator: DoubleValidator {
-						bottom: 0
-						top: 999999999
-						decimals: 9
-					}
+				LabelInput {
+					text: "Tolerance"
+					placeholderText: "Enter a number"
+					toolTipText: "Maximum error admitted for the computation"
+					objName: "tolerance"
+					decimals: true
 				}
 
-				Label {
-					id: label4
-					text: qsTr("Maximum iterations")
-					property string toolTipText: "Maximum number of iterations for the computation"
-					ToolTip.text: toolTipText
-					ToolTip.visible: toolTipText ? maxIterMA.containsMouse : false
-					ToolTip.delay: 500
-
-					MouseArea {
-						id: maxIterMA
-						anchors.fill: parent
-						hoverEnabled: true
-					}
-				}
-
-				TextField {
-					id: textField3
-					placeholderText: qsTr("Enter a number")
-					selectByMouse: true
-					validator: DoubleValidator {
-						bottom: 0
-						top: 999999999
-						decimals: 9
-					}
-				}
-
-				Label {
-					id: label5
-					text: qsTr("Admitted error")
-					property string toolTipText: "Maximum error admitted for the computation"
-					ToolTip.text: toolTipText
-					ToolTip.visible: toolTipText ? maxErrMA.containsMouse : false
-					ToolTip.delay: 500
-					MouseArea {
-						id: maxErrMA
-						anchors.fill: parent
-						hoverEnabled: true
-					}
-				}
-
-				TextField {
-					id: textField4
-					placeholderText: qsTr("Enter a number")
-					selectByMouse: true
-					validator: DoubleValidator {
-						bottom: 0
-						top: 999999999
-						decimals: 9
-					}
-				}
-
-				Label {
-					id: label6
-					text: qsTr("Artificial viscosity coeficient")
-					property string toolTipText: "Viscosity added to the solution to obtain smooth solutions across discontinuities"
-					ToolTip.text: toolTipText
-					ToolTip.visible: toolTipText ? viscMA.containsMouse : false
-					ToolTip.delay: 500
-					MouseArea {
-						id: viscMA
-						anchors.fill: parent
-						hoverEnabled: true
-					}
-				}
-
-				TextField {
-					id: textField5
-					placeholderText: qsTr("Enter a number")
-					selectByMouse: true
-					validator: DoubleValidator {
-						bottom: 0
-						top: 999999999
-						decimals: 9
-					}
+				LabelInput {
+					text: "Artificial viscosity coeficient"
+					placeholderText: "Enter a number"
+					toolTipText: "Viscosity added to the solution to obtain smooth solutions across discontinuities"
+					objName: "viscosity"
+					decimals: true
 				}
 			}
 		}

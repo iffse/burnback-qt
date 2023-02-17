@@ -11,9 +11,11 @@ public:
 
 signals:
 	void newOutput(QString output);
+	void finished();
 
 public slots:
 	void run();
 	void appendOutput(QString output);
 	void worker();
+	void afterWorker();
 };

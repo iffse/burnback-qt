@@ -24,7 +24,8 @@ HEADERS += \
 	src/headers/interface.h
 SOURCES += \
 	src/main.cpp \
-	src/interface.cpp
+	src/interface.cpp \
+	src/reader.cpp
 RESOURCES += \
 	src-qml/qml.qrc
 

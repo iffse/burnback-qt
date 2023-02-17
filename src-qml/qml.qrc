@@ -9,5 +9,6 @@
 		<file>PlotArea.qml</file>
 		<file>Output.qml</file>
 		<file>Footer.qml</file>
+		<file>LabelInput.qml</file>
 	</qresource>
 </RCC>

@@ -18,12 +18,11 @@ Item {
 				text: ""
 				placeholderText: "Outputs would be printed here."
 				anchors.fill: parent
-
 				selectByMouse: true
 				readOnly: true
 				objectName: "output"
 				onTextChanged: {
-					cursorPosition = length-1
+					cursorPosition = length-2
 				}
 			}
 		}
