@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QString>
+#include <QTextStream>
 
 namespace Reader {
-	bool readInput();
-	bool readMesh(QString filePath);
+	void readInput();
+	void readMesh(QTextStream &in);
 }

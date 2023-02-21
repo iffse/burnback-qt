@@ -14,16 +14,28 @@ inline int maxIter;
 inline double tolerance;
 inline double viscosity;
 
-const auto maxNodes = 25000;
-const auto maxTriangles = 2 * maxNodes;
-const auto maxEdges = 3 * maxNodes;
-const auto maxMeshData = 65 * maxNodes;
-const auto maxBoundaries = 100;
+// const auto maxNodes = 25000;
+// const auto maxTriangles = 2 * maxNodes;
+// const auto maxEdges = 3 * maxNodes;
+// const auto maxMeshData = 65 * maxNodes;
+// const auto maxBoundaries = 100;
 
-inline double meshData[maxMeshData];
-inline double x[maxNodes];
-inline double y[maxNodes];
-inline double connectivityMatrixEdges[maxBoundaries];
-inline double ubData[4][maxNodes];
-inline double uInit[4];
+// inline std::array<double, maxMeshData> meshData;
+// inline std::array<double, maxNodes> x;
+// inline std::array<double, maxNodes> y;
+// inline std::array<double, maxBoundaries> connectivityMatrixEdges;
+// inline std::array<std::array<double, maxNodes>, 4> ubData;
+// inline std::array<double, 4> uInit;
+
+inline std::vector<int> meshData;
+inline std::vector<double> x;
+inline std::vector<double> y;
+inline std::vector<double> connectivityMatrixEdges;
+inline std::array<std::vector<double>, 4> ubData;
+inline std::array<double, 4> uInit;
+
 inline int numBoundaries;
+inline int numNodes;
+inline int numTrinagles;
+inline int numEdges;
+inline int numEdges1; // ? nl1

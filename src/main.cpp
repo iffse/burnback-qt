@@ -3,8 +3,8 @@
 #include <QQmlContext>
 #include <QFontDatabase>
 
-#include "src/headers/interface.h"
-#include "src/headers/globals.h"
+#include <src/headers/interface.h>
+#include <src/headers/globals.h>
 
 int main(int argc, char *argv[])
 {
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	engine.load(url);
 
 	// Get the root object in order to access children properties
-	root = engine.rootObjects().first();
+	root = engine.rootObjects().at(0);
 
 	// Use monospaced font for output
 	const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);

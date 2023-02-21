@@ -1,7 +1,7 @@
-#include <QDebug>
-#include <QFile>
 #include <chrono>
 #include <thread>
+#include <QDebug>
+#include <QFile>
 
 #include <src/headers/interface.h>
 #include <src/headers/reader.h>
@@ -43,39 +43,54 @@ void Actions::appendOutput(QString text) {
 void Actions::run()
 {
 	appendOutput("--> Reading inputs");
-	if (!Reader::readInput()) {
-		emit newOutput("Error when reading inputs");
+	try {
+		Reader::readInput();
+	} catch (std::invalid_argument &e) {
+		appendOutput("Error: " + QString(e.what()));
+		return;
+	} catch (...) {
+		appendOutput("Error: Unknown exception");
 		return;
 	}
-	std::thread thread(&Actions::worker, this);
-	thread.detach();
+
+	appendOutput("--> Reading mesh");
+	auto *fileDialog = root->findChild<QObject*>("fileDialog");
+	auto filepath = fileDialog->property("fileUrl").toString();
+	if (filepath.isEmpty()) {
+		throw std::invalid_argument("No file selected");
+	}
+	const QString substring = "file://";
+	if (filepath.startsWith(substring)) {
+		filepath.remove(0, substring.length());
+	}
+	QFile file(filepath);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		throw std::invalid_argument("File not found or cannot be opened");
+
+	QTextStream in(&file);
+
+	try {
+		Reader::readMesh(in);
+	} catch (std::invalid_argument &e) {
+		appendOutput("Error: " + QString(e.what()));
+		file.close(); return;
+	} catch (...) {
+		appendOutput("Error: Unknown exception");
+		file.close(); return;
+	}
+
+	file.close();
+	// std::thread thread(&Actions::worker, this);
+	// thread.detach();
 }
 
 void Actions::afterWorker() {
 }
 
 void Actions::worker() {
-	QObject *output = root->findChild<QObject*>("fileDialog");
-	auto filePath = output->property("fileUrl").toString();
-	if (filePath.isEmpty()) {
-		emit newOutput("Error: No file selected");
-		return;
-	}
-	QString substring = "file://";
-	if (filePath.startsWith(substring))
-		filePath.remove(0, substring.length());
-
-	emit newOutput("--> Reading mesh");
-	if (!Reader::readMesh(filePath)) {
-		emit newOutput("Error: Could not open mesh file");
-		emit finished();
-		return;
-	}
-
 	// auto clock = std::chrono::system_clock::now();
 	// 	auto now = std::chrono::system_clock::now();
 	// 	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
 	// 	}
 	// }
 }
-
