@@ -268,7 +268,7 @@ void getBoundaryConditions() {
 						if (lcc == outlet)
 							nodeBoundaryConditions[0][node1] = inletOutlet;
 						else if (lcc == symmetry)
-						nodeBoundaryConditions[0][node1] = inletSymmetry;
+							nodeBoundaryConditions[0][node1] = inletSymmetry;
 					break;
 
 					case outlet:
