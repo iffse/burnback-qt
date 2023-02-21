@@ -4,7 +4,7 @@
 #include <QFile>
 
 #include <src/headers/interface.h>
-#include <src/headers/reader.h>
+#include <src/headers/filesystem.h>
 #include <src/headers/globals.h>
 
 Actions::Actions(QObject *parent) : QObject(parent)

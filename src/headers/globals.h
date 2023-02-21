@@ -42,4 +42,28 @@ inline int numEdges1; // ? nl1
 inline int helper; // ? ihlp
 
 // connectivity matrix
-inline std::array<std::vector<double>, 3> connectivityMatrixNodeTriangles;
+inline std::array<std::vector<int>, 3> connectivityMatrixNodeTriangle; // mcnt
+inline std::array<std::vector<int>, 2> connectivityMatrixNodeEdge; // mcnl
+inline std::array<std::vector<int>, 2> connectivityMatrixTriangleEdge; // mctl ?
+inline std::array<std::vector<int>, 2> connectivityMatrixNodeBoundary; // mcnb ?
+inline std::array<std::vector<int>, 2> connectivityMatrixVertexEdge; // mcvl ?
+
+// matrix?
+inline std::array<double, 3> connectivityMatrixBoundaryConditions;
+
+inline std::array<std::vector<double>, 8> alpha;
+inline std::vector<double> sector;
+inline std::vector<double> area;
+inline std::vector<double> height;
+inline std::vector<double> nodeSymmetry; // ncc ?
+inline std::vector<double> dt; // time step
+inline std::vector<double> eps; // used in flux calculation
+inline std::vector<double> uVertex;
+inline std::array<std::vector<double>, 2> duVariable; // variable triangle
+inline std::array<std::vector<double>, 2> duVertex; // variable vertex
+inline std::array<std::vector<double>, 2> flux;
+
+inline std::vector<double> bArea;
+inline std::vector<double> bWay;
+
+//

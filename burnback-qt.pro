@@ -20,12 +20,14 @@ INCLUDEPATH += $$PWD/include/eigen/
 
 HEADERS += \
 	src/headers/globals.h \
-	src/headers/reader.h \
+	src/headers/operations.h \
+	src/headers/filesystem.h \
 	src/headers/interface.h
 SOURCES += \
 	src/main.cpp \
+	src/operations.cpp \
 	src/interface.cpp \
-	src/reader.cpp
+	src/filesystem.cpp
 RESOURCES += \
 	src-qml/qml.qrc
 
