@@ -4,13 +4,13 @@
 
 inline QObject* root;
 
-inline int numberArea;
+inline uint numberArea;
 inline bool axisymmetric;
 inline bool resume;
 
 inline double cfl;
-inline int minIter;
-inline int maxIter;
+inline uint minIter;
+inline uint maxIter;
 inline double tolerance;
 inline double viscosity;
 
@@ -31,11 +31,15 @@ inline std::vector<int> meshData;
 inline std::vector<double> x;
 inline std::vector<double> y;
 inline std::vector<double> connectivityMatrixEdges;
-inline std::array<std::vector<double>, 4> ubData;
+inline std::array<std::vector<double>, 4> uBoundaryData;
 inline std::array<double, 4> uInit;
 
 inline int numBoundaries;
 inline int numNodes;
-inline int numTrinagles;
+inline int numTriangles;
 inline int numEdges;
 inline int numEdges1; // ? nl1
+inline int helper; // ? ihlp
+
+// connectivity matrix
+inline std::array<std::vector<double>, 3> connectivityMatrixNodeTriangles;

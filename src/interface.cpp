@@ -57,15 +57,19 @@ void Actions::run()
 	auto *fileDialog = root->findChild<QObject*>("fileDialog");
 	auto filepath = fileDialog->property("fileUrl").toString();
 	if (filepath.isEmpty()) {
-		throw std::invalid_argument("No file selected");
+		appendOutput("Error: No file selected");
+		return;
 	}
+
 	const QString substring = "file://";
 	if (filepath.startsWith(substring)) {
 		filepath.remove(0, substring.length());
 	}
 	QFile file(filepath);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-		throw std::invalid_argument("File not found or cannot be opened");
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		appendOutput("Error: Cannot open file");
+		return;
+	}
 
 	QTextStream in(&file);
 

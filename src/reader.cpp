@@ -38,12 +38,15 @@ void Reader::readInput() {//{{{
 
 void readInitialSolution(QTextStream &in) {
 	in.readLine();
+	uInit.fill(0);
 	uInit[0] = in.readLine().simplified().toDouble();
 }
 
 void readBoundaryConditions(QTextStream &in) {
 	in.readLine();
 	numBoundaries = in.readLine().simplified().toInt();
+
+	uBoundaryData = array<vector<double>, 4>({vector<double>(numNodes), vector<double>(numNodes), vector<double>(numNodes), vector<double>(numNodes)});
 	for (int i = 0; i < numBoundaries; ++i) {
 		in.readLine();
 		auto list = in.readLine().simplified().split(" ");
@@ -59,12 +62,12 @@ void readBoundaryConditions(QTextStream &in) {
 				if (list.size() != 2)
 					throw std::invalid_argument("Invalid symmetry boundary conditions");
 
-				ubData[0][node] = list[0].toDouble();
-				ubData[1][node] = list[1].toDouble();
+				uBoundaryData[0][node] = list[0].toDouble();
+				uBoundaryData[1][node] = list[1].toDouble();
 				break;
 			}
 			case 6: { // Source boundary
-				ubData[0][node] = in.readLine().simplified().toDouble();
+				uBoundaryData[0][node] = in.readLine().simplified().toDouble();
 				break;
 			}
 			case 7:{ // free boundary
@@ -79,15 +82,20 @@ void readBoundaryConditions(QTextStream &in) {
 }
 
 void readMeshData(QTextStream &in) {
+	meshData = vector<int>(65 * numNodes);
+
 	for (int i = 0; i < 9; ++i) {
 		meshData[i] = in.readLine().simplified().toInt();
 	}
 	numBoundaries = meshData[5];
 	numNodes = meshData[1];
-	numTrinagles = meshData[2];
+	numTriangles = meshData[2];
 	numEdges = meshData[3];
 	numEdges1 = meshData[7];
+	helper = meshData[8] + 1;
 
+	x = vector<double>(numNodes);
+	y = vector<double>(numNodes);
 	for (int i = 0; i < numNodes; ++i) {
 		auto list = in.readLine().simplified().split(" ");
 		qDebug() << list << "and" << i;
