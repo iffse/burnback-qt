@@ -38,8 +38,8 @@ inline int numBoundaries;
 inline int numNodes;
 inline int numTriangles;
 inline int numEdges;
-inline int numEdges1; // ? nl1
-inline int helper; // ? ihlp
+inline int numTriangleEdge; // ? nl1
+inline int meshDataHelper; // ? ihlp
 
 // connectivity matrix
 inline std::array<std::vector<int>, 3> connectivityMatrixNodeTriangle; // mcnt
@@ -48,14 +48,13 @@ inline std::array<std::vector<int>, 2> connectivityMatrixTriangleEdge; // mctl ?
 inline std::array<std::vector<int>, 2> connectivityMatrixNodeBoundary; // mcnb ?
 inline std::array<std::vector<int>, 2> connectivityMatrixVertexEdge; // mcvl ?
 
-// matrix?
-inline std::array<double, 3> connectivityMatrixBoundaryConditions;
+inline std::vector<int> connectivityMatrixBoundaryConditions;
 
 inline std::array<std::vector<double>, 8> alpha;
 inline std::vector<double> sector;
 inline std::vector<double> area;
 inline std::vector<double> height;
-inline std::vector<double> nodeSymmetry; // ncc ?
+inline std::array<std::vector<int>, 2> nodeBoundaryConditions; // ncc
 inline std::vector<double> dt; // time step
 inline std::vector<double> eps; // used in flux calculation
 inline std::vector<double> uVertex;

@@ -6,15 +6,15 @@ void NodeEdge();
 void TriangleEdge();
 
 void createVertexEdge();
-void reorder();
 }
 
+void reorder();
 void regenerateMeshData();
 void getBoundaryConditions();
 void setAlpha();
 void setMetric();
 void setduVar();
-void flux();
+void getFlux();
 void boundary();
 void setdt();
 

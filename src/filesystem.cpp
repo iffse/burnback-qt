@@ -47,14 +47,16 @@ void readBoundaryConditions(QTextStream &in) {
 	numBoundaries = in.readLine().simplified().toInt();
 
 	uBoundaryData = array<vector<double>, 4>({vector<double>(numNodes), vector<double>(numNodes), vector<double>(numNodes), vector<double>(numNodes)});
+	connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
 	for (int i = 0; i < numBoundaries; ++i) {
 		in.readLine();
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 2)
 			throw std::invalid_argument("Invalid boundary conditions");
 
-		auto node = list[0].toInt() - 1;
+		auto node = list[0].toInt() - 1; // -1 because the nodes are numbered from 1
 		auto boundaryCode = list[1].toInt();
+		connectivityMatrixBoundaryConditions[node] = boundaryCode;
 
 		switch (boundaryCode) {
 			case 4: { // Symmetry boundary
@@ -91,8 +93,8 @@ void readMeshData(QTextStream &in) {
 	numNodes = meshData[1];
 	numTriangles = meshData[2];
 	numEdges = meshData[3];
-	numEdges1 = meshData[7];
-	helper = meshData[8] + 1;
+	numTriangleEdge = meshData[7];
+	meshDataHelper = meshData[8] + 1;
 
 	x = vector<double>(numNodes);
 	y = vector<double>(numNodes);
@@ -111,10 +113,10 @@ void readMeshData(QTextStream &in) {
 		if (list.size() != 4)
 			throw std::invalid_argument("Invalid edge connectivity");
 
-		meshData[numEdges1 + 4 * i - 4] = list[0].toInt();
-		meshData[numEdges1 + 4 * i - 3] = list[1].toInt();
-		meshData[numEdges1 + 4 * i - 2] = list[2].toInt();
-		meshData[numEdges1 + 4 * i - 1] = list[3].toInt();
+		meshData[numTriangleEdge + 4 * i - 4] = list[0].toInt();
+		meshData[numTriangleEdge + 4 * i - 3] = list[1].toInt();
+		meshData[numTriangleEdge + 4 * i - 2] = list[2].toInt();
+		meshData[numTriangleEdge + 4 * i - 1] = list[3].toInt();
 	}
 }
 
