@@ -44,10 +44,14 @@ void readInitialSolution(QTextStream &in) {
 
 void readBoundaryConditions(QTextStream &in) {
 	in.readLine();
-	numBoundaries = in.readLine().simplified().toInt();
+	uint numBoundariesConditions = in.readLine().simplified().toInt();
 
-	uBoundaryData = array<vector<double>, 4>({vector<double>(numNodes), vector<double>(numNodes), vector<double>(numNodes), vector<double>(numNodes)});
-	connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
+	uBoundaryData.fill(vector<double>(numBoundariesConditions));
+	if (connectivityMatrixBoundaryConditions.size() == 0) {
+		connectivityMatrixBoundaryConditions = vector<int>(numBoundariesConditions);
+	} else {
+		connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
+	}
 	for (int i = 0; i < numBoundaries; ++i) {
 		in.readLine();
 		auto list = in.readLine().simplified().split(" ");
@@ -84,7 +88,11 @@ void readBoundaryConditions(QTextStream &in) {
 }
 
 void readMeshData(QTextStream &in) {
-	meshData = vector<int>(65 * numNodes);
+	if (numNodes != 0) {
+		meshData = vector<int>(65 * numNodes);
+	} else {
+		meshData = vector<int>(10);
+	}
 
 	for (int i = 0; i < 9; ++i) {
 		meshData[i] = in.readLine().simplified().toInt();
@@ -96,11 +104,18 @@ void readMeshData(QTextStream &in) {
 	numTriangleEdge = meshData[7];
 	meshDataHelper = meshData[8] + 1;
 
+	if (connectivityMatrixBoundaryConditions.size() < numBoundaries) {
+		connectivityMatrixBoundaryConditions.resize(numBoundaries);
+	}
+
+	if (meshData.size() < 65 * numNodes) {
+		meshData.resize(65 * numNodes);
+	}
+
 	x = vector<double>(numNodes);
 	y = vector<double>(numNodes);
 	for (int i = 0; i < numNodes; ++i) {
 		auto list = in.readLine().simplified().split(" ");
-		qDebug() << list << "and" << i;
 		if (list.size() != 2)
 			throw std::invalid_argument("Invalid node coordinates");
 

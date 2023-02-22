@@ -34,12 +34,12 @@ inline std::vector<double> connectivityMatrixEdges;
 inline std::array<std::vector<double>, 4> uBoundaryData;
 inline std::array<double, 4> uInit;
 
-inline int numBoundaries;
-inline int numNodes;
-inline int numTriangles;
-inline int numEdges;
-inline int numTriangleEdge; // ? nl1
-inline int meshDataHelper; // ? ihlp
+inline uint numBoundaries;
+inline uint numNodes;
+inline uint numTriangles;
+inline uint numEdges;
+inline uint numTriangleEdge; // ? nl1
+inline uint meshDataHelper; // ? ihlp
 
 // connectivity matrix
 inline std::array<std::vector<int>, 3> connectivityMatrixNodeTriangle; // mcnt
