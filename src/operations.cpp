@@ -339,14 +339,14 @@ void setAlpha() {
 	sector = vector<double>(numNodes);
 	alpha.fill(vector<double>(numEdges));
 
-	for (int i = 0; i < numEdges; ++i) {
+	for (uint i = 0; i < numEdges; ++i) {
 		int node1 = connectivityMatrixNodeEdge[0][i] - 1;
 		int node2 = connectivityMatrixNodeEdge[1][i] - 1;
 		int nodeVertex1 = connectivityMatrixVertexEdge[0][i] - 1;
 		int nodeVertex2 = connectivityMatrixVertexEdge[1][i] - 1;
-		int vertexX1 = x[node2] - x[node1];
-		int vertexY1 = y[node2] - y[node1];
-		int vertexV1 = sqrt(pow(vertexX1, 2) + pow(vertexY1, 2));
+		double vertexX1 = x[node2] - x[node1];
+		double vertexY1 = y[node2] - y[node1];
+		double vertexV1 = sqrt(pow(vertexX1, 2) + pow(vertexY1, 2));
 
 		vertexX1 = vertexX1 / vertexV1;
 		vertexY1 = vertexY1 / vertexV1;
@@ -355,12 +355,12 @@ void setAlpha() {
 		alpha[8 - 1][i] = vertexY1;
 
 		if (nodeVertex1 > 0) {
-			int vertexX2 = x[nodeVertex1] - x[node1];
-			int vertexY2 = y[nodeVertex1] - y[node1];
-			int vertexV2 = sqrt(pow(vertexX2, 2) + pow(vertexY2, 2));
-			int vertexX5 = x[nodeVertex1] - x[node2];
-			int vertexY5 = y[nodeVertex1] - y[node2];
-			int vertexV5 = sqrt(pow(vertexX5, 2) + pow(vertexY5, 2));
+			double vertexX2 = x[nodeVertex1] - x[node1];
+			double vertexY2 = y[nodeVertex1] - y[node1];
+			double vertexV2 = sqrt(pow(vertexX2, 2) + pow(vertexY2, 2));
+			double vertexX5 = x[nodeVertex1] - x[node2];
+			double vertexY5 = y[nodeVertex1] - y[node2];
+			double vertexV5 = sqrt(pow(vertexX5, 2) + pow(vertexY5, 2));
 
 			vertexX2 = vertexX2 / vertexV2;
 			vertexY2 = vertexY2 / vertexV2;
@@ -372,12 +372,12 @@ void setAlpha() {
 		}
 
 		if (nodeVertex2 > 0) {
-			int vertexX3 = x[nodeVertex2] - x[node1];
-			int vertexY3 = y[nodeVertex2] - y[node1];
-			int vertexV3 = sqrt(pow(vertexX3, 2) + pow(vertexY3, 2));
-			int vertexX4 = x[nodeVertex2] - x[node2];
-			int vertexY4 = y[nodeVertex2] - y[node2];
-			int vertexV4 = sqrt(pow(vertexX4, 2) + pow(vertexY4, 2));
+			double vertexX3 = x[nodeVertex2] - x[node1];
+			double vertexY3 = y[nodeVertex2] - y[node1];
+			double vertexV3 = sqrt(pow(vertexX3, 2) + pow(vertexY3, 2));
+			double vertexX4 = x[nodeVertex2] - x[node2];
+			double vertexY4 = y[nodeVertex2] - y[node2];
+			double vertexV4 = sqrt(pow(vertexX4, 2) + pow(vertexY4, 2));
 
 			vertexX3 = vertexX3 / vertexV3;
 			vertexY3 = vertexY3 / vertexV3;
@@ -410,12 +410,42 @@ void setAlpha() {
 	}
 
 	// udate angular sectors
-	for (int i = 0; i < numNodes; ++i) {
+	for (uint i = 0; i < numNodes; ++i) {
 		sector[i] = 1.0/2 * sector[i];
 	}
 }
 
-void setMetric();
+// what is this
+double sup(double x1, double y1, double x2, double y2, double x3, double y3) {
+	return 1.0/2 * abs(x2 * y3 + x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3 - x2 * y1);
+}
+
+void setMetric() {
+	for (uint i = 0; i < numTriangles; ++i) {
+		int node1 = connectivityMatrixNodeTriangle[1 - 1][i] - 1;
+		int node2 = connectivityMatrixNodeTriangle[2 - 1][i] - 1;
+		int node3 = connectivityMatrixNodeTriangle[3 - 1][i] - 1;
+
+		double vertexX1 = x[node2] - x[node1];
+		double vertexY1 = y[node2] - y[node1];
+		double vertexV1 = sqrt(pow(vertexX1, 2) + pow(vertexY1, 2));
+		double vertexX2 = x[node3] - x[node1];
+		double vertexY2 = y[node3] - y[node1];
+		double vertexV2 = sqrt(pow(vertexX2, 2) + pow(vertexY2, 2));
+		double vertexX3 = x[node3] - x[node1];
+		double vertexY3 = y[node3] - y[node1];
+		double vertexV3 = sqrt(pow(vertexX3, 2) + pow(vertexY3, 2));
+
+		double vvm = 0;
+		area[i] = sup( x[node1], y[node1], x[node2], y[node2], x[node3], y[node3] );
+
+		// max of the three vertices
+		vvm = max(max(vertexV1, vertexV2), vertexV3);
+
+		height[i] = area[i] / vvm;
+	}
+}
+
 void setduVar();
 void getFlux();
 void boundary();
@@ -427,4 +457,3 @@ void getError();
 
 void setqbnd();
 void burningArea();
-
