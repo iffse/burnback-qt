@@ -40,6 +40,7 @@ inline uint numTriangles;
 inline uint numEdges;
 inline uint numTriangleEdge; // ? nl1
 inline uint meshDataHelper; // ? ihlp
+inline uint numBoundarySides; // nbl
 
 // connectivity matrix
 inline std::array<std::vector<int>, 3> connectivityMatrixNodeTriangle; // mcnt
@@ -62,7 +63,9 @@ inline std::array<std::vector<double>, 2> duVariable; // variable triangle
 inline std::array<std::vector<double>, 2> duVertex; // variable vertex
 inline std::array<std::vector<double>, 2> flux;
 
-inline std::vector<double> bArea;
-inline std::vector<double> bWay;
+inline std::vector<double> burningArea;
+inline std::vector<double> burningWay;
 
-//
+inline double elipch;
+inline double timeTotal;
+

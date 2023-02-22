@@ -222,7 +222,7 @@ void regenerateMeshData() {
 	}
 }
 
-void getBoundaryConditions() {
+void setBoundaryConditions() {
 	// std::map<std::string, int> boundaryConditions = {
 	// 	{"inlet", 1},
 	// 	{"outlet", 2},
@@ -388,7 +388,7 @@ void setAlpha() {
 			alpha[4 - 1][i] = acos(- vertexX1 * vertexX4 - vertexY1 * vertexY4);
 
 		}
-		
+
 		// setting angular sector of each node
 		sector[node1] = sector[node1] + alpha[1 - 1][i] + alpha[2 - 1][i];
 		sector[node2] = sector[node2] + alpha[3 - 1][i] + alpha[4 - 1][i];
@@ -446,14 +446,261 @@ void setMetric() {
 	}
 }
 
-void setduVar();
-void getFlux();
-void boundary();
-void setdt();
+void setduVarriable() {
+	for (uint i = 0; i < numTriangles; ++i) {
+		int node1 = connectivityMatrixNodeTriangle[1 - 1][i] - 1;
+		int node2 = connectivityMatrixNodeTriangle[2 - 1][i] - 1;
+		int node3 = connectivityMatrixNodeTriangle[3 - 1][i] - 1;
 
-void eulerExplicit();
+		double u21 = uVertex[node2] - uVertex[node1];
+		double u31 = uVertex[node3] - uVertex[node1];
 
-void getError();
+		double x21 = x[node2] - x[node1];
+		double x31 = x[node3] - x[node1];
+		double y21 = y[node2] - y[node1];
+		double y31 = y[node3] - y[node1];
 
-void setqbnd();
-void burningArea();
+		double rr = 1.0 / (y31 * x21 - y21 * x31);
+		duVariable[1 - 1][i] = rr * (u21 * y31 - u31 * y21);
+		duVariable[2 - 1][i] = rr * (u31 * x21 - u21 * x31);
+	}
+}
+void setFlux() {
+	duVertex.fill(vector<double>(numNodes));
+	flux[1] = vector<double>(numNodes);
+	eps = vector<double>(numNodes);
+
+	for (uint i = 0; i < numEdges; ++i) {
+		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][i] - 1;
+		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][i] - 1;
+		int node1 = connectivityMatrixNodeEdge[1 - 1][i] - 1;
+		int node2 = connectivityMatrixNodeEdge[2 - 1][i] - 1;
+		
+		double dux = 0.0;
+		double duy = 0.0;
+
+		if (triangle1 > 0) {
+			duVertex[1 - 1][node1] = duVertex[1 - 1][node1] + alpha[1 - 1][i] * duVariable[1 - 1][triangle1];
+			duVertex[2 - 1][node1] = duVertex[2 - 1][node1] + alpha[1 - 1][i] * duVariable[2 - 1][triangle1];
+			duVertex[1 - 1][node2] = duVertex[1 - 1][node2] + alpha[3 - 1][i] * duVariable[1 - 1][triangle1];
+			duVertex[2 - 1][node2] = duVertex[2 - 1][node2] + alpha[3 - 1][i] * duVariable[2 - 1][triangle1];
+
+			dux = dux + duVariable[1 - 1][triangle1];
+			duy = duy + duVariable[2 - 1][triangle1];
+
+			double duMod = 1 + sqrt(pow(duVariable[1 - 1][triangle1], 2) + pow(duVariable[2 - 1][triangle1], 2));
+			if (duMod > eps[node1])
+				eps[node1] = duMod;
+			if (duMod > eps[node2])
+				eps[node2] = duMod;
+		}
+
+		if (triangle2 > 0) {
+			duVertex[1 - 1][node1] = duVertex[1 - 1][node1] + alpha[2 - 1][i] * duVariable[1 - 1][triangle2];
+			duVertex[2 - 1][node1] = duVertex[2 - 1][node1] + alpha[2 - 1][i] * duVariable[2 - 1][triangle2];
+			duVertex[1 - 1][node2] = duVertex[1 - 1][node2] + alpha[4 - 1][i] * duVariable[1 - 1][triangle2];
+			duVertex[2 - 1][node2] = duVertex[2 - 1][node2] + alpha[4 - 1][i] * duVariable[2 - 1][triangle2];
+
+			dux = dux + duVariable[1 - 1][triangle2];
+			duy = duy + duVariable[2 - 1][triangle2];
+			// why not triangle2 ?
+			double duMod = 1 + sqrt(pow(duVariable[1 - 1][triangle1], 2) + pow(duVariable[2 - 1][triangle1], 2));
+
+			if (duMod > eps[node1])
+				eps[node1] = duMod;
+			if (duMod > eps[node2])
+				eps[node2] = duMod;
+
+		}
+
+		// why du of both triangle?
+		dux = 1.0/2 * dux * alpha[7 - 1][i];
+		duy = 1.0/2 * duy * alpha[8 - 1][i];
+
+		flux[1][node1] = flux[1][node1] + alpha[5 - 1][i] * (dux + duy);
+		flux[1][node2] = flux[1][node2] - alpha[6 - 1][i] * (dux + duy);
+	}
+
+	for (uint i = 0; i < numNodes; ++i) {
+		eps[i] = eps[i] / M_PI;
+		flux[1][i] = eps[i] * flux[1][i];
+		duVertex[1 - 1][i] = 0.5 * duVertex[1 - 1][i];
+		duVertex[2 - 1][i] = 0.5 * duVertex[2 - 1][i];
+	}
+
+}
+void boundary() {
+	for (uint i = 0; i < numNodes; ++i) {
+		int boundary = nodeBoundaryConditions[1][i];
+		int condition = nodeBoundaryConditions[2][i];
+
+		duVertex[1 - 1][i] = duVertex[1 - 1][i] / sector[i];
+		duVertex[2 - 1][i] = duVertex[2 - 1][i] / sector[i];
+
+		if (boundary == 0) {
+			flux[0][i] = 1 - sqrt( pow(duVertex[1 - 1][i], 2) + pow(duVertex[2 - 1][i], 2) );
+		} else {
+			if (boundary == 1 || boundary == 12 || boundary == 13) {
+		  		// source boundary
+				flux[0][i] = 0.0;
+				flux[1][0] = 0.0;
+			}
+
+			if (boundary == 2) {
+	  			// free boundary
+				flux[0][i] = 1 - sqrt( pow(duVertex[1 - 1][i], 2) + pow(duVertex[2 - 1][i], 2) );
+			}
+
+			if (boundary == 3 || boundary == 23) {
+				// symmetry boundary
+				double ubNorm = sqrt( pow(uBoundaryData[1 - 1][condition], 2) + pow(uBoundaryData[2 - 1][condition], 2));
+				double duVer = duVertex[1 - 1][i] * uBoundaryData[1 - 1][condition] + duVertex[2 - 1][i] * uBoundaryData[2 - 1][condition];
+				duVertex[1 - 1][i] = duVer * uBoundaryData[1 - 1][condition] / ubNorm;
+				duVertex[2 - 1][i] = duVer * uBoundaryData[2 - 1][condition] / ubNorm;
+				flux[0][i] = 1 - sqrt( pow(duVertex[1 - 1][i], 2) + pow(duVertex[2 - 1][i], 2) );
+				flux[1][i] = 2 * flux[0][i];
+			}
+		}
+	}
+}
+void setdt() {
+	for (uint i = 0; i < numNodes; ++i) {
+		dt[i] = 1.570796 * cfl * height[i] / eps[i];
+	}
+}
+
+void eulerExplicit() {
+	double dtmin = dt[0];
+
+	for (uint i = 0; i < numNodes; ++i) {
+		if (dtmin > dt[i]) 
+			dtmin = dt[i];
+	}
+
+	for (uint i = 0; i < numNodes; ++i) {
+		uVertex[i] = uVertex[i] + dtmin * (flux[0][i] + elipch * flux[1][i]);
+	}
+	
+	timeTotal = timeTotal + dtmin;
+}
+
+double getError() {
+	double error = 0.0;
+	for (uint i = 0; i < numNodes; ++i) {
+		error = error + pow(flux[0][i], 2);
+	}
+	error = sqrt(error / numNodes);
+	return error;
+}
+
+void setqbnd() {
+	numBoundarySides = 0;
+	for (uint i = 0; i < numEdges; ++i) {
+		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][i] - 1;
+		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][i] - 1;
+
+		if (triangle1 > 0 || triangle2 > 0) {
+			numBoundarySides = numBoundarySides + 1;
+			connectivityMatrixNodeBoundary[1 - 1][numBoundarySides] = connectivityMatrixNodeEdge[1 - 1][numBoundarySides];
+			connectivityMatrixNodeBoundary[2 - 1][numBoundarySides] = connectivityMatrixNodeEdge[2 - 1][numBoundarySides];
+		}
+	}
+}
+
+void setBurningArea() {
+	double epsilon = 0.001;
+	double uMin = uVertex[0];
+	double uMax = uVertex[0];
+
+	double orderedNode1;
+	double orderedNode2;
+	double orderedNode3;
+
+	for (uint i = 0; i < numNodes; ++i) {
+		if (uMin > uVertex[i])
+			uMin = uVertex[i];
+		if (uMax < uVertex[i])
+			uMax = uVertex[i];
+	}
+
+	uMin = uMin + (uMax - uMin) * epsilon;
+	uMax = uMax - (uMax - uMin) * epsilon;
+
+	for (uint i = 0; i < numberArea; ++i) {
+		burningArea[i] = 0.0;
+		double uCut = uMin + (i-1) * (uMax - uMin) / numberArea;
+		burningWay[i] = uCut;
+	}
+
+	for (int i = 0; i < numTriangles; ++i) {
+		double node1 = connectivityMatrixNodeTriangle[1 - 1][i] - 1;
+		double node2 = connectivityMatrixNodeTriangle[2 - 1][i] - 1;
+		double node3 = connectivityMatrixNodeTriangle[3 - 1][i] - 1;
+
+		if (uVertex[node1] > uVertex[node2]) {
+			if (uVertex[node1] > uVertex[node3]) {
+				orderedNode1 = node1;
+				if (uVertex[node2] > uVertex[node3]) {
+					orderedNode2 = node2;
+					orderedNode3 = node3;
+				} else {
+					orderedNode2 = node3;
+					orderedNode3 = node2;
+				}
+			} else {
+				orderedNode1 = node3;
+				orderedNode2 = node1;
+				orderedNode3 = node2;
+			}
+		} else {
+			if (uVertex[node1] > uVertex[node3]) {
+				orderedNode1 = node2;
+				orderedNode2 = node1;
+				orderedNode3 = node3;
+			} else {
+				orderedNode3 = node1;
+				if (uVertex[node2] > uVertex[node3]) {
+					orderedNode1 = node2;
+					orderedNode2 = node3;
+				} else {
+					orderedNode1 = node3;
+					orderedNode2 = node2;
+				}
+			}
+		}
+
+		for (int i = 0; i < numberArea; ++i) {
+			double uCut = burningWay[i];
+
+			if (uCut < uVertex[node1] && uCut > uVertex[node3]) {
+				double factor;
+				double xCut1;
+				double xCut2;
+				double yCut1;
+				double yCut2;
+
+				if (uCut > uVertex[orderedNode2]) {
+					factor = (uCut - uVertex[orderedNode2]) / (uVertex[orderedNode1] - uVertex[orderedNode2]);
+					xCut1 = x[orderedNode2] + (x[orderedNode1] - x[orderedNode2]) * factor;
+					yCut1 = y[orderedNode2] + (y[orderedNode1] - y[orderedNode2]) * factor;
+				} else {
+					factor = (uCut - uVertex[orderedNode3]) / (uVertex[orderedNode2] - uVertex[orderedNode3]);
+					xCut1 = x[orderedNode3] + (x[orderedNode2] - x[orderedNode3]) * factor;
+					yCut1 = y[orderedNode3] + (y[orderedNode2] - y[orderedNode3]) * factor;
+				}
+				factor = (uCut - uVertex[orderedNode3]) / (uVertex[orderedNode1] - uVertex[orderedNode3]);
+				xCut2 = x[orderedNode3] + (x[orderedNode1] - x[orderedNode3]) * factor;
+				yCut2 = y[orderedNode3] + (y[orderedNode1] - y[orderedNode3]) * factor;
+				double distance = sqrt(pow(xCut1 - xCut2, 2) + pow(yCut1 - yCut2, 2));
+
+				if (axisymmetric)
+					distance = distance * 1.0/2 * (yCut1 + yCut2);
+
+				burningArea[i] = burningArea[i] + distance;
+			}
+		}
+	}
+	
+
+
+}

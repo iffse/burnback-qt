@@ -10,20 +10,20 @@ void createVertexEdge();
 
 void reorder();
 void regenerateMeshData();
-void getBoundaryConditions();
+void setBoundaryConditions();
 void setAlpha();
 void setMetric();
-void setduVar();
-void getFlux();
+void setduVarriable();
+void setFlux();
 void boundary();
 void setdt();
 
 void eulerExplicit();
 
-void getError();
+double getError();
 
 void setqbnd();
-void burningArea();
+void setBurningArea();
 
 void mainLoop();
 
