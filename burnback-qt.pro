@@ -21,13 +21,17 @@ INCLUDEPATH += $$PWD/include/eigen/
 HEADERS += \
 	src/headers/globals.h \
 	src/headers/operations.h \
+	src/headers/coeficcientMatrix.h \
 	src/headers/filesystem.h \
-	src/headers/interface.h
+	src/headers/interface.h \
+	src/headers/iterations.h
 SOURCES += \
 	src/main.cpp \
 	src/operations.cpp \
+	src/coeficcientMatrix.cpp \
+	src/filesystem.cpp \
 	src/interface.cpp \
-	src/filesystem.cpp
+	src/iterations.cpp
 RESOURCES += \
 	src-qml/qml.qrc
 

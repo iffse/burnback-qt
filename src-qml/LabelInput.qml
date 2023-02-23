@@ -27,8 +27,8 @@ Column {
 		placeholderText: parent.placeholderText
 		selectByMouse: true
 		objectName: parent.objName
-		validator: RegExpValidator {
-			regExp: parent.decimals ? /^\d*\.?\d*$/ : /^\d*$/
-		}
+		// validator: RegExpValidator {
+		// 	regExp: parent.decimals ? /^-?\d*\.?\d*$/ : /^-?\d*$/
+		// }
 	}
 }
