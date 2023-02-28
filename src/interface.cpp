@@ -2,6 +2,7 @@
 #include <thread>
 #include <QDebug>
 #include <QFile>
+#include <vector>
 
 #include <src/headers/interface.h>
 #include <src/headers/filesystem.h>
@@ -9,6 +10,10 @@
 #include <src/headers/coeficcientMatrix.h>
 #include <src/headers/operations.h>
 #include <src/headers/iterations.h>
+
+#include <fenv.h>
+
+using namespace std;
 
 Actions::Actions(QObject *parent) : QObject(parent)
 {
@@ -95,7 +100,8 @@ void Actions::afterWorker() {
 }
 
 void Actions::worker() {
-	QString linesToPrint = "";
+	feenableexcept(FE_INVALID | FE_OVERFLOW);
+
 
 	emit newOutput("--> Creating connectivity matrix");
 	ConnectivityMatrix::NodeTriangles();
@@ -125,19 +131,45 @@ void Actions::worker() {
 	}
 
 	emit newOutput("--> Creating boundary matrix");
+	setBoundaryConditions();
 	emit newOutput("--> Creating alpha matrix");
+	setAlpha();
 	emit newOutput("--> Creating metric matrix");
+	setMetric();
 
-	auto clock = std::chrono::system_clock::now();
 	emit newOutput("--> Starting subiteration loop");
-	uint numItereations = 0;
-	double error = 0;
+	uVertex = vector<double>(numNodes);
+	duVertex.fill(vector<double>(numNodes));
+	duVariable.fill(vector<double>(numNodes));
+	flux.fill(vector<double>(numNodes));
+	eps = vector<double>(numNodes);
+	dt = vector<double>(numNodes);
+	double error = tolerance + 1;
 
+	uint numItereations = 0;
+	QString linesToPrint = "";
+	auto clock = std::chrono::system_clock::now();
+
+	// Iterations::subIteration();
+
+	for (int i = 0; i < numNodes; ++i) {
+		qDebug() << "uVertex[" << i << "] = " << uVertex[i];
+		qDebug() << "duVertex[" << i << "] = " << duVertex[i];
+		qDebug() << "duVariable[" << i << "] = " << duVariable[i];
+		qDebug() << "flux[" << i << "] = " << flux[i];
+		qDebug() << "eps[" << i << "] = " << eps[i];
+		qDebug() << "dt[" << i << "] = " << dt[i];
+	}
+
+	return;
 	while (numItereations <= maxIter && error > tolerance) {
 		for (int i = 0; i < minIter; ++i) {
 			Iterations::subIteration();
+			error = getError();
 
-			linesToPrint = "Iteration: " + QString::number(i + 1) + ". Error: " + QString::number(getError());
+			qDebug() << "Iteration: " << i + 1 << ". Error: " << error;
+
+			linesToPrint += "Iteration: " + QString::number(i + 1) + ". Error: " + QString::number(error) + "\n";
 
 			auto now = std::chrono::system_clock::now();
 			if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {

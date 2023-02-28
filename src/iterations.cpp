@@ -11,15 +11,13 @@ namespace Iterations {
 
 void subIteration() {
 	setduVarriable();
+	setFlux();
 	boundary();
 	setdt();
 	eulerExplicit();
 }
 
 tuple<double, double> mainLoop() {
-	setqbnd();
-	setBurningArea();
-
 	double areaP = 0.0;
 	double areaG = 0.0;
 

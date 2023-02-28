@@ -17,25 +17,25 @@ void NodeTriangles() {
 	// 	throw std::invalid_argument("Invalid mesh data. Connectivity matrix node as function of triangle (mcnt) is out of bounds");
 
 	// helping array
-	// for (uint i = 0; i < numTriangles; ++i) {
-	// 	meshData[meshDataHelper + i - 1] = 0;
-	// }
+	for (uint i = 0; i < numTriangles; ++i) {
+		meshData[meshDataHelper + i - 1] = 0;
+	}
 
 	// creation of table
 	// loop over edges
 	for (uint i = 0; i < numEdges; ++i) {
 		int index1 = 0;
 		int index2 = 0;
-		int node1 = meshData[numTriangleEdge + 4 * i - 4];
-		int node2 = meshData[numTriangleEdge + 4 * i - 3];
+		int node1 = meshData[numTriangleEdge + 4 * i];
+		int node2 = meshData[numTriangleEdge + 4 * i + 1];
 
 		// nt
-		int nodeT1 = meshData[numTriangleEdge + 4 * i - 2];
-		int nodeT2 = meshData[numTriangleEdge + 4 * i - 1];
+		int nodeT1 = meshData[numTriangleEdge + 4 * i + 2];
+		int nodeT2 = meshData[numTriangleEdge + 4 * i + 3];
 
 		if (nodeT1 > 0) {
 			// check if node already exist in cells of mcnt(x, nodeT1)
-			for (int j = 0; j < meshData[meshDataHelper + (nodeT1 - 1) - 1]; ++j) {
+			for (int j = 0; j < meshData[meshDataHelper + (nodeT1) - 1]; ++j) {
 				if (node1 == connectivityMatrixNodeTriangle[j][nodeT1 - 1])
 					index1 = 1;
 				if (node2 == connectivityMatrixNodeTriangle[j][nodeT1 - 1])
@@ -81,11 +81,11 @@ void NodeTriangles() {
 
 // node as function of edge (mcnl)
 void NodeEdge() {
-	connectivityMatrixNodeEdge= array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
+	connectivityMatrixNodeEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
 	for (uint i = 0; i < numEdges; ++i) {
-		connectivityMatrixNodeEdge[0][i] = meshData[numTriangleEdge + 4 * i - 4];
-		connectivityMatrixNodeEdge[1][i] = meshData[numTriangleEdge + 4 * i - 3];
+		connectivityMatrixNodeEdge[0][i] = meshData[numTriangleEdge + 4 * i];
+		connectivityMatrixNodeEdge[1][i] = meshData[numTriangleEdge + 4 * i + 1];
 	}
 }
 
@@ -94,8 +94,8 @@ void TriangleEdge() {
 	connectivityMatrixTriangleEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
 	for (uint i = 0; i < numEdges; ++i) {
-		connectivityMatrixTriangleEdge[0][i] = meshData[numTriangleEdge + 4 * i - 2];
-		connectivityMatrixTriangleEdge[1][i] = meshData[numTriangleEdge + 4 * i - 1];
+		connectivityMatrixTriangleEdge[0][i] = meshData[numTriangleEdge + 4 * i + 2];
+		connectivityMatrixTriangleEdge[1][i] = meshData[numTriangleEdge + 4 * i + 3];
 	}
 }
 
@@ -178,9 +178,9 @@ void reorder() {
 		const int nodeVertex1 = connectivityMatrixVertexEdge[0][i] - 1;
 		const int nodeVertex2 = connectivityMatrixVertexEdge[1][i] - 1;
 
-		if (triangle1 > 0) {
+		if (triangle1 >= 0) {
 			int difference1 = ( x[nodeVertex1] - x[node1] ) * ( y[node2] - y[node1] );
-			int difference2 = ( x[node2] -  x[node1] ) * ( y[nodeVertex1] - y[node1] );
+			int difference2 = ( x[node2] - x[node1] ) * ( y[nodeVertex1] - y[node1] );
 			if (difference1 > difference2) {
 				connectivityMatrixTriangleEdge[0][i] = triangle2 + 1; // naming correction
 				connectivityMatrixTriangleEdge[1][i] = triangle1 + 1;
@@ -191,7 +191,7 @@ void reorder() {
 			int difference1 = ( x[nodeVertex2] - x[node1] ) * ( y[node2] - y[node1] );
 			int difference2 = ( x[node2] -  x[node1] ) * ( y[nodeVertex2] - y[node1] );
 
-			if (difference1 > difference2) {
+			if (difference1 < difference2) {
 				connectivityMatrixTriangleEdge[0][i] = triangle2 + 1;
 				connectivityMatrixTriangleEdge[1][i] = triangle1 + 1;
 				connectivityMatrixVertexEdge[0][i] = nodeVertex2 + 1;

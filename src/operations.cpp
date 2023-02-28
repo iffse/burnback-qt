@@ -1,5 +1,6 @@
 #include <src/headers/operations.h>
 #include <src/headers/globals.h>
+#include <QDebug>
 
 #include <array>
 #include <cmath>
@@ -149,7 +150,7 @@ void setAlpha() {
 		alpha[7 - 1][i] = vertexX1;
 		alpha[8 - 1][i] = vertexY1;
 
-		if (nodeVertex1 > 0) {
+		if (nodeVertex1 >= 0) {
 			double vertexX2 = x[nodeVertex1] - x[node1];
 			double vertexY2 = y[nodeVertex1] - y[node1];
 			double vertexV2 = sqrt(pow(vertexX2, 2) + pow(vertexY2, 2));
@@ -166,7 +167,7 @@ void setAlpha() {
 			alpha[3 - 1][i] = acos(- vertexX1 * vertexX5 - vertexY1 * vertexY5);
 		}
 
-		if (nodeVertex2 > 0) {
+		if (nodeVertex2 >= 0) {
 			double vertexX3 = x[nodeVertex2] - x[node1];
 			double vertexY3 = y[nodeVertex2] - y[node1];
 			double vertexV3 = sqrt(pow(vertexX3, 2) + pow(vertexY3, 2));
@@ -216,6 +217,9 @@ double sup(double x1, double y1, double x2, double y2, double x3, double y3) {
 }
 
 void setMetric() {
+	area = vector<double>(numTriangles);
+	height = vector<double>(numTriangles);
+
 	for (uint i = 0; i < numTriangles; ++i) {
 		int node1 = connectivityMatrixNodeTriangle[1 - 1][i] - 1;
 		int node2 = connectivityMatrixNodeTriangle[2 - 1][i] - 1;
@@ -231,10 +235,10 @@ void setMetric() {
 		double vertexY3 = y[node3] - y[node1];
 		double vertexV3 = sqrt(pow(vertexX3, 2) + pow(vertexY3, 2));
 
-		double vvm = 0;
 		area[i] = sup( x[node1], y[node1], x[node2], y[node2], x[node3], y[node3] );
 
 		// max of the three vertices
+		double vvm;
 		vvm = max(max(vertexV1, vertexV2), vertexV3);
 
 		height[i] = area[i] / vvm;
@@ -261,10 +265,6 @@ void setduVarriable() {
 	}
 }
 void setFlux() {
-	duVertex.fill(vector<double>(numNodes));
-	flux[1] = vector<double>(numNodes);
-	eps = vector<double>(numNodes);
-
 	for (uint i = 0; i < numEdges; ++i) {
 		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][i] - 1;
 		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][i] - 1;
@@ -326,8 +326,8 @@ void setFlux() {
 }
 void boundary() {
 	for (uint i = 0; i < numNodes; ++i) {
-		int boundary = nodeBoundaryConditions[1][i];
-		int condition = nodeBoundaryConditions[2][i];
+		int boundary = nodeBoundaryConditions[0][i];
+		int condition = nodeBoundaryConditions[1][i];
 
 		duVertex[1 - 1][i] = duVertex[1 - 1][i] / sector[i];
 		duVertex[2 - 1][i] = duVertex[2 - 1][i] / sector[i];
@@ -389,12 +389,14 @@ double getError() {
 }
 
 void setqbnd() {
+	connectivityMatrixNodeBoundary = array<vector<int>, 2>({vector<int>(numTriangles), vector<int>(numTriangles)});
+
 	numBoundarySides = 0;
 	for (uint i = 0; i < numEdges; ++i) {
-		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][i] - 1;
-		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][i] - 1;
+		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][i];
+		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][i];
 
-		if (triangle1 > 0 || triangle2 > 0) {
+		if (triangle1 < 0 || triangle2 < 0) {
 			numBoundarySides = numBoundarySides + 1;
 			connectivityMatrixNodeBoundary[1 - 1][numBoundarySides] = connectivityMatrixNodeEdge[1 - 1][numBoundarySides];
 			connectivityMatrixNodeBoundary[2 - 1][numBoundarySides] = connectivityMatrixNodeEdge[2 - 1][numBoundarySides];
@@ -403,6 +405,8 @@ void setqbnd() {
 }
 
 void setBurningArea() {
+	burningArea = vector<double>(numberArea);
+	burningWay = vector<double>(numberArea);
 	double epsilon = 0.001;
 	double uMin = uVertex[0];
 	double uMax = uVertex[0];
