@@ -331,8 +331,8 @@ void setFlux() {
 }
 void boundary() {
 	for (uint node = 0; node < numNodes; ++node) {
-		int boundary = nodeBoundaryConditions[0][node];
-		int condition = nodeBoundaryConditions[1][node];
+		int &boundary = nodeBoundaryConditions[0][node];
+		int &condition = nodeBoundaryConditions[1][node];
 
 		duVertex[0][node] /= sector[node];
 		duVertex[1][node] /= sector[node];
@@ -371,17 +371,10 @@ void setdt() {
 }
 
 void eulerExplicit() {
-	double dtmin = dt[0];
-
-	for (uint node = 0; node < numNodes; ++node) {
-		if (dtmin > dt[node]) 
-			dtmin = dt[node];
-	}
-
-	// dtmin = min(dtmin);
+	double dtmin = *min_element(dt.begin(), dt.end());
 
 	for (uint node = 0; node < numNodes; ++node)
-		uVertex[node] += dtmin * (flux[0][node] + elipch * flux[1][node]);
+		uVertex[node] += dtmin * (flux[0][node] + viscosity * flux[1][node]);
 	
 	timeTotal = timeTotal + dtmin;
 }

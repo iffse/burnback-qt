@@ -66,6 +66,5 @@ inline std::array<std::vector<double>, 2> flux;
 inline std::vector<double> burningArea;
 inline std::vector<double> burningWay;
 
-inline double elipch;
 inline double timeTotal;
 
