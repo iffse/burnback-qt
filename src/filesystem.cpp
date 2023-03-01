@@ -52,7 +52,7 @@ void readBoundaryConditions(QTextStream &in) {
 	} else {
 		connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
 	}
-	for (uint i = 0; i < numBoundaries; ++i) {
+	for (uint i = 0; i < numBoundariesConditions; ++i) {
 		in.readLine();
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 2)
@@ -77,6 +77,7 @@ void readBoundaryConditions(QTextStream &in) {
 				break;
 			}
 			case 7:{ // free boundary
+				in.readLine();
 				break;
 			}
 
