@@ -34,11 +34,11 @@ void Actions::appendOutput(QString text) {
 
 	auto indexRemove = 0;
 	if (lines > 2 * maxLines) {
-		for (int i = 0; i < maxLines; ++ i) {
+		for (int line = 0; line < maxLines; ++ line) {
 			indexRemove = setText.lastIndexOf("\n", indexRemove - 2);
 		}
 	} else {
-		for (int i = 0; i < lines - maxLines; ++ i) {
+		for (int line = 0; line < lines - maxLines; ++ line) {
 			indexRemove = setText.indexOf("\n", indexRemove + 2);
 		}
 	}
@@ -121,12 +121,11 @@ void Actions::worker() {
 
 	emit newOutput("--> Counting number of boundaries");
 	numBoundaries = 0;
-	for (int i = 0; i < numEdges; ++i) {
-		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][i];
-		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][i];
-		if (triangle1 * triangle2  < 0) {
+	for (uint edge = 0; edge < numEdges; ++edge) {
+		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][edge];
+		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][edge];
+		if (triangle1 * triangle2  < 0)
 			++numBoundaries;
-		}
 	}
 
 	emit newOutput("--> Creating boundary matrix");
@@ -138,6 +137,9 @@ void Actions::worker() {
 
 	emit newOutput("--> Starting subiteration loop");
 	uVertex = vector<double>(numNodes);
+	for (uint node = 0; node < numNodes; ++node)
+		uVertex[node] = uInit[0];
+
 	duVertex.fill(vector<double>(numNodes));
 	duVariable.fill(vector<double>(numNodes));
 	flux.fill(vector<double>(numNodes));
@@ -149,23 +151,21 @@ void Actions::worker() {
 	QString linesToPrint = "";
 	auto clock = std::chrono::system_clock::now();
 
-	while (numItereations <= maxIter && error > tolerance) {
-		for (int i = 0; i < minIter; ++i) {
-			Iterations::subIteration();
-			error = getError();
+	while (numItereations < minIter || (numItereations < maxIter && error > tolerance)) {
+		Iterations::subIteration();
+		error = getError();
 
-			qDebug() << "Iteration: " << i + 1 << ". Error: " << error;
+		if (linesToPrint != "")
+			linesToPrint += "\n";
+		linesToPrint += "Iteration: " + QString::number(numItereations + 1) + ". Error: " + QString::number(error * 100) + "%";
 
-			linesToPrint += "Iteration: " + QString::number(i + 1) + ". Error: " + QString::number(error) + "\n";
-
-			auto now = std::chrono::system_clock::now();
-			if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
-				clock = now;
-				emit newOutput(linesToPrint);
-				linesToPrint = "";
-			}
-			++numItereations;
+		auto now = std::chrono::system_clock::now();
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
+			clock = now;
+			emit newOutput(linesToPrint);
+			linesToPrint = "";
 		}
+		++numItereations;
 	}
 
 	if (linesToPrint != "") {
