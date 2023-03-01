@@ -157,7 +157,7 @@ void Actions::worker() {
 
 		if (linesToPrint != "")
 			linesToPrint += "\n";
-		linesToPrint += "Iteration: " + QString::number(numItereations + 1) + ". Error: " + QString::number(error * 100) + "%";
+		linesToPrint += "Iteration: " + QString::number(numItereations + 1) + " Time: " + QString::number(timeTotal) + " Error: " + QString::number(error * 100) + "%";
 
 		auto now = std::chrono::system_clock::now();
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
