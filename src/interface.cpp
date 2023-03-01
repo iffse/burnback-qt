@@ -149,18 +149,6 @@ void Actions::worker() {
 	QString linesToPrint = "";
 	auto clock = std::chrono::system_clock::now();
 
-	// Iterations::subIteration();
-
-	for (int i = 0; i < numNodes; ++i) {
-		qDebug() << "uVertex[" << i << "] = " << uVertex[i];
-		qDebug() << "duVertex[" << i << "] = " << duVertex[i];
-		qDebug() << "duVariable[" << i << "] = " << duVariable[i];
-		qDebug() << "flux[" << i << "] = " << flux[i];
-		qDebug() << "eps[" << i << "] = " << eps[i];
-		qDebug() << "dt[" << i << "] = " << dt[i];
-	}
-
-	return;
 	while (numItereations <= maxIter && error > tolerance) {
 		for (int i = 0; i < minIter; ++i) {
 			Iterations::subIteration();

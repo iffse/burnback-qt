@@ -88,15 +88,12 @@ void readBoundaryConditions(QTextStream &in) {
 }
 
 void readMeshData(QTextStream &in) {
-	if (numNodes != 0) {
-		meshData = vector<int>(65 * numNodes);
-	} else {
+	if (meshData.size() < 10)
 		meshData = vector<int>(10);
-	}
 
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < 9; ++i)
 		meshData[i] = in.readLine().simplified().toInt();
-	}
+
 	numBoundaries = meshData[5];
 	numNodes = meshData[1];
 	numTriangles = meshData[2];
@@ -104,17 +101,15 @@ void readMeshData(QTextStream &in) {
 	numTriangleEdge = meshData[7];
 	meshDataHelper = meshData[8] + 1;
 
-	if (connectivityMatrixBoundaryConditions.size() < numBoundaries) {
+	if (connectivityMatrixBoundaryConditions.size() < numBoundaries)
 		connectivityMatrixBoundaryConditions.resize(numBoundaries);
-	}
 
-	if (meshData.size() < 65 * numNodes) {
+	if (meshData.size() < 65 * numNodes)
 		meshData.resize(65 * numNodes);
-	}
 
 	x = vector<double>(numNodes);
 	y = vector<double>(numNodes);
-	for (int i = 0; i < numNodes; ++i) {
+	for (uint i = 0; i < numNodes; ++i) {
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 2)
 			throw std::invalid_argument("Invalid node coordinates");
@@ -123,7 +118,7 @@ void readMeshData(QTextStream &in) {
 		y[i] = list[1].toDouble();
 	}
 
-	for (int i = 1; i < numEdges; ++i) {
+	for (uint i = 0; i < numEdges; ++i) {
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 4)
 			throw std::invalid_argument("Invalid edge connectivity");
