@@ -10,11 +10,11 @@ using namespace std;
 // node as function of triangle (mcnt)
 void regenerateMeshData() {
 	for (uint i = 0; i < numEdges; ++i) {
-		meshData[numTriangleEdge + 4 * i - 4] = connectivityMatrixNodeEdge[0][i];
-		meshData[numTriangleEdge + 4 * i - 3] = connectivityMatrixNodeEdge[1][i];
+		meshData[numTriangleEdge - 1 + 4 * i] = connectivityMatrixNodeEdge[0][i];
+		meshData[numTriangleEdge - 1 + 4 * i + 1] = connectivityMatrixNodeEdge[1][i];
 
-		meshData[numTriangleEdge + 4 * i - 2] = connectivityMatrixTriangleEdge[0][i];
-		meshData[numTriangleEdge + 4 * i - 1] = connectivityMatrixTriangleEdge[1][i];
+		meshData[numTriangleEdge - 1 + 4 * i + 2] = connectivityMatrixTriangleEdge[0][i];
+		meshData[numTriangleEdge - 1 + 4 * i + 3] = connectivityMatrixTriangleEdge[1][i];
 	}
 }
 

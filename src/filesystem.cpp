@@ -128,10 +128,10 @@ void readMeshData(QTextStream &in) {
 		if (list.size() != 4)
 			throw std::invalid_argument("Invalid edge connectivity");
 
-		meshData[numTriangleEdge + 4 * i] = list[0].toInt();
-		meshData[numTriangleEdge + 4 * i + 1] = list[1].toInt();
-		meshData[numTriangleEdge + 4 * i + 2] = list[2].toInt();
-		meshData[numTriangleEdge + 4 * i + 3] = list[3].toInt();
+		meshData[numTriangleEdge - 1 + 4 * i] = list[0].toInt();
+		meshData[numTriangleEdge - 1 + 4 * i + 1] = list[1].toInt();
+		meshData[numTriangleEdge - 1 + 4 * i + 2] = list[2].toInt();
+		meshData[numTriangleEdge - 1 + 4 * i + 3] = list[3].toInt();
 	}
 }
 

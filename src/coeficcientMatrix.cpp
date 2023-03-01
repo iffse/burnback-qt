@@ -26,16 +26,16 @@ void NodeTriangles() {
 	for (uint i = 0; i < numEdges; ++i) {
 		int index1 = 0;
 		int index2 = 0;
-		int node1 = meshData[numTriangleEdge + 4 * i];
-		int node2 = meshData[numTriangleEdge + 4 * i + 1];
+		int node1 = meshData[numTriangleEdge - 1 + 4 * i];
+		int node2 = meshData[numTriangleEdge - 1 + 4 * i + 1];
 
 		// nt
-		int nodeT1 = meshData[numTriangleEdge + 4 * i + 2];
-		int nodeT2 = meshData[numTriangleEdge + 4 * i + 3];
+		int nodeT1 = meshData[numTriangleEdge - 1 + 4 * i + 2];
+		int nodeT2 = meshData[numTriangleEdge - 1 + 4 * i + 3];
 
 		if (nodeT1 > 0) {
 			// check if node already exist in cells of mcnt(x, nodeT1)
-			for (int j = 0; j < meshData[meshDataHelper + (nodeT1) - 1]; ++j) {
+			for (int j = 0; j < meshData[meshDataHelper + (nodeT1 - 1) - 1]; ++j) {
 				if (node1 == connectivityMatrixNodeTriangle[j][nodeT1 - 1])
 					index1 = 1;
 				if (node2 == connectivityMatrixNodeTriangle[j][nodeT1 - 1])
@@ -84,8 +84,8 @@ void NodeEdge() {
 	connectivityMatrixNodeEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
 	for (uint i = 0; i < numEdges; ++i) {
-		connectivityMatrixNodeEdge[0][i] = meshData[numTriangleEdge + 4 * i];
-		connectivityMatrixNodeEdge[1][i] = meshData[numTriangleEdge + 4 * i + 1];
+		connectivityMatrixNodeEdge[0][i] = meshData[numTriangleEdge - 1 + 4 * i];
+		connectivityMatrixNodeEdge[1][i] = meshData[numTriangleEdge - 1 + 4 * i + 1];
 	}
 }
 
@@ -94,8 +94,8 @@ void TriangleEdge() {
 	connectivityMatrixTriangleEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
 	for (uint i = 0; i < numEdges; ++i) {
-		connectivityMatrixTriangleEdge[0][i] = meshData[numTriangleEdge + 4 * i + 2];
-		connectivityMatrixTriangleEdge[1][i] = meshData[numTriangleEdge + 4 * i + 3];
+		connectivityMatrixTriangleEdge[0][i] = meshData[numTriangleEdge - 1 + 4 * i + 2];
+		connectivityMatrixTriangleEdge[1][i] = meshData[numTriangleEdge - 1 + 4 * i + 3];
 	}
 }
 

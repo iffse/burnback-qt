@@ -1,6 +1,5 @@
 #include <chrono>
 #include <thread>
-#include <QDebug>
 #include <QFile>
 #include <vector>
 
