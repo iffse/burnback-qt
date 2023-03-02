@@ -56,7 +56,7 @@ void setBoundaryConditions() {
 			int node1 = connectivityMatrixNodeEdge[0][edge] - 1; // -1 because the node numbers start from 1
 			int node2 = connectivityMatrixNodeEdge[1][edge] - 1;
 
-			if (nodeBoundaryConditions[0][node1] == 0){
+			if (nodeBoundaryConditions[0][node1] == 0) {
 				nodeBoundaryConditions[0][node1] = lcc;
 				nodeBoundaryConditions[1][node1] = ic;
 			} else if (nodeBoundaryConditions[0][node1] != lcc) {
@@ -82,7 +82,7 @@ void setBoundaryConditions() {
 							nodeBoundaryConditions[0][node1] = inletSymmetry;
 							nodeBoundaryConditions[1][node1] = ic;
 						} else if (lcc == outlet)
-						nodeBoundaryConditions[0][node1] = outletSymmetry;
+							nodeBoundaryConditions[0][node1] = outletSymmetry;
 
 					break;
 
@@ -175,10 +175,10 @@ void setAlpha() {
 			double vertexY4 = y[nodeVertex2] - y[node2];
 			double vertexV4 = sqrt(pow(vertexX4, 2) + pow(vertexY4, 2));
 
-			vertexX3 = vertexX3 / vertexV3;
-			vertexY3 = vertexY3 / vertexV3;
-			vertexX4 = vertexX4 / vertexV4;
-			vertexY4 = vertexY4 / vertexV4;
+			vertexX3 /= vertexV3;
+			vertexY3 /= vertexV3;
+			vertexX4 /= vertexV4;
+			vertexY4 /= vertexV4;
 
 			alpha[1][edge] = acos(vertexX1 * vertexX3 + vertexY1 * vertexY3);
 			alpha[3][edge] = acos(- vertexX1 * vertexX4 - vertexY1 * vertexY4);
@@ -200,20 +200,20 @@ void setAlpha() {
 		}
 
 		// beta and beta prime
-		alpha[4][edge] = tan( 1/2.0 * alpha[0][edge] ) + tan( 1/2.0 * alpha[1][edge] );
-		alpha[5][edge] = tan( 1/2.0 * alpha[2][edge] ) + tan( 1/2.0 * alpha[3][edge] );
+		alpha[4][edge] = tan( 0.5 * alpha[0][edge] ) + tan( 0.5 * alpha[1][edge] );
+		alpha[5][edge] = tan( 0.5 * alpha[2][edge] ) + tan( 0.5 * alpha[3][edge] );
 
 	}
 
-	// udate angular sectors
+	// update angular sectors
 	for (uint node = 0; node < numNodes; ++node)
-		sector[node] = 1/2.0 * sector[node];
+		sector[node] *= 0.5;
 
 }
 
 // what is this
 double sup(double x1, double y1, double x2, double y2, double x3, double y3) {
-	return 1.0/2 * abs(x2 * y3 + x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3 - x2 * y1);
+	return 0.5 * abs(x2 * y3 + x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3 - x2 * y1);
 }
 
 void setMetric() {
@@ -228,8 +228,8 @@ void setMetric() {
 		double vertexX1 = x[node2] - x[node1];
 		double vertexY1 = y[node2] - y[node1];
 		double vertexV1 = sqrt(pow(vertexX1, 2) + pow(vertexY1, 2));
-		double vertexX2 = x[node3] - x[node1];
-		double vertexY2 = y[node3] - y[node1];
+		double vertexX2 = x[node2] - x[node3];
+		double vertexY2 = y[node2] - y[node3];
 		double vertexV2 = sqrt(pow(vertexX2, 2) + pow(vertexY2, 2));
 		double vertexX3 = x[node3] - x[node1];
 		double vertexY3 = y[node3] - y[node1];
@@ -238,10 +238,9 @@ void setMetric() {
 		area[triangle] = sup( x[node1], y[node1], x[node2], y[node2], x[node3], y[node3] );
 
 		// max of the three vertices
-		double vvm;
-		vvm = max(max(vertexV1, vertexV2), vertexV3);
+		double vertexVMax = max(max(vertexV1, vertexV2), vertexV3);
 
-		height[triangle] = area[triangle] / vvm;
+		height[triangle] = area[triangle] / vertexVMax;
 	}
 }
 
@@ -371,12 +370,12 @@ void setdt() {
 }
 
 void eulerExplicit() {
-	double dtmin = *min_element(dt.begin(), dt.end());
+	double &dtmin = *min_element(dt.begin(), dt.end());
 
 	for (uint node = 0; node < numNodes; ++node)
 		uVertex[node] += dtmin * (flux[0][node] + viscosity * flux[1][node]);
 	
-	timeTotal = timeTotal + dtmin;
+	timeTotal += dtmin;
 }
 
 double getError() {

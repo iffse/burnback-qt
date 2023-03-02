@@ -2,15 +2,15 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 import numpy as np
 
-# filename = 'plotData.txt'
-filename = 'graf.plot'
+filename = 'plotData.txt'
+# filename = 'graf.plot'
 file = open(filename, 'r')
 
 numTriangles = int(file.readline())
 triangles = []
 for i in range(numTriangles):
-		line = file.readline()
-		triangles.append([int(x) - 1 for x in line.split()])
+	line = file.readline()
+	triangles.append([int(x) - 1 for x in line.split()])
 
 numNodes = int(file.readline())
 nodes_x = []
