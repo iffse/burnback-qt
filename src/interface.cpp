@@ -9,6 +9,7 @@
 #include <src/headers/coeficcientMatrix.h>
 #include <src/headers/operations.h>
 #include <src/headers/iterations.h>
+#include <src/headers/plotData.h>
 
 #include <fenv.h>
 
@@ -96,6 +97,7 @@ void Actions::run()
 }
 
 void Actions::afterWorker() {
+	plotData::generateData();
 }
 
 void Actions::worker() {
@@ -183,6 +185,8 @@ void Actions::worker() {
 	emit newOutput("Area of the propellant: " + QString::number(areag));
 	emit newOutput("Propellant burnt: " + QString::number(areap));
 	emit newOutput("Error: " + QString::number(100 * abs(areag - areap) / areag) + "%");
+
+	afterWorker();
 
 	// 	auto now = std::chrono::system_clock::now();
 	// 	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {

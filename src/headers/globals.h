@@ -40,7 +40,7 @@ inline uint numTriangles;
 inline uint numEdges;
 inline uint numTriangleEdge; // ? nl1
 inline uint meshDataHelper; // ? ihlp
-inline uint numBoundarySides; // nbl
+inline uint numBoundaryEdge; // nbl
 
 // connectivity matrix
 inline std::array<std::vector<int>, 3> connectivityMatrixNodeTriangle; // mcnt

@@ -391,15 +391,15 @@ double getError() {
 void setqbnd() {
 	connectivityMatrixNodeBoundary = array<vector<int>, 2>({vector<int>(numTriangles), vector<int>(numTriangles)});
 
-	numBoundarySides = 0;
+	numBoundaryEdge = 0;
 	for (uint i = 0; i < numEdges; ++i) {
 		int triangle1 = connectivityMatrixTriangleEdge[0][i];
 		int triangle2 = connectivityMatrixTriangleEdge[1][i];
 
 		if (triangle1 < 0 || triangle2 < 0) {
-			numBoundarySides = numBoundarySides + 1;
-			connectivityMatrixNodeBoundary[0][numBoundarySides] = connectivityMatrixNodeEdge[0][numBoundarySides];
-			connectivityMatrixNodeBoundary[1][numBoundarySides] = connectivityMatrixNodeEdge[1][numBoundarySides];
+			numBoundaryEdge = numBoundaryEdge + 1;
+			connectivityMatrixNodeBoundary[0][numBoundaryEdge] = connectivityMatrixNodeEdge[0][numBoundaryEdge];
+			connectivityMatrixNodeBoundary[1][numBoundaryEdge] = connectivityMatrixNodeEdge[1][numBoundaryEdge];
 		}
 	}
 }

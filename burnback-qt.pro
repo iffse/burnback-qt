@@ -24,14 +24,16 @@ HEADERS += \
 	src/headers/coeficcientMatrix.h \
 	src/headers/filesystem.h \
 	src/headers/interface.h \
-	src/headers/iterations.h
+	src/headers/iterations.h \
+	src/headers/plotData.h
 SOURCES += \
 	src/main.cpp \
 	src/operations.cpp \
 	src/coeficcientMatrix.cpp \
 	src/filesystem.cpp \
 	src/interface.cpp \
-	src/iterations.cpp
+	src/iterations.cpp \
+	src/plotData.cpp
 RESOURCES += \
 	src-qml/qml.qrc
 
