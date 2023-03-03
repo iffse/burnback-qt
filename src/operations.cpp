@@ -7,6 +7,19 @@
 
 using namespace std;
 
+enum boundaryConditions {
+	inlet = 1,
+	outlet = 2,
+	symmetry = 3,
+	inletOutlet = 12,
+	inletSymmetry = 13,
+	outletSymmetry = 23,
+	symmetry2 = 4,
+	source2 = 6,
+	free2 = 7
+};
+
+
 // node as function of triangle (mcnt)
 void regenerateMeshData() {
 	for (uint edge = 0; edge < numEdges; ++edge) {
@@ -27,15 +40,6 @@ void setBoundaryConditions() {
 	// 	{"inlet-symmetry", 13},
 	// 	{"outlet-symmetry", 23}
 	// };
-	enum boundaryConditions {
-		inlet = 1,
-		outlet = 2,
-		symmetry = 3,
-		inletOutlet = 12,
-		inletSymmetry = 13,
-		outletSymmetry = 23
-	};
-
 	nodeBoundaryConditions = array<vector<int>, 2> {vector<int>(numNodes), vector<int>(numNodes)};
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
@@ -61,14 +65,14 @@ void setBoundaryConditions() {
 				nodeBoundaryConditions[1][node1] = ic;
 			} else if (nodeBoundaryConditions[0][node1] != lcc) {
 				switch (nodeBoundaryConditions[0][node1]) {
-					case inlet:
+					case inlet: case source2:
 						if (lcc == outlet)
 							nodeBoundaryConditions[0][node1] = inletOutlet;
 						else if (lcc == symmetry)
 							nodeBoundaryConditions[0][node1] = inletSymmetry;
 					break;
 
-					case outlet:
+					case outlet: case free2:
 						if (lcc == inlet)
 							nodeBoundaryConditions[0][node1] = inletOutlet;
 						else if (lcc == symmetry)
@@ -77,7 +81,7 @@ void setBoundaryConditions() {
 						nodeBoundaryConditions[1][node1] = ic;
 					break;
 
-					case symmetry:
+					case symmetry: case symmetry2:
 						if (lcc == inlet) {
 							nodeBoundaryConditions[0][node1] = inletSymmetry;
 							nodeBoundaryConditions[1][node1] = ic;
@@ -263,6 +267,7 @@ void setduVarriable() {
 		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
 	}
 }
+
 void setFlux() {
 	flux[1] = vector<double>(numNodes, 0);
 	duVertex.fill(vector<double>(numNodes, 0));
@@ -273,7 +278,7 @@ void setFlux() {
 		int triangle2 = connectivityMatrixTriangleEdge[1][edge] - 1;
 		int node1 = connectivityMatrixNodeEdge[0][edge] - 1;
 		int node2 = connectivityMatrixNodeEdge[1][edge] - 1;
-		
+
 		double dux = 0.0;
 		double duy = 0.0;
 
@@ -313,25 +318,25 @@ void setFlux() {
 		}
 
 		// why du of both triangle?
-		dux *= 1.0/2 * alpha[6][edge];
-		duy *= 1.0/2 * alpha[7][edge];
+		dux *= 0.5 * alpha[6][edge];
+		duy *= 0.5 * alpha[7][edge];
 
 		flux[1][node1] += alpha[4][edge] * (dux + duy);
 		flux[1][node2] -= alpha[5][edge] * (dux + duy);
 	}
 
-	for (uint i = 0; i < numNodes; ++i) {
-		eps[i] = eps[i] / M_PI;
-		flux[1][i] *= eps[i];
-		duVertex[0][i] *= 0.5;
-		duVertex[1][i] *= 0.5;
+	for (uint node = 0; node < numNodes; ++node) {
+		eps[node] = eps[node] / M_PI;
+		flux[1][node] *= eps[node];
+		duVertex[0][node] *= 0.5;
+		duVertex[1][node] *= 0.5;
 	}
 
 }
 void boundary() {
 	for (uint node = 0; node < numNodes; ++node) {
 		int &boundary = nodeBoundaryConditions[0][node];
-		int &condition = nodeBoundaryConditions[1][node];
+		int condition = nodeBoundaryConditions[1][node] - 1;
 
 		duVertex[0][node] /= sector[node];
 		duVertex[1][node] /= sector[node];
@@ -339,26 +344,32 @@ void boundary() {
 		if (boundary == 0) {
 			flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
 		} else {
-			// source boundary
-			if (boundary == 1 || boundary == 12 || boundary == 13) {
-				flux[0][node] = 0.0;
-				flux[1][node] = 0.0;
-			}
+			switch (boundary) {
+				// sourceBoundaries
+				case inlet: case inletOutlet: case inletSymmetry: case source2: {
+					flux[0][node] = 0.0;
+					flux[1][node] = 0.0;
+					break;
+				}
+				// freeBoundaries
+				case outlet: case free2: {
+					flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
+					break;
+				}
+				// symmetryBoundaries
+				case symmetry: case outletSymmetry: case symmetry2: {
+					double ubNorm = sqrt( pow(uBoundaryData[0][condition], 2) + pow(uBoundaryData[1][condition], 2));
+					double duVer = duVertex[0][node] * uBoundaryData[0][condition] + duVertex[1][node] * uBoundaryData[1][condition];
 
-			// free boundary
-			if (boundary == 2) {
-				flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
-				// flux[1][node] *= 2;
-			}
-			// symmetry boundary
-			if (boundary == 3 || boundary == 23) {
-				double ubNorm = sqrt( pow(uBoundaryData[0][condition], 2) + pow(uBoundaryData[1][condition], 2));
-				double duVer = duVertex[0][node] * uBoundaryData[0][condition] + duVertex[1][node] * uBoundaryData[1][condition];
+					duVertex[0][node] = duVer * uBoundaryData[0][condition] / ubNorm;
+					duVertex[1][node] = duVer * uBoundaryData[1][condition] / ubNorm;
+					flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
+					flux[1][node] *= 2;
+					break;
+				}
+				default:
+					break;
 
-				duVertex[0][node] = duVer * uBoundaryData[0][condition] / ubNorm;
-				duVertex[1][node] = duVer * uBoundaryData[1][condition] / ubNorm;
-				flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
-				flux[1][node] *= 2;
 			}
 		}
 	}
@@ -374,7 +385,7 @@ void eulerExplicit() {
 
 	for (uint node = 0; node < numNodes; ++node)
 		uVertex[node] += dtmin * (flux[0][node] + viscosity * flux[1][node]);
-	
+
 	timeTotal += dtmin;
 }
 
@@ -392,13 +403,13 @@ void setqbnd() {
 
 	numBoundaryEdge = 0;
 	for (uint i = 0; i < numEdges; ++i) {
-		int triangle1 = connectivityMatrixTriangleEdge[0][i];
-		int triangle2 = connectivityMatrixTriangleEdge[1][i];
+		int &triangle1 = connectivityMatrixTriangleEdge[0][i];
+		int &triangle2 = connectivityMatrixTriangleEdge[1][i];
 
 		if (triangle1 < 0 || triangle2 < 0) {
-			numBoundaryEdge = numBoundaryEdge + 1;
 			connectivityMatrixNodeBoundary[0][numBoundaryEdge] = connectivityMatrixNodeEdge[0][numBoundaryEdge];
 			connectivityMatrixNodeBoundary[1][numBoundaryEdge] = connectivityMatrixNodeEdge[1][numBoundaryEdge];
+			++numBoundaryEdge;
 		}
 	}
 }
@@ -499,7 +510,7 @@ void setBurningArea() {
 			}
 		}
 	}
-	
+
 
 
 }
