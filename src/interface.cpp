@@ -97,7 +97,7 @@ void Actions::run()
 }
 
 void Actions::afterWorker() {
-	plotData::generateData();
+	paintCanvas(plotData::isocolourData(3));
 }
 
 void Actions::worker() {

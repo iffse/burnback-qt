@@ -1,6 +1,8 @@
 #pragma once
+#include <vector>
 
 namespace plotData
 {
-		void generateData();
+void generateData();
+std::vector<double> isocolourData(int numLines);
 }

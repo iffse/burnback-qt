@@ -11,6 +11,7 @@ public:
 
 signals:
 	void newOutput(QString output);
+	void paintCanvas(std::vector<double> list);
 	void finished();
 
 public slots:

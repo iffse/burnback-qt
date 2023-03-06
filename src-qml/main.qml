@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.15
 
 ApplicationWindow {
+	id: root
 	width: 1280
 	height: 720
 	visible: true
