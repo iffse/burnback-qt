@@ -17,16 +17,15 @@ Item {
 				anchors.fill: parent
 				height: 2000
 				width: 2000
-				scale: 2
 
 				function paint(list) {
 					var ctx = getContext("2d");
 					ctx.lineWidth = 0.2;
 					for	(var i = 0; i < list.length; i+=4) {
-						ctx.moveTo(1000 + list[i], 1000 - list[i+1]);
-						ctx.lineTo(1000 + list[i+2], 1000 - list[i+3]);
-						ctx.stroke();
+						ctx.moveTo(500 + list[i], 1000 - list[i+1]);
+						ctx.lineTo(500 + list[i+2], 1000 - list[i+3]);
 					}
+					ctx.stroke();
 					canvas.requestPaint()
 				}
 

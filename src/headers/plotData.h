@@ -4,5 +4,5 @@
 namespace plotData
 {
 void generateData();
-std::vector<double> isocolourData(int numLines);
+std::vector<double> isocolourData(double value);
 }

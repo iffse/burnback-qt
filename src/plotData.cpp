@@ -62,65 +62,68 @@ double lerp(double x1, double x2, double t) {
 }
 #endif
 
-vector<double> isocolourData(int numLines) {
-	double maxValue = *max_element(uVertex.begin(), uVertex.end());
-	double minValue = *min_element(uVertex.begin(), uVertex.end());
+vector<double> isocolourData(double value) {
 	vector<double> data;
 
-	double step = (maxValue - minValue) / numLines;
-	for (double value = minValue; value < maxValue; value += step) {
+	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
+		uint node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
+		uint node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
+		uint node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
 
-		for (uint triangle = 0; triangle < numTriangles; ++triangle) {
-			uint node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
-			uint node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
-			uint node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
+		double &uVertex1 = uVertex[node1];
+		double &uVertex2 = uVertex[node2];
+		double &uVertex3 = uVertex[node3];
+		double value1 = uVertex1 - value;
+		double value2 = uVertex2 - value;
+		double value3 = uVertex3 - value;
 
-			double value1 = uVertex[node1] - value;
-			double value2 = uVertex[node2] - value;
-			double value3 = uVertex[node3] - value;
+		if (value1 * value2 < 0) {
+			double x1 = x[node1];
+			double x2 = x[node2];
+			double y1 = y[node1];
+			double y2 = y[node2];
 
-			if (value1 * value2 < 0) {
-				double x1 = x[node1];
-				double x2 = x[node2];
-				double y1 = y[node1];
-				double y2 = y[node2];
+			double t = (value - uVertex1) / (value2 - value1);
 
-				double x = lerp(x1, x2, - value2 / (value1 - value2));
-				double y = lerp(y1, y2, - value2 / (value1 - value2));
+			double x = lerp(x1, x2, t) * 10;
+			double y = lerp(y1, y2, t) * 10;
 
-				data.push_back(x);
-				data.push_back(y);
-			}
-
-			if (value2 * value3 < 0) {
-				double x1 = x[node2];
-				double x2 = x[node3];
-				double y1 = y[node2];
-				double y2 = y[node3];
-
-				double x = lerp(x1, x2, - value3 / (value2 - value3));
-				double y = lerp(y1, y2, - value3 / (value2 - value3));
-
-				data.push_back(x);
-				data.push_back(y);
-			}
-
-			if (value3 * value1 < 0) {
-				double x1 = x[node3];
-				double x2 = x[node1];
-				double y1 = y[node3];
-				double y2 = y[node1];
-
-				double x = lerp(x1, x2, - value1 / (value3 - value1));
-				double y = lerp(y1, y2, - value1 / (value3 - value1));
-
-				data.push_back(x);
-				data.push_back(y);
-
-			}
+			data.push_back(x);
+			data.push_back(y);
 		}
 
+		if (value2 * value3 < 0) {
+			double x1 = x[node2];
+			double x2 = x[node3];
+			double y1 = y[node2];
+			double y2 = y[node3];
+
+			double t = (value - uVertex2) / (value3 - value2);
+
+			double x = lerp(x1, x2, t) * 10;
+			double y = lerp(y1, y2, t) * 10;
+
+			data.push_back(x);
+			data.push_back(y);
+		}
+
+		if (value3 * value1 < 0) {
+			double x1 = x[node3];
+			double x2 = x[node1];
+			double y1 = y[node3];
+			double y2 = y[node1];
+
+			double t = (value - uVertex3) / (value1 - value3);
+
+			double x = lerp(x1, x2, t) * 10;
+			double y = lerp(y1, y2, t) * 10;
+
+			data.push_back(x);
+			data.push_back(y);
+
+		}
 	}
+
 	return data;
 }
 

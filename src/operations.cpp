@@ -4,10 +4,12 @@
 
 #include <array>
 #include <cmath>
+#include <complex>
 
 using namespace std;
 
 enum boundaryConditions {
+	none = 0,
 	inlet = 1,
 	outlet = 2,
 	symmetry = 3,
@@ -20,7 +22,6 @@ enum boundaryConditions {
 };
 
 
-// node as function of triangle (mcnt)
 void regenerateMeshData() {
 	for (uint edge = 0; edge < numEdges; ++edge) {
 		meshData[numTriangleEdge - 1 + 4 * edge] = connectivityMatrixNodeEdge[0][edge];
@@ -32,105 +33,65 @@ void regenerateMeshData() {
 }
 
 void setBoundaryConditions() {
-	// std::map<std::string, int> boundaryConditions = {
-	// 	{"inlet", 1},
-	// 	{"outlet", 2},
-	// 	{"symmetry", 3},
-	// 	{"inlet-outlet", 12},
-	// 	{"inlet-symmetry", 13},
-	// 	{"outlet-symmetry", 23}
-	// };
 	nodeBoundaryConditions = array<vector<int>, 2> {vector<int>(numNodes), vector<int>(numNodes)};
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
-		int lcc = 0;
-		int ic = 0;
-		const int triangle1 = connectivityMatrixTriangleEdge[0][edge];
-		const int triangle2 = connectivityMatrixTriangleEdge[1][edge];
+		auto condition = 0;
+		auto boundary = 0;
+		auto &triangle1 = connectivityMatrixTriangleEdge[0][edge];
+		auto &triangle2 = connectivityMatrixTriangleEdge[1][edge];
 
 		if (triangle1 < 0) {
-			ic = - triangle1;
-			lcc = connectivityMatrixBoundaryConditions[ic - 1];
+			boundary = - triangle1;
+			condition = connectivityMatrixBoundaryConditions[boundary - 1];
 		} else if (triangle2 < 0) {
-			ic = - triangle2;
-			lcc = connectivityMatrixBoundaryConditions[ic - 1];
+			boundary = - triangle2;
+			condition = connectivityMatrixBoundaryConditions[boundary - 1];
 		}
 
-		if (lcc != 0) {
-			int node1 = connectivityMatrixNodeEdge[0][edge] - 1; // -1 because the node numbers start from 1
-			int node2 = connectivityMatrixNodeEdge[1][edge] - 1;
-
-			if (nodeBoundaryConditions[0][node1] == 0) {
-				nodeBoundaryConditions[0][node1] = lcc;
-				nodeBoundaryConditions[1][node1] = ic;
-			} else if (nodeBoundaryConditions[0][node1] != lcc) {
-				switch (nodeBoundaryConditions[0][node1]) {
-					case inlet: case source2:
-						if (lcc == outlet)
-							nodeBoundaryConditions[0][node1] = inletOutlet;
-						else if (lcc == symmetry)
-							nodeBoundaryConditions[0][node1] = inletSymmetry;
+		if (condition != 0) {
+			auto setCondition = [&](int node) {
+				switch (nodeBoundaryConditions[0][node]) {
+					case none:
+						nodeBoundaryConditions[0][node] = condition;
+						nodeBoundaryConditions[1][node] = boundary;
 					break;
+
+					case inlet: case source2:
+						if (condition == outlet || condition == free2)
+							nodeBoundaryConditions[0][node] = inletOutlet;
+						else if (condition == symmetry || condition == symmetry2)
+							nodeBoundaryConditions[0][node] = inletSymmetry;
+						break;
 
 					case outlet: case free2:
-						if (lcc == inlet)
-							nodeBoundaryConditions[0][node1] = inletOutlet;
-						else if (lcc == symmetry)
-							nodeBoundaryConditions[0][node1] = outletSymmetry;
+						if (condition == inlet || condition == source2)
+							nodeBoundaryConditions[0][node] = inletOutlet;
+						else if (condition == symmetry || condition == symmetry2)
+							nodeBoundaryConditions[0][node] = outletSymmetry;
 
-						nodeBoundaryConditions[1][node1] = ic;
-					break;
+						nodeBoundaryConditions[1][node] = boundary;
+						break;
 
 					case symmetry: case symmetry2:
-						if (lcc == inlet) {
-							nodeBoundaryConditions[0][node1] = inletSymmetry;
-							nodeBoundaryConditions[1][node1] = ic;
-						} else if (lcc == outlet)
-							nodeBoundaryConditions[0][node1] = outletSymmetry;
-
-					break;
-
-					default:
-					break;
-
-				}
-			}
-
-			if (nodeBoundaryConditions[0][node2] == 0) {
-				nodeBoundaryConditions[0][node2] = lcc;
-				nodeBoundaryConditions[1][node2] = ic;
-			} else if (nodeBoundaryConditions[0][node2] != lcc) {
-				switch (nodeBoundaryConditions[0][node2]) {
-					case inlet:
-						if (lcc == outlet)
-							nodeBoundaryConditions[0][node2] = inletOutlet;
-						else if (lcc == symmetry)
-							nodeBoundaryConditions[0][node2] = inletSymmetry;
-					break;
-
-					case outlet:
-						if (lcc == inlet)
-							nodeBoundaryConditions[0][node2] = inletOutlet;
-						else if (lcc == symmetry)
-							nodeBoundaryConditions[0][node2] = outletSymmetry;
-
-						nodeBoundaryConditions[1][node2] = ic;
-					break;
-
-					case symmetry:
-						if (lcc == inlet) {
-							nodeBoundaryConditions[0][node2] = inletSymmetry;
-							nodeBoundaryConditions[1][node2] = ic;
-						} else if (lcc == outlet)
-							nodeBoundaryConditions[0][node2] = outletSymmetry;
-
-					break;
+						if (condition == inlet || condition == source2) {
+							nodeBoundaryConditions[0][node] = inletSymmetry;
+							nodeBoundaryConditions[1][node] = boundary;
+						} else if (condition == outlet || condition == free2)
+							nodeBoundaryConditions[0][node] = outletSymmetry;
+						break;
 
 					default:
-					break;
+						break;
 
 				}
-			}
+			};
+
+			auto node1 = connectivityMatrixNodeEdge[0][edge] - 1; // -1 because the node numbers start from 1
+			auto node2 = connectivityMatrixNodeEdge[1][edge] - 1;
+
+			setCondition(node1);
+			setCondition(node2);
 		}
 	}
 }
@@ -140,13 +101,14 @@ void setAlpha() {
 	alpha.fill(vector<double>(numEdges));
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
-		int node1 = connectivityMatrixNodeEdge[0][edge] - 1;
-		int node2 = connectivityMatrixNodeEdge[1][edge] - 1;
-		int nodeVertex1 = connectivityMatrixVertexEdge[0][edge] - 1;
-		int nodeVertex2 = connectivityMatrixVertexEdge[1][edge] - 1;
-		double vertexX1 = x[node2] - x[node1];
-		double vertexY1 = y[node2] - y[node1];
-		double vertexV1 = sqrt(pow(vertexX1, 2) + pow(vertexY1, 2));
+		auto node1 = connectivityMatrixNodeEdge[0][edge] - 1;
+		auto node2 = connectivityMatrixNodeEdge[1][edge] - 1;
+		auto nodeVertex1 = connectivityMatrixVertexEdge[0][edge] - 1;
+		auto nodeVertex2 = connectivityMatrixVertexEdge[1][edge] - 1;
+		auto vertexX1 = x[node2] - x[node1];
+		auto vertexY1 = y[node2] - y[node1];
+
+		auto vertexV1 = abs(complex<double>(vertexX1, vertexY1));
 
 		vertexX1 /= vertexV1;
 		vertexY1 /= vertexV1;
@@ -155,12 +117,12 @@ void setAlpha() {
 		alpha[7][edge] = vertexY1;
 
 		if (nodeVertex1 >= 0) {
-			double vertexX2 = x[nodeVertex1] - x[node1];
-			double vertexY2 = y[nodeVertex1] - y[node1];
-			double vertexV2 = sqrt(pow(vertexX2, 2) + pow(vertexY2, 2));
-			double vertexX5 = x[nodeVertex1] - x[node2];
-			double vertexY5 = y[nodeVertex1] - y[node2];
-			double vertexV5 = sqrt(pow(vertexX5, 2) + pow(vertexY5, 2));
+			auto vertexX2 = x[nodeVertex1] - x[node1];
+			auto vertexY2 = y[nodeVertex1] - y[node1];
+			auto vertexV2 = abs(complex<double>(vertexX2, vertexY2));
+			auto vertexX5 = x[nodeVertex1] - x[node2];
+			auto vertexY5 = y[nodeVertex1] - y[node2];
+			auto vertexV5 = abs(complex<double>(vertexX5, vertexY5));
 
 			vertexX2 /= vertexV2;
 			vertexY2 /= vertexV2;
@@ -172,12 +134,12 @@ void setAlpha() {
 		}
 
 		if (nodeVertex2 >= 0) {
-			double vertexX3 = x[nodeVertex2] - x[node1];
-			double vertexY3 = y[nodeVertex2] - y[node1];
-			double vertexV3 = sqrt(pow(vertexX3, 2) + pow(vertexY3, 2));
-			double vertexX4 = x[nodeVertex2] - x[node2];
-			double vertexY4 = y[nodeVertex2] - y[node2];
-			double vertexV4 = sqrt(pow(vertexX4, 2) + pow(vertexY4, 2));
+			auto vertexX3 = x[nodeVertex2] - x[node1];
+			auto vertexY3 = y[nodeVertex2] - y[node1];
+			auto vertexV3 = abs(complex<double>(vertexX3, vertexY3));
+			auto vertexX4 = x[nodeVertex2] - x[node2];
+			auto vertexY4 = y[nodeVertex2] - y[node2];
+			auto vertexV4 = abs(complex<double>(vertexX4, vertexY4));
 
 			vertexX3 /= vertexV3;
 			vertexY3 /= vertexV3;
@@ -185,7 +147,7 @@ void setAlpha() {
 			vertexY4 /= vertexV4;
 
 			alpha[1][edge] = acos(vertexX1 * vertexX3 + vertexY1 * vertexY3);
-			alpha[3][edge] = acos(- vertexX1 * vertexX4 - vertexY1 * vertexY4);
+			alpha[3][edge] = acos(-vertexX1 * vertexX4 - vertexY1 * vertexY4);
 		}
 
 		// setting angular sector of each node
@@ -215,34 +177,33 @@ void setAlpha() {
 
 }
 
-// what is this
-double sup(double x1, double y1, double x2, double y2, double x3, double y3) {
-	return 0.5 * abs(x2 * y3 + x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3 - x2 * y1);
-}
-
 void setMetric() {
 	area = vector<double>(numTriangles);
 	height = vector<double>(numTriangles);
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
-		int node1 = connectivityMatrixNodeTriangle[1 - 1][triangle] - 1;
-		int node2 = connectivityMatrixNodeTriangle[2 - 1][triangle] - 1;
-		int node3 = connectivityMatrixNodeTriangle[3 - 1][triangle] - 1;
+		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
+		auto node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
+		auto node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
 
-		double vertexX1 = x[node2] - x[node1];
-		double vertexY1 = y[node2] - y[node1];
-		double vertexV1 = sqrt(pow(vertexX1, 2) + pow(vertexY1, 2));
-		double vertexX2 = x[node2] - x[node3];
-		double vertexY2 = y[node2] - y[node3];
-		double vertexV2 = sqrt(pow(vertexX2, 2) + pow(vertexY2, 2));
-		double vertexX3 = x[node3] - x[node1];
-		double vertexY3 = y[node3] - y[node1];
-		double vertexV3 = sqrt(pow(vertexX3, 2) + pow(vertexY3, 2));
+		auto vertexX1 = x[node2] - x[node1];
+		auto vertexY1 = y[node2] - y[node1];
+		auto vertexX2 = x[node2] - x[node3];
+		auto vertexY2 = y[node2] - y[node3];
+		auto vertexX3 = x[node3] - x[node1];
+		auto vertexY3 = y[node3] - y[node1];
 
+		auto vertexV1 = abs(complex<double>(vertexX1, vertexY1));
+		auto vertexV2 = abs(complex<double>(vertexX2, vertexY2));
+		auto vertexV3 = abs(complex<double>(vertexX3, vertexY3));
+
+		auto sup = [](double x1, double y1, double x2, double y2, double x3, double y3) {
+			return 0.5 * abs(x2 * y3 + x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3 - x2 * y1);
+		};
 		area[triangle] = sup( x[node1], y[node1], x[node2], y[node2], x[node3], y[node3] );
 
 		// max of the three vertices
-		double vertexVMax = max(max(vertexV1, vertexV2), vertexV3);
+		auto vertexVMax = max(max(vertexV1, vertexV2), vertexV3);
 
 		height[triangle] = area[triangle] / vertexVMax;
 	}
@@ -250,37 +211,37 @@ void setMetric() {
 
 void setduVarriable() {
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
-		int node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
-		int node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
-		int node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
+		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
+		auto node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
+		auto node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
 
-		double u21 = uVertex[node2] - uVertex[node1];
-		double u31 = uVertex[node3] - uVertex[node1];
+		auto u21 = uVertex[node2] - uVertex[node1];
+		auto u31 = uVertex[node3] - uVertex[node1];
 
-		double x21 = x[node2] - x[node1];
-		double x31 = x[node3] - x[node1];
-		double y21 = y[node2] - y[node1];
-		double y31 = y[node3] - y[node1];
+		auto x21 = x[node2] - x[node1];
+		auto x31 = x[node3] - x[node1];
+		auto y21 = y[node2] - y[node1];
+		auto y31 = y[node3] - y[node1];
 
-		double rr = 1.0 / (y31 * x21 - y21 * x31);
+		auto rr = 1.0 / (y31 * x21 - y21 * x31);
 		duVariable[0][triangle] = rr * (u21 * y31 - u31 * y21);
 		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
 	}
 }
 
 void setFlux() {
-	flux[1] = vector<double>(numNodes, 0);
-	duVertex.fill(vector<double>(numNodes, 0));
-	eps = vector<double>(numNodes, 0);
+	flux[1] = vector<double>(numNodes);
+	duVertex.fill(vector<double>(numNodes));
+	eps = vector<double>(numNodes);
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
-		int triangle1 = connectivityMatrixTriangleEdge[0][edge] - 1;
-		int triangle2 = connectivityMatrixTriangleEdge[1][edge] - 1;
-		int node1 = connectivityMatrixNodeEdge[0][edge] - 1;
-		int node2 = connectivityMatrixNodeEdge[1][edge] - 1;
+		const auto triangle1 = connectivityMatrixTriangleEdge[0][edge] - 1;
+		const auto triangle2 = connectivityMatrixTriangleEdge[1][edge] - 1;
+		const auto node1 = connectivityMatrixNodeEdge[0][edge] - 1;
+		const auto node2 = connectivityMatrixNodeEdge[1][edge] - 1;
 
-		double dux = 0.0;
-		double duy = 0.0;
+		auto dux = 0.0;
+		auto duy = 0.0;
 
 		if (triangle1 >= 0) {
 			duVertex[0][node1] += alpha[0][edge] * duVariable[0][triangle1];
@@ -291,11 +252,10 @@ void setFlux() {
 			dux += duVariable[0][triangle1];
 			duy += duVariable[1][triangle1];
 
-			double duMod = 1 + sqrt(pow(duVariable[0][triangle1], 2) + pow(duVariable[1][triangle1], 2));
+			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 			if (duMod > eps[node1])
 				eps[node1] = duMod;
-			// Why not node2 ?
-			if (duMod > eps[node1])
+			if (duMod > eps[node2])
 				eps[node2] = duMod;
 		}
 
@@ -307,17 +267,16 @@ void setFlux() {
 
 			dux += duVariable[0][triangle2];
 			duy += duVariable[1][triangle2];
-			// why not triangle2 ?
-			double duMod = 1 + sqrt(pow(duVariable[0][triangle1], 2) + pow(duVariable[1][triangle1], 2));
 
+			// ?
+			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 			if (duMod > eps[node1])
 				eps[node1] = duMod;
-			if (duMod > eps[node1])
+			if (duMod > eps[node2])
 				eps[node2] = duMod;
 
 		}
 
-		// why du of both triangle?
 		dux *= 0.5 * alpha[6][edge];
 		duy *= 0.5 * alpha[7][edge];
 
@@ -326,54 +285,58 @@ void setFlux() {
 	}
 
 	for (uint node = 0; node < numNodes; ++node) {
-		eps[node] = eps[node] / M_PI;
+		eps[node] /= M_PI;
 		flux[1][node] *= eps[node];
 		duVertex[0][node] *= 0.5;
 		duVertex[1][node] *= 0.5;
 	}
 
 }
+
 void boundary() {
 	for (uint node = 0; node < numNodes; ++node) {
-		int &boundary = nodeBoundaryConditions[0][node];
-		int condition = nodeBoundaryConditions[1][node] - 1;
+		const auto &condition = nodeBoundaryConditions[0][node];
+		const auto boundary = nodeBoundaryConditions[1][node] - 1;
 
 		duVertex[0][node] /= sector[node];
 		duVertex[1][node] /= sector[node];
 
-		if (boundary == 0) {
-			flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
-		} else {
-			switch (boundary) {
-				// sourceBoundaries
-				case inlet: case inletOutlet: case inletSymmetry: case source2: {
-					flux[0][node] = 0.0;
-					flux[1][node] = 0.0;
-					break;
-				}
-				// freeBoundaries
-				case outlet: case free2: {
-					flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
-					break;
-				}
-				// symmetryBoundaries
-				case symmetry: case outletSymmetry: case symmetry2: {
-					double ubNorm = sqrt( pow(uBoundaryData[0][condition], 2) + pow(uBoundaryData[1][condition], 2));
-					double duVer = duVertex[0][node] * uBoundaryData[0][condition] + duVertex[1][node] * uBoundaryData[1][condition];
-
-					duVertex[0][node] = duVer * uBoundaryData[0][condition] / ubNorm;
-					duVertex[1][node] = duVer * uBoundaryData[1][condition] / ubNorm;
-					flux[0][node] = 1 - sqrt( pow(duVertex[0][node], 2) + pow(duVertex[1][node], 2) );
-					flux[1][node] *= 2;
-					break;
-				}
-				default:
-					break;
-
+		switch (condition) {
+			// not a boundary
+			case none: {
+				flux[0][node] = 1 - abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+			break;
 			}
+			// sourceBoundaries
+			case inlet: case inletOutlet: case inletSymmetry: case source2: {
+				flux[0][node] = 0;
+				flux[1][node] = 0;
+				break;
+			}
+			// freeBoundaries
+			case outlet: case free2: {
+				flux[0][node] = 1 - abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+				flux[1][node] *= 2;
+				break;
+			}
+			// symmetryBoundaries
+			case symmetry: case outletSymmetry: case symmetry2: {
+				auto ubNorm = abs(complex<double>(uBoundaryData[0][boundary], uBoundaryData[1][boundary]));
+				auto duVer = duVertex[0][node] * uBoundaryData[0][boundary] + duVertex[1][node] * uBoundaryData[1][boundary];
+
+				duVertex[0][node] = duVer * uBoundaryData[0][boundary] / ubNorm;
+				duVertex[1][node] = duVer * uBoundaryData[1][boundary] / ubNorm;
+				flux[0][node] = 1 - abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+				flux[1][node] *= 2;
+				break;
+			}
+			default:
+				break;
+
 		}
 	}
 }
+
 void setdt() {
 	for (uint node = 0; node < numNodes; ++node) {
 		dt[node] = 1.570796 * cfl * height[node] / eps[node];
@@ -381,16 +344,20 @@ void setdt() {
 }
 
 void eulerExplicit() {
-	double &dtmin = *min_element(dt.begin(), dt.end());
+	const auto &dtMin = *min_element(dt.begin(), dt.end());
 
-	for (uint node = 0; node < numNodes; ++node)
-		uVertex[node] += dtmin * (flux[0][node] + viscosity * flux[1][node]);
+	for (uint node = 0; node < numNodes; ++node) {
+		uVertex[node] += dtMin * (flux[0][node] + viscosity * flux[1][node]);
+		if (uVertex[node] < 0)
+			qDebug() << "uVertex < 0";
+	}
 
-	timeTotal += dtmin;
+
+	timeTotal += dtMin;
 }
 
 double getError() {
-	double error = 0.0;
+	auto error = 0.0;
 	for (uint node = 0; node < numNodes; ++node)
 		error += pow(flux[0][node], 2);
 
@@ -403,8 +370,8 @@ void setqbnd() {
 
 	numBoundaryEdge = 0;
 	for (uint i = 0; i < numEdges; ++i) {
-		int &triangle1 = connectivityMatrixTriangleEdge[0][i];
-		int &triangle2 = connectivityMatrixTriangleEdge[1][i];
+		auto &triangle1 = connectivityMatrixTriangleEdge[0][i];
+		auto &triangle2 = connectivityMatrixTriangleEdge[1][i];
 
 		if (triangle1 < 0 || triangle2 < 0) {
 			connectivityMatrixNodeBoundary[0][numBoundaryEdge] = connectivityMatrixNodeEdge[0][numBoundaryEdge];
@@ -417,34 +384,27 @@ void setqbnd() {
 void setBurningArea() {
 	burningArea = vector<double>(numberArea);
 	burningWay = vector<double>(numberArea);
-	double epsilon = 0.001;
-	double uMin = uVertex[0];
-	double uMax = uVertex[0];
+	auto epsilon = 0.001;
+	auto uMin = *min_element(uVertex.begin(), uVertex.end());
+	auto uMax = *max_element(uVertex.begin(), uVertex.end());
+
+	uMin += (uMax - uMin) * epsilon;
+	uMax -= (uMax - uMin) * epsilon;
 
 	double orderedNode1;
 	double orderedNode2;
 	double orderedNode3;
 
-	for (uint i = 0; i < numNodes; ++i) {
-		if (uMin > uVertex[i])
-			uMin = uVertex[i];
-		if (uMax < uVertex[i])
-			uMax = uVertex[i];
-	}
-
-	uMin += (uMax - uMin) * epsilon;
-	uMax -= (uMax - uMin) * epsilon;
-
 	for (uint area = 0; area < numberArea; ++area) {
-		burningArea[area] = 0.0;
-		double uCut = uMin + area * (uMax - uMin) / (numberArea - 1);
+		burningArea[area] = 0;
+		auto uCut = uMin + area * (uMax - uMin) / (numberArea - 1);
 		burningWay[area] = uCut;
 	}
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
-		double node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
-		double node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
-		double node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
+		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
+		auto node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
+		auto node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
 
 		if (uVertex[node1] > uVertex[node2]) {
 			if (uVertex[node1] > uVertex[node3]) {
@@ -479,7 +439,7 @@ void setBurningArea() {
 		}
 
 		for (uint area = 0; area < numberArea; ++area) {
-			double uCut = burningWay[area];
+			auto &uCut = burningWay[area];
 
 			if (uCut < uVertex[orderedNode1] && uCut > uVertex[orderedNode3]) {
 				double factor;
@@ -501,16 +461,15 @@ void setBurningArea() {
 				xCut2 = x[orderedNode3] + (x[orderedNode1] - x[orderedNode3]) * factor;
 				yCut2 = y[orderedNode3] + (y[orderedNode1] - y[orderedNode3]) * factor;
 
-				double distance = sqrt(pow(xCut1 - xCut2, 2) + pow(yCut1 - yCut2, 2));
+				auto distance = abs(complex<double>(xCut1 - xCut2, yCut1 - yCut2));
+
 
 				if (axisymmetric)
-					distance *= 1.0/2 * (yCut1 + yCut2);
+					distance *= 0.5 * (yCut1 + yCut2);
 
 				burningArea[area] += distance;
 			}
 		}
 	}
-
-
 
 }

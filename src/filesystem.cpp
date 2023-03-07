@@ -58,9 +58,9 @@ void readBoundaryConditions(QTextStream &in) {
 		if (list.size() != 2)
 			throw std::invalid_argument("Invalid boundary conditions");
 
-		auto node = list[0].toInt() - 1; // -1 because the nodes are numbered from 1
+		auto boundary = list[0].toInt() - 1; // -1 because the nodes are numbered from 1
 		auto boundaryCode = list[1].toInt();
-		connectivityMatrixBoundaryConditions[node] = boundaryCode;
+		connectivityMatrixBoundaryConditions[boundary] = boundaryCode;
 
 		switch (boundaryCode) {
 			case 4: case 3: { // Symmetry boundary
@@ -68,15 +68,15 @@ void readBoundaryConditions(QTextStream &in) {
 				if (list.size() != 2)
 					throw std::invalid_argument("Invalid symmetry boundary conditions");
 
-				uBoundaryData[0][node] = list[0].toDouble();
-				uBoundaryData[1][node] = list[1].toDouble();
+				uBoundaryData[0][boundary] = list[0].toDouble();
+				uBoundaryData[1][boundary] = list[1].toDouble();
 				break;
 			}
 			case 6: case 1: { // Source boundary
-				uBoundaryData[0][node] = in.readLine().simplified().toDouble();
+				uBoundaryData[0][boundary] = in.readLine().simplified().toDouble();
 				break;
 			}
-			case 7: case 2:{ // free boundary
+			case 7: case 2: { // free boundary
 				in.readLine();
 				break;
 			}

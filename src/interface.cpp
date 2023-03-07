@@ -15,8 +15,7 @@
 
 using namespace std;
 
-Actions::Actions(QObject *parent) : QObject(parent)
-{
+Actions::Actions(QObject *parent) : QObject(parent) {
 	connect(this, &Actions::newOutput, this, &Actions::appendOutput);
 }
 
@@ -97,7 +96,15 @@ void Actions::run()
 }
 
 void Actions::afterWorker() {
-	paintCanvas(plotData::isocolourData(3));
+	plotData::generateData();
+	uint numLlines = 5;
+
+	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
+	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
+
+	for (double value = uVertexMin; value < uVertexMax; value += (uVertexMax - uVertexMin) / numLlines) {
+		paintCanvas(plotData::isocolourData(value));
+	}
 }
 
 void Actions::worker() {
@@ -121,15 +128,6 @@ void Actions::worker() {
 	ConnectivityMatrix::TriangleEdge();
 	ConnectivityMatrix::NodeEdge();
 
-	emit newOutput("--> Counting number of boundaries");
-	numBoundaries = 0;
-	for (uint edge = 0; edge < numEdges; ++edge) {
-		int triangle1 = connectivityMatrixTriangleEdge[1 - 1][edge];
-		int triangle2 = connectivityMatrixTriangleEdge[2 - 1][edge];
-		if (triangle1 * triangle2  < 0)
-			++numBoundaries;
-	}
-
 	emit newOutput("--> Creating boundary matrix");
 	setBoundaryConditions();
 	emit newOutput("--> Creating alpha matrix");
@@ -138,9 +136,7 @@ void Actions::worker() {
 	setMetric();
 
 	emit newOutput("--> Starting subiteration loop");
-	uVertex = vector<double>(numNodes);
-	for (uint node = 0; node < numNodes; ++node)
-		uVertex[node] = uInit[0];
+	uVertex = vector<double>(numNodes, uInit[0]);
 
 	duVertex.fill(vector<double>(numNodes));
 	duVariable.fill(vector<double>(numNodes));
@@ -187,9 +183,4 @@ void Actions::worker() {
 	emit newOutput("Error: " + QString::number(100 * abs(areag - areap) / areag) + "%");
 
 	afterWorker();
-
-	// 	auto now = std::chrono::system_clock::now();
-	// 	if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
-	// 	}
-	// }
 }

@@ -35,9 +35,8 @@ tuple<double, double> mainLoop() {
 		areaG += dArea;
 	}
 
-	for (uint area = 0; area < numberArea - 1; ++area) {
+	for (uint area = 0; area < numberArea - 1; ++area)
 		areaP += 0.5 * (burningArea[area] + burningArea[area + 1]) * (burningWay[area + 1] - burningWay[area]);
-	}
 
 	return {areaG, areaP};
 }
