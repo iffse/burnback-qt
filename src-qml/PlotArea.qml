@@ -18,13 +18,15 @@ Item {
 				height: 2000
 				width: 2000
 
-				function paint(list) {
+				function paint(list, color) {
 					var ctx = getContext("2d");
-					ctx.lineWidth = 0.2;
-					for	(var i = 0; i < list.length; i+=4) {
+					ctx.beginPath();
+					ctx.lineWidth = 1;
+					for (var i = 0; i < list.length; i+=4) {
 						ctx.moveTo(500 + list[i], 1000 - list[i+1]);
 						ctx.lineTo(500 + list[i+2], 1000 - list[i+3]);
 					}
+					ctx.strokeStyle = color;
 					ctx.stroke();
 					canvas.requestPaint()
 				}
@@ -32,7 +34,7 @@ Item {
 				Connections {
 					target: actions
 					onPaintCanvas: {
-						canvas.paint(list)
+						canvas.paint(list, color)
 					}
 				}
 			}

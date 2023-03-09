@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QString>
-#include <QDebug>
+#include <QObject>
 
 class Actions: public QObject
 {
@@ -11,7 +11,7 @@ public:
 
 signals:
 	void newOutput(QString output);
-	void paintCanvas(std::vector<double> list);
+	void paintCanvas(std::vector<double> list, QString color = "#000000");
 	void finished();
 
 public slots:

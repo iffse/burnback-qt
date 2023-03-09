@@ -127,4 +127,27 @@ vector<double> isocolourData(double value) {
 	return data;
 }
 
+vector<double> contourData() {
+
+	vector<double> data = vector<double>(4 * numBoundaryEdge);
+
+	for (uint boundary = 0; boundary < numBoundaryEdge; ++boundary) {
+		uint node1 = connectivityMatrixNodeBoundary[0][boundary] - 1;
+		uint node2 = connectivityMatrixNodeBoundary[1][boundary] - 1;
+
+		double x1 = x[node1];
+		double x2 = x[node2];
+		double y1 = y[node1];
+		double y2 = y[node2];
+
+		data[4 * boundary] = x1 * 10;
+		data[4 * boundary + 1] = y1 * 10;
+		data[4 * boundary + 2] = x2 * 10;
+		data[4 * boundary + 3] = y2 * 10;
+	}
+
+	return data;
+
+}
+
 }

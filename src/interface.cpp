@@ -96,14 +96,37 @@ void Actions::run()
 }
 
 void Actions::afterWorker() {
-	plotData::generateData();
-	uint numLlines = 5;
+	// plotData::generateData();
+	uint numLines = 5;
+	++numLines;
+
+	// paintCanvas(plotData::contourData(), "#000000");
 
 	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
 	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
 
-	for (double value = uVertexMin; value < uVertexMax; value += (uVertexMax - uVertexMin) / numLlines) {
-		paintCanvas(plotData::isocolourData(value));
+	paintCanvas(plotData::contourData(), "#000000");
+
+	auto step = (uVertexMax - uVertexMin)/numLines;
+
+	auto value = step;
+	for (uint line = 1; line < numLines; ++line) {
+
+		auto pickColor = [](double region) {
+			if (region < 0.25) {
+				return QString("rgb(%1, %2, %3)").arg(255).arg(255*region*4).arg(0);
+			} else if (region < 0.5) {
+				return QString("rgb(%1, %2, %3)").arg(255*(1-(region-0.25)*4)).arg(255).arg(0);
+			} else if (region < 0.75) {
+				return QString("rgb(%1, %2, %3)").arg(0).arg(255).arg(255*(region-0.5)*4);
+			} else {
+				return QString("rgb(%1, %2, %3)").arg(0).arg(255*(1-(region-0.75)*4)).arg(255);
+			}
+		};
+
+		// paintCanvas(plotData::isocolourData(value), color);
+		paintCanvas(plotData::isocolourData(value), pickColor(double(line-1)/(numLines-1)));
+		value += step;
 	}
 }
 
