@@ -139,7 +139,7 @@ void Actions::worker() {
 	uVertex = vector<double>(numNodes, uInit[0]);
 
 	duVertex.fill(vector<double>(numNodes));
-	duVariable.fill(vector<double>(numNodes));
+	duVariable.fill(vector<double>(numTriangles));
 	flux.fill(vector<double>(numNodes));
 	eps = vector<double>(numNodes);
 	dt = vector<double>(numNodes);
