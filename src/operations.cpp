@@ -5,6 +5,7 @@
 #include <array>
 #include <cmath>
 #include <complex>
+#include <algorithm>
 
 using namespace std;
 
@@ -172,9 +173,7 @@ void setAlpha() {
 	}
 
 	// update angular sectors
-	for (uint node = 0; node < numNodes; ++node)
-		sector[node] *= 0.5;
-
+	for_each(sector.begin(), sector.end(), [](double& sector) { sector /= 2; });
 }
 
 void setMetric() {
@@ -223,7 +222,7 @@ void setduVarriable() {
 		auto y21 = y[node2] - y[node1];
 		auto y31 = y[node3] - y[node1];
 
-		auto rr = 1.0 / (y31 * x21 - y21 * x31);
+		auto rr = 1 / (y31 * x21 - y21 * x31);
 		duVariable[0][triangle] = rr * (u21 * y31 - u31 * y21);
 		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
 	}
