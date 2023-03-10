@@ -1,5 +1,6 @@
 #include <QFile>
 #include <QTextStream>
+#include "QPointF"
 #include <vector>
 
 #if __cplusplus >= 202002L
@@ -148,6 +149,17 @@ vector<double> contourData() {
 
 	return data;
 
+}
+
+QVariant burningAreaData() {
+
+	QVariantList data;
+
+	for(uint area = 0; area < numberArea; ++area) {
+		data.append(QPointF(burningWay[area], burningArea[area]));
+	}
+
+	return QVariant::fromValue(data);
 }
 
 }

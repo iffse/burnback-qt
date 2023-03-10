@@ -395,7 +395,6 @@ void setBurningArea() {
 	double orderedNode3;
 
 	for (uint area = 0; area < numberArea; ++area) {
-		burningArea[area] = 0;
 		auto uCut = uMin + area * (uMax - uMin) / (numberArea - 1);
 		burningWay[area] = uCut;
 	}

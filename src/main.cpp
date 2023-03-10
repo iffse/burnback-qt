@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QFontDatabase>
@@ -11,9 +11,15 @@ int main(int argc, char *argv[])
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-	QGuiApplication app(argc, argv);
+	QApplication app(argc, argv);
 
 	QQmlApplicationEngine engine;
+
+	// Set the context property to access the class from QML
+	QQmlContext *rootContext = engine.rootContext();
+	Actions actions;
+	rootContext->setContextProperty("actions", &actions);
+
 	const QUrl url(QStringLiteral("qrc:/main.qml"));
 	QObject::connect(
 			&engine, &QQmlApplicationEngine::objectCreated,
@@ -30,12 +36,6 @@ int main(int argc, char *argv[])
 	const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 	QObject *output = root->findChild<QObject*>("output");
 	output->setProperty("font", fixedFont);
-
-	// Set the context property to access the class from QML
-	QQmlContext *rootContext = engine.rootContext();
-
-	Actions actions;
-	rootContext->setContextProperty("actions", &actions);
 
 	return app.exec();
 }

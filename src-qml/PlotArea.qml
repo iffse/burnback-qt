@@ -3,41 +3,11 @@ import QtQuick.Controls 2.12
 
 Item {
 	GroupBox {
-		id: preview
-		title: qsTr("Preview")
+		id: results
+		title: qsTr("Results")
 		anchors.fill: parent
-		ScrollView {
+		ResultTab {
 			anchors.fill: parent
-			clip: true
-			contentHeight: canvas.height
-			contentWidth: canvas.width
-
-			Canvas {
-				id: canvas
-				anchors.fill: parent
-				height: 2000
-				width: 2000
-
-				function paint(list, color) {
-					var ctx = getContext("2d");
-					ctx.beginPath();
-					ctx.lineWidth = 1;
-					for (var i = 0; i < list.length; i+=4) {
-						ctx.moveTo(500 + list[i], 1000 - list[i+1]);
-						ctx.lineTo(500 + list[i+2], 1000 - list[i+3]);
-					}
-					ctx.strokeStyle = color;
-					ctx.stroke();
-					canvas.requestPaint()
-				}
-
-				Connections {
-					target: actions
-					onPaintCanvas: {
-						canvas.paint(list, color)
-					}
-				}
-			}
 		}
 	}
 }

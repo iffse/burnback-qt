@@ -1,5 +1,6 @@
 # QT += qml
 QT += quick
+QT += widgets
 CONFIG += c++17
 
 CONFIG(debug, debug|release) {
@@ -14,9 +15,6 @@ RCC_DIR = $$DESTDIR/qrc
 UI_DIR = $$DESTDIR/ui
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
-
-# Include dependencies
-INCLUDEPATH += $$PWD/include/eigen/
 
 HEADERS += \
 	src/headers/globals.h \

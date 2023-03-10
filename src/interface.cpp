@@ -100,7 +100,10 @@ void Actions::afterWorker() {
 	uint numLines = 5;
 	++numLines;
 
-	// paintCanvas(plotData::contourData(), "#000000");
+	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
+	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
+
+	graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
 
 	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
 	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
@@ -127,6 +130,7 @@ void Actions::afterWorker() {
 		// paintCanvas(plotData::isocolourData(value), color);
 		paintCanvas(plotData::isocolourData(value), pickColor(double(line-1)/(numLines-1)));
 		value += step;
+
 	}
 }
 
