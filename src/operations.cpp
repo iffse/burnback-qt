@@ -1,6 +1,5 @@
 #include <src/headers/operations.h>
 #include <src/headers/globals.h>
-#include <QDebug>
 
 #include <array>
 #include <cmath>
@@ -347,10 +346,7 @@ void eulerExplicit() {
 
 	for (uint node = 0; node < numNodes; ++node) {
 		uVertex[node] += dtMin * (flux[0][node] + viscosity * flux[1][node]);
-		if (uVertex[node] < 0)
-			qDebug() << "uVertex < 0";
 	}
-
 
 	timeTotal += dtMin;
 }

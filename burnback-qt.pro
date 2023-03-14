@@ -3,6 +3,11 @@ QT += quick
 QT += widgets
 CONFIG += c++17
 
+# Uncomment to enable sanitizer
+# CONFIG += sanitizer sanitize_address sanitize_undefined sanitize_leak
+# QMAKE_LINK=clang++
+# QMAKE_CXX = clang++
+
 CONFIG(debug, debug|release) {
 	DESTDIR = target/debug
 } else {

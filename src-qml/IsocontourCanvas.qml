@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.15
 
 ScrollView {
 	clip: true
@@ -21,6 +22,10 @@ ScrollView {
 				for (var i = 0; i < list.length; i+=4) {
 					ctx.moveTo(500 + list[i], 1000 - list[i+1]);
 					ctx.lineTo(500 + list[i+2], 1000 - list[i+3]);
+				}
+
+				if (Material.theme == Material.Dark && color === "#000000") {
+					color = "#ffffff"
 				}
 				ctx.strokeStyle = color;
 				ctx.stroke();
