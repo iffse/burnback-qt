@@ -4,9 +4,15 @@ QT += widgets
 CONFIG += c++17
 
 # Uncomment to enable sanitizer
-# CONFIG += sanitizer sanitize_address sanitize_undefined sanitize_leak
-# QMAKE_LINK=clang++
-# QMAKE_CXX = clang++
+# if config has sanitizer, then add -fsanitize=address,undefined,leak
+
+CONFIG(sanitizer) {
+	message("Sanitizer enabled")
+	CONFIG += sanitizer sanitize_address sanitize_undefined sanitize_leak
+	QMAKE_LINK=clang++
+	QMAKE_CXX = clang++
+}
+
 
 CONFIG(debug, debug|release) {
 	DESTDIR = target/debug
