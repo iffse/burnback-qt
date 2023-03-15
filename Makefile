@@ -2,7 +2,6 @@
 
 EXECUTABLE := burnback-qt
 DEBUG := target/debug
-SANITIZER := target/sanitizer
 RELEASE := target/release
 
 ifeq ($(OS),Windows_NT)
@@ -14,12 +13,10 @@ else
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Linux)
 		DEBUG := $(DEBUG)/$(EXECUTABLE)
-		SANITIZER := $(SANITIZER)/$(EXECUTABLE)
 		RELEASE := $(RELEASE)/$(EXECUTABLE)
 	endif
 	ifeq ($(UNAME_S),Darwin)
 		DEBUG := $(DEBUG)/$(EXECUTABLE)
-		SANITIZER := $(SANITIZER)/$(EXECUTABLE)
 		RELEASE := $(RELEASE)/$(EXECUTABLE)
 	endif
 endif
@@ -27,7 +24,7 @@ endif
 run: $(DEBUG)
 	$(DEBUG)
 
-run-sanitizer: $(SANITIZER)
+run-sanitizer: sanitizer
 	$(DEBUG)
 
 debug: $(DEBUG)
@@ -49,7 +46,7 @@ $(DEBUG): ./src ./src-qml ./.qmake-debug
 $(RELEASE): ./src ./src-qml ./.qmake-release
 	make -f .qmake-release
 
-$(SANITIZER): ./src ./src-qml ./.qmake-saint-debug
+sanitizer: ./src ./src-qml ./.qmake-saint-debug
 	make -f .qmake-saint-debug
 
 clean:
