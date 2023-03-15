@@ -1,6 +1,6 @@
 # Burnback-qt
 
-Analysis of burn surfaces for solid propellant rockets using Burnback as an alternative of the Top Level Method
+Analysis of burn surfaces for solid propellant rockets using Time Marching Method as an alternative of the Level Set Method.
 
 Supports both light and dark theme. Should use accordingly to your system theme. If you want dark theme and it isn't, add `QT_QUICK_CONTROLS_MATERIAL_THEME=Dark` to your environment variables.
 
@@ -13,6 +13,7 @@ Can be compiled by either using command line or using the QtCreator. Binaries sh
 The project can be easily built with the `Makefile`. The `Makefile` is written with multiplatform compilation in mind, it should work with Linux, macOS, or Microsoft Windows:
 
 - `make run`: Build the debug binary and run
+	- `make run-sanitizer`: Build the debug binary with sanitizer and run
 - `make debug`: Build the debug binary
 - `make release`: Build the release binary
 
