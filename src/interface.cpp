@@ -108,6 +108,8 @@ void Actions::afterWorker() {
 	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
 	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
 
+	clearCanvas();
+
 	paintCanvas(plotData::contourData(), "#000000");
 
 	auto step = (uVertexMax - uVertexMin)/numLines;
