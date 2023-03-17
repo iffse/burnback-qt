@@ -51,11 +51,8 @@ void readBoundaryConditions(QTextStream &in) {
 	uint numBoundariesConditions = in.readLine().simplified().toInt();
 
 	uBoundaryData.fill(vector<double>(numBoundariesConditions));
-	if (connectivityMatrixBoundaryConditions.size() == 0) {
-		connectivityMatrixBoundaryConditions = vector<int>(numBoundariesConditions);
-	} else {
-		connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
-	}
+	connectivityMatrixBoundaryConditions = vector<int>(numBoundariesConditions);
+
 	for (uint i = 0; i < numBoundariesConditions; ++i) {
 		in.readLine();
 		auto list = in.readLine().simplified().split(" ");

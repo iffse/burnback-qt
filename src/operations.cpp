@@ -370,8 +370,12 @@ void eulerExplicit() {
 			}
 			case diffusiveMethods::ZhangShu: {
 				auto duMod = abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				auto alf = max(abs(duVertex[0][node]), abs(duVertex[1][node]))/duMod;
-				diffWeight *= alf / M_PI;
+				if (duMod == 0)
+					diffWeight = 0;
+				else {
+					auto alf = max(abs(duVertex[0][node]), abs(duVertex[1][node]))/duMod;
+					diffWeight *= alf / M_PI;
+				}
 				break;
 			}
 		}

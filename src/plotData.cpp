@@ -1,7 +1,6 @@
 #include <QFile>
 #include <QTextStream>
 #include "QPointF"
-#include <vector>
 
 #if __cplusplus >= 202002L
 #include <cmath>
