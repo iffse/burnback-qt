@@ -97,7 +97,7 @@ void Actions::run()
 
 void Actions::afterWorker() {
 	// plotData::generateData();
-	uint numLines = 5;
+	auto numLines = numIsocontourLines;
 	++numLines;
 
 	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());

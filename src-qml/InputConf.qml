@@ -51,6 +51,7 @@ ScrollView {
 			title: qsTr("Model data")
 
 			Column {
+				width: parent.width
 
 				LabelInput {
 					text: "Number of areas"
@@ -82,9 +83,10 @@ ScrollView {
 
 		GroupBox {
 			title: qsTr("Computation data")
-			width: parent.width
+				width: parent.width
 
 			Column {
+				width: parent.width
 				spacing: 5
 
 				LabelInput {

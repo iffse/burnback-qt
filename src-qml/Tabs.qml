@@ -25,7 +25,16 @@ Item{
 			id: inputTab
 			width: parent.width
 			height: parent.height
-			InputBox {
+			InputConf {
+				width: parent.width
+				height: parent.height - 10
+			}
+		}
+		Item {
+			id: outputTab
+			width: parent.width
+			height: parent.height
+			OutputConf {
 				width: parent.width
 				height: parent.height - 10
 			}
