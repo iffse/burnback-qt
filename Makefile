@@ -9,8 +9,10 @@ ifeq ($(OS),Windows_NT)
 	DEBUG := $(DEBUG)/$(EXECUTABLE)
 	SANITIZER := $(SANITIZER)/$(EXECUTABLE)
 	RELEASE := $(RELEASE)/$(EXECUTABLE)
+	MAKE_COMMAND := nmake /F
 else
 	UNAME_S := $(shell uname -s)
+	MAKE_COMMAND := make -f
 	ifeq ($(UNAME_S),Linux)
 		DEBUG := $(DEBUG)/$(EXECUTABLE)
 		RELEASE := $(RELEASE)/$(EXECUTABLE)
@@ -41,10 +43,10 @@ release: $(RELEASE)
 	qmake -makefile -o .qmake-saint-debug CONFIG+=debug CONFIG+=sanitizer
 
 $(DEBUG): ./src ./src-qml ./.qmake-debug
-	make -f .qmake-debug
+	$(MAKE_COMMAND) .qmake-debug
 
 $(RELEASE): ./src ./src-qml ./.qmake-release
-	make -f .qmake-release
+	$(MAKE_COMMAND) .qmake-release
 
 sanitizer: ./src ./src-qml ./.qmake-saint-debug
 	make -f .qmake-saint-debug

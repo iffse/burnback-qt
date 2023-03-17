@@ -2,16 +2,17 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - '*'
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [windows-latest, macos-latest]
         qt: [5.15.2]
     steps:
     - uses: actions/checkout@v2
@@ -20,27 +21,41 @@ jobs:
       with:
         version: ${{ matrix.qt }}
         modules: qtcharts
-    - name: Install MSVC Build Tools
+    - name: Set up MSVC Developer Command Prompt (Windows)
       if: matrix.os == 'windows-latest'
-      uses: microsoft/setup-msbuild@v1.0.2
-    - name: Build
-      run: make release
-    - name: Upload Release Binary (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v2
+      uses: TheMrMilchmann/setup-msvc-dev@v2
       with:
-        name: Linux Release Binary
-        path: target/release/burnback-qt
-    - name: Upload Release Binary (Mac)
-      if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v2
-      with:
-        name: Mac Release Binary
-        path: target/release/burnback-qt.app
-    - name: Upload Release Binary (Windows)
-      if: matrix.os == 'windows-latest'
-      uses: actions/upload-artifact@v2
-      with:
-        name: Windows Release Binary
-        path: target/release/burnback-qt.exe
+        arch: x64
 
+    - name: Build (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        qmake -config release
+        nmake
+        mkdir target\distribution
+        mv target/release/burnback-qt.exe target/distribution/
+        cd target/distribution
+        windeployqt.exe burnback-qt.exe --qmldir=../../src-qml
+      shell: cmd
+
+    - name: Build (MacOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        qmake -config release
+        make
+        mkdir target/distribution
+        mv target/release/burnback-qt.app target/distribution/
+        cd target/distribution
+        macdeployqt burnback-qt.app -qmldir=../../src-qml
+
+    - name: Zipping files
+      uses: vimtor/action-zip@v1
+      with:
+        files: target/distribution/
+        dest: burnback-qt-${{ matrix.os }}.zip
+
+    - name: Uploading to release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: burnback-qt-${{ matrix.os }}.zip
+        allowUpdates: true

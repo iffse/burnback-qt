@@ -11,8 +11,6 @@
 #include <src/headers/iterations.h>
 #include <src/headers/plotData.h>
 
-#include <fenv.h>
-
 using namespace std;
 
 Actions::Actions(QObject *parent) : QObject(parent) {
@@ -142,9 +140,6 @@ void Actions::afterWorker() {
 }
 
 void Actions::worker() {
-	feenableexcept(FE_INVALID | FE_OVERFLOW);
-
-
 	emit newOutput("--> Creating connectivity matrix");
 	ConnectivityMatrix::NodeTriangles();
 	ConnectivityMatrix::TriangleEdge();

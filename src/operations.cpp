@@ -7,7 +7,6 @@
 #include <src/headers/globals.h>
 
 #include <array>
-#include <cmath>
 #include <complex>
 #include <algorithm>
 

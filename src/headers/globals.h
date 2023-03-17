@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QQmlApplicationEngine>
+#include <array>
+#include <vector>
 
 inline QObject* root;
 

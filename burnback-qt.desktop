@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Burnback-qt
+Comment=Burnback analysis using Time Marching Method
+Exec=burnback-qt
+Categories=Science;
