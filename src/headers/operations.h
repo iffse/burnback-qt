@@ -18,4 +18,4 @@ void setqbnd();
 void setBurningArea();
 
 void mainLoop();
-
+void setZhangShu();

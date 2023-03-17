@@ -1,3 +1,8 @@
+#ifdef _WIN32
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+
 #include <src/headers/operations.h>
 #include <src/headers/globals.h>
 
@@ -124,6 +129,10 @@ void setAlpha() {
 			auto vertexY5 = y[nodeVertex1] - y[node2];
 			auto vertexV5 = abs(complex<double>(vertexX5, vertexY5));
 
+			// calculate the angle between two edges
+			// the angle is calculated by the dot product of the two vectors
+			// vertexX1 * vertexX2 + vertexY1 * vertexY2 = cos(alpha)
+
 			vertexX2 /= vertexV2;
 			vertexY2 /= vertexV2;
 			vertexX5 /= vertexV5;
@@ -221,6 +230,7 @@ void setduVarriable() {
 		auto y21 = y[node2] - y[node1];
 		auto y31 = y[node3] - y[node1];
 
+		// reciprocal of the cross product
 		auto rr = 1 / (y31 * x21 - y21 * x31);
 		duVariable[0][triangle] = rr * (u21 * y31 - u31 * y21);
 		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
@@ -275,6 +285,7 @@ void setFlux() {
 
 		}
 
+		// Uj and Uj+1 * n
 		dux *= 0.5 * alpha[6][edge];
 		duy *= 0.5 * alpha[7][edge];
 
@@ -344,8 +355,28 @@ void setdt() {
 void eulerExplicit() {
 	const auto &dtMin = *min_element(dt.begin(), dt.end());
 
+	enum diffusiveMethods {
+		Abgrall,
+		ZhangShu
+	};
+
+
 	for (uint node = 0; node < numNodes; ++node) {
-		uVertex[node] += dtMin * (flux[0][node] + viscosity * flux[1][node]);
+		auto diffWeight = diffusiveWeight;
+
+		switch (diffusiveMethod) {
+			case diffusiveMethods::Abgrall: {
+				break;
+			}
+			case diffusiveMethods::ZhangShu: {
+				auto duMod = abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+				auto alf = max(abs(duVertex[0][node]), abs(duVertex[1][node]))/duMod;
+				diffWeight *= alf / M_PI;
+				break;
+			}
+		}
+
+		uVertex[node] += dtMin * (flux[0][node] + diffWeight * flux[1][node]);
 	}
 
 	timeTotal += dtMin;
@@ -465,5 +496,8 @@ void setBurningArea() {
 			}
 		}
 	}
+}
+
+void setZhangCoeficcient() {
 
 }

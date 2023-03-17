@@ -68,7 +68,12 @@ void Actions::run()
 		return;
 	}
 
+#ifdef _WIN32
+	const QString substring = "file:///";
+#else
 	const QString substring = "file://";
+#endif
+
 	if (filepath.startsWith(substring)) {
 		filepath.remove(0, substring.length());
 	}
