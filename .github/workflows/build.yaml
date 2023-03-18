@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-18.04 ,windows-latest, macos-latest]
         qt: [5.15.2]
