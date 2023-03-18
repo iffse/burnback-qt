@@ -15,7 +15,7 @@ jobs:
         os: [windows-latest, macos-latest]
         qt: [5.15.2]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Qt ${{ matrix.qt }} on ${{ matrix.os }}
       uses: jurplel/install-qt-action@v3
       with:
@@ -49,7 +49,7 @@ jobs:
         macdeployqt burnback-qt.app -qmldir=../../src-qml
 
     - name: Zipping files
-      uses: vimtor/action-zip@v1
+      uses: vimtor/action-zip@v1.1
       with:
         files: target/distribution/
         dest: burnback-qt-${{ matrix.os }}.zip
@@ -59,3 +59,4 @@ jobs:
       with:
         artifacts: burnback-qt-${{ matrix.os }}.zip
         allowUpdates: true
+        makeLatest: true
