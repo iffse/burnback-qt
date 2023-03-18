@@ -32,8 +32,6 @@ void Reader::readInput() {//{{{
 	if (tolerance < 0)
 		throw std::invalid_argument("Tolerance must be greater than 0");
 
-	viscosity = root->findChild<QObject*>("viscosity")->property("text").toDouble();
-
 	diffusiveWeight = root->findChild<QObject*>("diffusiveWeight")->property("text").toDouble();
 	diffusiveMethod = root->findChild<QObject*>("diffusiveMethod")->property("currentIndex").toInt();
 	numIsocontourLines = root->findChild<QObject*>("numIsocontourLines")->property("text").toInt();

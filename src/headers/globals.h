@@ -12,7 +12,6 @@ inline double cfl;
 inline uint minIter;
 inline uint maxIter;
 inline double tolerance;
-inline double viscosity;
 
 // const auto maxNodes = 25000;
 // const auto maxTriangles = 2 * maxNodes;

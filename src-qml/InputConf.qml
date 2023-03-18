@@ -118,14 +118,6 @@ ScrollView {
 					objName: "tolerance"
 					decimals: true
 				}
-
-				LabelInput {
-					text: "Artificial viscosity coeficient"
-					placeholderText: "Enter a number"
-					toolTipText: "Viscosity added to the solution to obtain smooth solutions across discontinuities"
-					objName: "viscosity"
-					decimals: true
-				}
 			}
 		}
 
