@@ -22,6 +22,7 @@ jobs:
       with:
         version: ${{ matrix.qt }}
         modules: qtcharts
+        cache: true
     - name: Set up MSVC Developer Command Prompt (Windows)
       if: matrix.os == 'windows-latest'
       uses: TheMrMilchmann/setup-msvc-dev@v2
@@ -33,7 +34,7 @@ jobs:
       run: |
         qmake -config release
         make
-        mkdir -p target/distribution/usr/bin target/distribution/usr/lib target/distribution/usr/share/aplications
+        mkdir -p target/distribution/usr/bin target/distribution/usr/lib target/distribution/usr/share/applications
         mv target/release/burnback-qt target/distribution/usr/bin/
         mv ./burnback-qt.desktop target/distribution/usr/share/applications/
         cd target
