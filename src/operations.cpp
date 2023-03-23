@@ -373,7 +373,7 @@ void eulerExplicit() {
 					diffWeight = 0;
 				else {
 					auto alf = max(abs(duVertex[0][node]), abs(duVertex[1][node]))/duMod;
-					diffWeight *= alf / M_PI;
+					diffWeight *= alf / pow(M_PI, 2);
 				}
 				break;
 			}
