@@ -215,6 +215,7 @@ void Actions::worker() {
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
 			clock = now;
 			emit newOutput(linesToPrint);
+			updateProgress(numItereations, maxIter);
 			linesToPrint = "";
 		}
 		++numItereations;
@@ -222,6 +223,7 @@ void Actions::worker() {
 
 	if (linesToPrint != "") {
 		emit newOutput(linesToPrint);
+		updateProgress(numItereations, maxIter);
 	}
 
 	emit newOutput("--> Subiteration ended");

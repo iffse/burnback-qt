@@ -15,6 +15,7 @@ signals:
 	void clearCanvas();
 	void setCanvasSize(uint width, uint height);
 	void graphBurningArea(QVariant points, double xMax, double yMax);
+	void updateProgress(uint progress, uint total);
 	void finished();
 
 public slots:

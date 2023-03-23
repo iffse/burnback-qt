@@ -11,7 +11,7 @@ RowLayout {
 	ProgressBar {
 		id: progressBar
 		Layout.fillWidth: true
-		value: 0.5
+		value: 0
 	}
 	Label {
 		id: compleatedCount
@@ -21,5 +21,13 @@ RowLayout {
 		id: runButton
 		text: "Run"
 		onClicked: actions.run()
+	}
+
+	Connections {
+		target: actions
+		function onUpdateProgress(progress, total) {
+			progressBar.value = progress/total
+			compleatedCount.text = progress + "/" + total
+		}
 	}
 }
