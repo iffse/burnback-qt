@@ -204,12 +204,13 @@ void Actions::worker() {
 	auto clock = std::chrono::system_clock::now();
 
 	while (numItereations < minIter || (numItereations < maxIter && error > tolerance)) {
+		++numItereations;
 		Iterations::subIteration();
 		error = getError();
 
 		if (linesToPrint != "")
 			linesToPrint += "\n";
-		linesToPrint += "Iteration: " + QString::number(numItereations + 1) + " Time: " + QString::number(timeTotal) + " Error: " + QString::number(error * 100) + "%";
+		linesToPrint += "Iteration: " + QString::number(numItereations) + " Time: " + QString::number(timeTotal) + " Error: " + QString::number(error * 100) + "%";
 
 		auto now = std::chrono::system_clock::now();
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
@@ -218,7 +219,6 @@ void Actions::worker() {
 			updateProgress(numItereations, maxIter);
 			linesToPrint = "";
 		}
-		++numItereations;
 	}
 
 	if (linesToPrint != "") {
