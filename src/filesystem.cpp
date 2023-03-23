@@ -35,6 +35,7 @@ void Reader::readInput() {//{{{
 	diffusiveWeight = root->findChild<QObject*>("diffusiveWeight")->property("text").toDouble();
 	diffusiveMethod = root->findChild<QObject*>("diffusiveMethod")->property("currentIndex").toInt();
 	numIsocontourLines = root->findChild<QObject*>("numIsocontourLines")->property("text").toInt();
+	isocontourSize = root->findChild<QObject*>("isocontourSize")->property("text").toInt();
 }
 //}}}
 

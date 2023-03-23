@@ -103,6 +103,20 @@ void Actions::afterWorker() {
 	auto numLines = numIsocontourLines;
 	++numLines;
 
+	auto &xmin = *min_element(x.begin(), x.end());
+	auto &xmax = *max_element(x.begin(), x.end());
+	auto &ymin = *min_element(y.begin(), y.end());
+	auto &ymax = *max_element(y.begin(), y.end());
+
+	auto scale = isocontourSize/max(xmax - xmin, ymax - ymin);
+
+	auto canvasHeight = uint(1.5 * (ymax - ymin) * scale);
+	auto canvasWidth = uint(1.5 * (xmax - xmin) * scale);
+	auto shiftX = uint(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
+	auto shiftY = uint(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
+
+	setCanvasSize(canvasWidth, canvasHeight);
+
 	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
 	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
 
@@ -113,7 +127,7 @@ void Actions::afterWorker() {
 
 	clearCanvas();
 
-	paintCanvas(plotData::contourData(), "#000000");
+	paintCanvas(plotData::contourData(shiftX, shiftY, scale), "#000000");
 
 	auto step = (uVertexMax - uVertexMin)/numLines;
 
@@ -133,7 +147,7 @@ void Actions::afterWorker() {
 		};
 
 		// paintCanvas(plotData::isocolourData(value), color);
-		paintCanvas(plotData::isocolourData(value), pickColor(double(line-1)/(numLines-1)));
+		paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
 		value += step;
 
 	}

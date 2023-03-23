@@ -62,7 +62,7 @@ double lerp(double x1, double x2, double t) {
 }
 #endif
 
-vector<double> isocolourData(double value) {
+vector<double> isocolourData(double value, uint shiftX, uint shiftY, double scale) {
 	vector<double> data;
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
@@ -85,8 +85,8 @@ vector<double> isocolourData(double value) {
 
 			double t = (value - uVertex1) / (value2 - value1);
 
-			double x = lerp(x1, x2, t) * 10;
-			double y = lerp(y1, y2, t) * 10;
+			double x = lerp(x1, x2, t) * scale + shiftX;
+			double y = lerp(y1, y2, t) * scale + shiftY;
 
 			data.push_back(x);
 			data.push_back(y);
@@ -100,8 +100,8 @@ vector<double> isocolourData(double value) {
 
 			double t = (value - uVertex2) / (value3 - value2);
 
-			double x = lerp(x1, x2, t) * 10;
-			double y = lerp(y1, y2, t) * 10;
+			double x = lerp(x1, x2, t) * scale + shiftX;
+			double y = lerp(y1, y2, t) * scale + shiftY;
 
 			data.push_back(x);
 			data.push_back(y);
@@ -115,8 +115,8 @@ vector<double> isocolourData(double value) {
 
 			double t = (value - uVertex3) / (value1 - value3);
 
-			double x = lerp(x1, x2, t) * 10;
-			double y = lerp(y1, y2, t) * 10;
+			double x = lerp(x1, x2, t) * scale + shiftX;
+			double y = lerp(y1, y2, t) * scale + shiftY;
 
 			data.push_back(x);
 			data.push_back(y);
@@ -127,7 +127,7 @@ vector<double> isocolourData(double value) {
 	return data;
 }
 
-vector<double> contourData() {
+vector<double> contourData(uint shiftX, uint shiftY, double scale) {
 
 	vector<double> data = vector<double>(4 * numBoundaryEdge);
 
@@ -140,10 +140,10 @@ vector<double> contourData() {
 		double y1 = y[node1];
 		double y2 = y[node2];
 
-		data[4 * boundary] = x1 * 10;
-		data[4 * boundary + 1] = y1 * 10;
-		data[4 * boundary + 2] = x2 * 10;
-		data[4 * boundary + 3] = y2 * 10;
+		data[4 * boundary] = x1 * scale + shiftX;
+		data[4 * boundary + 1] = y1 * scale + shiftY;
+		data[4 * boundary + 2] = x2 * scale + shiftX;
+		data[4 * boundary + 3] = y2 * scale + shiftY;
 	}
 
 	return data;

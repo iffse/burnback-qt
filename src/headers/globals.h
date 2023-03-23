@@ -72,3 +72,4 @@ inline double timeTotal;
 inline double diffusiveWeight;
 inline uint diffusiveMethod;
 inline uint numIsocontourLines;
+inline uint isocontourSize;

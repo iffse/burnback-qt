@@ -7,7 +7,7 @@ void setAlpha();
 void setMetric();
 void setduVarriable();
 void setFlux();
-void boundary();
+void boundaryFlux();
 void setdt();
 
 void eulerExplicit();

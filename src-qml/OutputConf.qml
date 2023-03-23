@@ -29,11 +29,10 @@ ScrollView {
 					placeholderText: "Enter a number"
 					toolTipText: "."
 					objName: "diffusiveWeight"
+					defaultInput: "1"
 					decimals: true
 				}
-
 			}
-
 		}
 
 		GroupBox {
@@ -44,16 +43,21 @@ ScrollView {
 				width: parent.width
 
 				LabelInput {
+					text: "Size to draw (px)"
+					placeholderText: "Enter a number"
+					toolTipText: "Maximum size of the weight or height to draw the isocontour lines, in pixels."
+					objName: "isocontourSize"
+					defaultInput: "1000"
+					decimals: false
+				}
+
+				LabelInput {
 					text: "Number of lines"
 					placeholderText: "Enter a number"
 					toolTipText: "Number of isocontour lines to draw. 0 to disable."
 					objName: "numIsocontourLines"
 					defaultInput: "10"
 					decimals: false
-				}
-
-				Button {
-					text: "Redraw"
 				}
 			}
 		}

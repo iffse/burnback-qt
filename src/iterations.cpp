@@ -12,7 +12,7 @@ namespace Iterations {
 void subIteration() {
 	setduVarriable();
 	setFlux();
-	boundary();
+	boundaryFlux();
 	setdt();
 	eulerExplicit();
 }

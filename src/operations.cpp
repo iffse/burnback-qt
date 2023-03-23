@@ -301,7 +301,7 @@ void setFlux() {
 
 }
 
-void boundary() {
+void boundaryFlux() {
 	for (uint node = 0; node < numNodes; ++node) {
 		const auto &condition = nodeBoundaryConditions[0][node];
 		const auto boundary = nodeBoundaryConditions[1][node] - 1;
