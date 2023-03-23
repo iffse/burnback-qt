@@ -24,7 +24,6 @@ ScrollView {
 					var ctx = canvas.getContext("2d");
 					ctx.beginPath();
 					ctx.lineWidth = 1;
-					console.log(list)
 					for (var i = 0; i < list.length; i+=4) {
 						ctx.moveTo(list[i], canvas.height - list[i+1]);
 						ctx.lineTo(list[i+2], canvas.height - list[i+3]);
@@ -49,8 +48,6 @@ ScrollView {
 					canvas.height = height
 					flick.contentWidth = width
 					flick.contentHeight = height
-					flick.contentX = width / 2
-					flick.contentY = height / 2
 				}
 			}
 		}
