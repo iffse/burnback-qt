@@ -83,6 +83,17 @@ void Actions::run()
 
 	QTextStream in(&file);
 
+	// clear data
+	numBoundaries = 0;
+	numNodes = 0;
+	numTriangles = 0;
+	numEdges = 0;
+	numTriangleEdge = 0;
+	meshDataHelper = 0;
+	meshData.clear();
+	connectivityMatrixBoundaryConditions.clear();
+
+
 	try {
 		Reader::readMesh(in);
 	} catch (std::invalid_argument &e) {
