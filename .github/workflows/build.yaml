@@ -32,6 +32,7 @@ jobs:
     - name: Build (Linux)
       if: matrix.os == 'ubuntu-18.04'
       run: |
+        sudo apt-get install libxkbcommon-x11-0
         qmake -config release
         make
         mkdir -p target/distribution/usr/bin target/distribution/usr/lib target/distribution/usr/share/applications
