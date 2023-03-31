@@ -216,7 +216,26 @@ void setMetric() {
 }
 
 void setduVarriable() {
+	maxDuEdge.fill(vector<double>(numNodes));
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
+
+		for (uint i = 0; i < 3; ++i) {
+			auto node = connectivityMatrixNodeTriangle[i][triangle] - 1;
+
+			auto &ux = duVariable[0][triangle];
+			auto &uy = duVariable[1][triangle];
+
+			auto uMod = abs(complex<double>(ux, uy));
+
+			if (uMod == 0)
+				continue;
+
+			if (abs(ux/uMod) > maxDuEdge[0][node])
+				maxDuEdge[0][node] = abs(ux/uMod);
+			if (uy/uMod > maxDuEdge[1][node])
+				maxDuEdge[1][node] = abs(uy/uMod);
+		}
+
 		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
 		auto node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
 		auto node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
@@ -346,9 +365,8 @@ void boundaryFlux() {
 }
 
 void setdt() {
-	for (uint node = 0; node < numNodes; ++node) {
+	for (uint node = 0; node < numNodes; ++node)
 		dt[node] = 1.570796 * cfl * height[node] / eps[node];
-	}
 }
 
 void eulerExplicit() {
@@ -368,13 +386,8 @@ void eulerExplicit() {
 				break;
 			}
 			case diffusiveMethods::ZhangShu: {
-				auto duMod = abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				if (duMod == 0)
-					diffWeight = 0;
-				else {
-					auto alf = max(abs(duVertex[0][node]), abs(duVertex[1][node]))/duMod;
-					diffWeight *= alf / pow(M_PI, 2);
-				}
+				auto alf = max(maxDuEdge[0][node], maxDuEdge[1][node]);
+				diffWeight *= alf / pow(M_PI, 2);
 				break;
 			}
 		}
@@ -499,8 +512,4 @@ void setBurningArea() {
 			}
 		}
 	}
-}
-
-void setZhangCoeficcient() {
-
 }

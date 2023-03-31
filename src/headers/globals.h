@@ -62,6 +62,7 @@ inline std::vector<double> eps; // used in flux calculation
 inline std::vector<double> uVertex;
 inline std::array<std::vector<double>, 2> duVariable; // variable triangle
 inline std::array<std::vector<double>, 2> duVertex; // variable vertex
+inline std::array<std::vector<double>, 2> maxDuEdge;
 inline std::array<std::vector<double>, 2> flux;
 
 inline std::vector<double> burningArea;

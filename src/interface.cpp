@@ -194,6 +194,7 @@ void Actions::worker() {
 
 	duVertex.fill(vector<double>(numNodes));
 	duVariable.fill(vector<double>(numTriangles));
+	maxDuEdge.fill(vector<double>(numNodes));
 	flux.fill(vector<double>(numNodes));
 	eps = vector<double>(numNodes);
 	dt = vector<double>(numNodes);
