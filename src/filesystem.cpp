@@ -20,6 +20,10 @@ void Reader::readInput() {//{{{
 	if (cfl < 0)
 		throw std::invalid_argument("CFL number must be greater than 0");
 
+	cflViscous = root->findChild<QObject*>("viscousCFL")->property("text").toDouble();
+	if (cflViscous < 0)
+		throw std::invalid_argument("Viscous CFL number must be greater than 0");
+
 	minIter = root->findChild<QObject*>("minIter")->property("text").toInt();
 	if (minIter < 1)
 		throw std::invalid_argument("Minimum number of iterations must be greater than 0");

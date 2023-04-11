@@ -25,6 +25,12 @@ enum boundaryConditions {
 	free2 = 7
 };
 
+enum diffusiveMethods {
+	Abgrall,
+	Tizon,
+	ZhangShu
+};
+
 
 void regenerateMeshData() {
 	for (uint edge = 0; edge < numEdges; ++edge) {
@@ -174,9 +180,13 @@ void setAlpha() {
 		}
 
 		// beta and beta prime
-		alpha[4][edge] = tan( 0.5 * alpha[0][edge] ) + tan( 0.5 * alpha[1][edge] );
-		alpha[5][edge] = tan( 0.5 * alpha[2][edge] ) + tan( 0.5 * alpha[3][edge] );
-
+		if (diffusiveMethod == Tizon) {
+			alpha[4][edge] = 2 * sin(alpha[0][edge] / 2) ;
+			alpha[5][edge] = 2 * sin(alpha[2][edge] / 2) ;
+		} else {
+			alpha[4][edge] = tan( 0.5 * alpha[0][edge] ) + tan( 0.5 * alpha[1][edge] );
+			alpha[5][edge] = tan( 0.5 * alpha[2][edge] ) + tan( 0.5 * alpha[3][edge] );
+		}
 	}
 
 	// update angular sectors
@@ -216,8 +226,30 @@ void setMetric() {
 }
 
 void setduVarriable() {
-	maxDuEdge.fill(vector<double>(numNodes));
+	if (diffusiveMethod == ZhangShu)
+		maxDuEdge.fill(vector<double>(numNodes));
+
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
+
+		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
+		auto node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
+		auto node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
+
+		auto u21 = uVertex[node2] - uVertex[node1];
+		auto u31 = uVertex[node3] - uVertex[node1];
+
+		auto x21 = x[node2] - x[node1];
+		auto x31 = x[node3] - x[node1];
+		auto y21 = y[node2] - y[node1];
+		auto y31 = y[node3] - y[node1];
+
+		// reciprocal of the cross product
+		auto rr = 1 / (y31 * x21 - y21 * x31);
+		duVariable[0][triangle] = rr * (u21 * y31 - u31 * y21);
+		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
+
+		if (diffusiveMethod != ZhangShu)
+			continue;
 
 		for (uint i = 0; i < 3; ++i) {
 			auto node = connectivityMatrixNodeTriangle[i][triangle] - 1;
@@ -236,29 +268,13 @@ void setduVarriable() {
 				maxDuEdge[1][node] = abs(uy/uMod);
 		}
 
-		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
-		auto node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
-		auto node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
-
-		auto u21 = uVertex[node2] - uVertex[node1];
-		auto u31 = uVertex[node3] - uVertex[node1];
-
-		auto x21 = x[node2] - x[node1];
-		auto x31 = x[node3] - x[node1];
-		auto y21 = y[node2] - y[node1];
-		auto y31 = y[node3] - y[node1];
-
-		// reciprocal of the cross product
-		auto rr = 1 / (y31 * x21 - y21 * x31);
-		duVariable[0][triangle] = rr * (u21 * y31 - u31 * y21);
-		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
 	}
 }
 
 void setFlux() {
 	flux[1] = vector<double>(numNodes);
 	duVertex.fill(vector<double>(numNodes));
-	eps = vector<double>(numNodes);
+	eps = vector<double>(numNodes, 1);
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
 		const auto triangle1 = connectivityMatrixTriangleEdge[0][edge] - 1;
@@ -279,10 +295,12 @@ void setFlux() {
 			duy += duVariable[1][triangle1];
 
 			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
-			if (duMod > eps[node1])
-				eps[node1] = duMod;
-			if (duMod > eps[node2])
-				eps[node2] = duMod;
+			if (diffusiveMethod == Abgrall) {
+				if (duMod > eps[node1])
+					eps[node1] = duMod;
+				if (duMod > eps[node2])
+					eps[node2] = duMod;
+			}
 		}
 
 		if (triangle2 >= 0) {
@@ -296,10 +314,12 @@ void setFlux() {
 
 			// ?
 			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
-			if (duMod > eps[node1])
-				eps[node1] = duMod;
-			if (duMod > eps[node2])
-				eps[node2] = duMod;
+			if (diffusiveMethod == Abgrall) {
+				if (duMod > eps[node1])
+					eps[node1] = duMod;
+				if (duMod > eps[node2])
+					eps[node2] = duMod;
+			}
 
 		}
 
@@ -312,7 +332,7 @@ void setFlux() {
 	}
 
 	for (uint node = 0; node < numNodes; ++node) {
-		eps[node] /= M_PI;
+		eps[node] /= 2 * M_PI;
 		flux[1][node] *= eps[node];
 		duVertex[0][node] *= 0.5;
 		duVertex[1][node] *= 0.5;
@@ -365,29 +385,29 @@ void boundaryFlux() {
 }
 
 void setdt() {
-	for (uint node = 0; node < numNodes; ++node)
-		dt[node] = 1.570796 * cfl * height[node] / eps[node];
+	// for (uint node = 0; node < numNodes; ++node)
+		// dt[node] = 1.570796 * cfl * height[node] / eps[node];
+		// dt[node] = cfl * height[node];
 }
 
 void eulerExplicit() {
-	const auto &dtMin = *min_element(dt.begin(), dt.end());
-
-	enum diffusiveMethods {
-		Abgrall,
-		ZhangShu
-	};
-
+	// const auto &dtMin = *min_element(dt.begin(), dt.end());
+	const auto dtMin = cfl * *max_element(height.begin(), height.end());
 
 	for (uint node = 0; node < numNodes; ++node) {
 		auto diffWeight = diffusiveWeight;
 
 		switch (diffusiveMethod) {
-			case diffusiveMethods::Abgrall: {
+			case Abgrall: {
 				break;
 			}
-			case diffusiveMethods::ZhangShu: {
+			case ZhangShu: {
 				auto alf = max(maxDuEdge[0][node], maxDuEdge[1][node]);
-				diffWeight *= alf / pow(M_PI, 2);
+				diffWeight *= alf;
+				break;
+			}
+			case Tizon: {
+				diffWeight *= cflViscous / cfl;
 				break;
 			}
 		}

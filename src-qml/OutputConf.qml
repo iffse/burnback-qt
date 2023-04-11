@@ -16,11 +16,16 @@ ScrollView {
 			Column {
 				width: parent.width
 
-
 				ComboBox {
+					id: diffusiveMethod
 					objectName: "diffusiveMethod"
 					width: parent.width
-					model: ["Abgrall", "Zhang and Shu"]
+					currentIndex: 0
+					model: [
+						"Abgrall",
+						"Tizón",
+						"Zhang and Shu"
+					]
 				}
 
 				LabelInput {
@@ -29,6 +34,17 @@ ScrollView {
 					placeholderText: "Enter a number"
 					toolTipText: "."
 					objName: "diffusiveWeight"
+					defaultInput: "1"
+					decimals: true
+				}
+
+				LabelInput {
+					visible: diffusiveMethod.currentIndex == 1
+					width: parent.width
+					text: "Viscous CFL"
+					placeholderText: "Enter a number"
+					toolTipText: "Viscous CFL number."
+					objName: "viscousCFL"
 					defaultInput: "1"
 					decimals: true
 				}
