@@ -392,7 +392,7 @@ void setdt() {
 
 void eulerExplicit() {
 	// const auto &dtMin = *min_element(dt.begin(), dt.end());
-	const auto dtMin = cfl * *max_element(height.begin(), height.end());
+	const auto dtMin = cfl * *min_element(height.begin(), height.end());
 
 	for (uint node = 0; node < numNodes; ++node) {
 		auto diffWeight = diffusiveWeight;
