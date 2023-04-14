@@ -20,6 +20,8 @@ CONFIG(debug, debug|release) {
 	DESTDIR = target/release
 }
 
+INCLUDEPATH += include
+
 OBJECTS_DIR = $$DESTDIR/objects
 MOC_DIR = $$DESTDIR/moc
 RCC_DIR = $$DESTDIR/qrc
@@ -31,7 +33,7 @@ HEADERS += \
 	src/headers/globals.h \
 	src/headers/operations.h \
 	src/headers/coeficcientMatrix.h \
-	src/headers/filesystem.h \
+	src/headers/iosystem.h \
 	src/headers/interface.h \
 	src/headers/iterations.h \
 	src/headers/plotData.h
@@ -39,7 +41,7 @@ SOURCES += \
 	src/main.cpp \
 	src/operations.cpp \
 	src/coeficcientMatrix.cpp \
-	src/filesystem.cpp \
+	src/iosystem.cpp \
 	src/interface.cpp \
 	src/iterations.cpp \
 	src/plotData.cpp

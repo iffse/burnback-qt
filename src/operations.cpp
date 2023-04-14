@@ -34,11 +34,11 @@ enum diffusiveMethods {
 
 void regenerateMeshData() {
 	for (uint edge = 0; edge < numEdges; ++edge) {
-		meshData[numTriangleEdge - 1 + 4 * edge] = connectivityMatrixNodeEdge[0][edge];
-		meshData[numTriangleEdge - 1 + 4 * edge + 1] = connectivityMatrixNodeEdge[1][edge];
+		edgeData[0][edge] = connectivityMatrixNodeEdge[0][edge];
+		edgeData[1][edge] = connectivityMatrixNodeEdge[1][edge];
 
-		meshData[numTriangleEdge - 1 + 4 * edge + 2] = connectivityMatrixTriangleEdge[0][edge];
-		meshData[numTriangleEdge - 1 + 4 * edge + 3] = connectivityMatrixTriangleEdge[1][edge];
+		edgeData[2][edge] = connectivityMatrixTriangleEdge[0][edge];
+		edgeData[3][edge] = connectivityMatrixTriangleEdge[1][edge];
 	}
 }
 

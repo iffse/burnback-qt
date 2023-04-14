@@ -18,7 +18,7 @@ ScrollView {
 
 				Label {
 					id: meshLabel
-					text: qsTr("Click \"import\" and select a mesh file (*.dat)")
+					text: qsTr("Click \"import\" and select a mesh file (*.dat or *.json)")
 					width: parent.width
 					wrapMode: Text.Wrap
 				}
@@ -33,7 +33,7 @@ ScrollView {
 					selectExisting: true
 					selectFolder: false
 					folder: ""
-					nameFilters: ["Mesh files (*.dat)"]
+					nameFilters: ["Mesh files (*.dat, *.json)"]
 					onAccepted: {
 						meshLabel.text = ("Current selection:\n" + basename(fileUrl.toString()))
 					}
@@ -58,6 +58,15 @@ ScrollView {
 					placeholderText: "Enter a number"
 					toolTipText: "Influence the number of segments used to draw the geometry of the solution"
 					objName: "areas"
+					decimals: true
+				}
+
+				LabelInput {
+					text: "Initial condition"
+					placeholderText: "Enter a number"
+					toolTipText: "The initial value used for the model"
+					objName: "initialCondition"
+					defaultInput: "0"
 					decimals: true
 				}
 

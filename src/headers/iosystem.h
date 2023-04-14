@@ -3,9 +3,14 @@
 #include <QTextStream>
 
 namespace Reader {
-	void readInput();
-	void readMesh(QTextStream &in);
-	void inResult();
+void readInput();
+namespace Legacy {
+void readMesh(QTextStream &in);
+}
+
+namespace Json {
+void readMesh(QString &filepath);;
+}
 }
 
 namespace Writer {

@@ -1,17 +1,25 @@
 // #include <QRegularExpression>
 
-#include <src/headers/filesystem.h>
+#include <src/headers/iosystem.h>
 #include <src/headers/globals.h>
 #include <src/headers/operations.h>
 #include <src/headers/interface.h>
 
+#include <nlohmann/json.hpp>
+#include <fstream>
+
 using namespace std;
+using json = nlohmann::json;
 
 void Reader::readInput() {//{{{
 
 	numberArea = root->findChild<QObject*>("areas")->property("text").toInt();
 	if (numberArea < 1)
 		throw std::invalid_argument("Number of areas must be greater than 0");
+
+	uInit = root->findChild<QObject*>("initialCondition")->property("text").toDouble();
+		if (uInit < 0)
+			throw std::invalid_argument("Initial condition must be greater than 0");
 
 	axisymmetric = root->findChild<QObject*>("axisymmetric")->property("checked").toBool();
 	resume = root->findChild<QObject*>("resume")->property("checked").toBool();
@@ -43,20 +51,15 @@ void Reader::readInput() {//{{{
 }
 //}}}
 
-void readInitialSolution(QTextStream &in) {
-	in.readLine();
-	uInit.fill(0);
-	uInit[0] = in.readLine().simplified().toDouble();
-}
-
+namespace Reader::Legacy {//{{{
 void readBoundaryConditions(QTextStream &in) {
 	in.readLine();
-	uint numBoundariesConditions = in.readLine().simplified().toInt();
+	uint numBoundaries = in.readLine().simplified().toInt();
 
-	uBoundaryData.fill(vector<double>(numBoundariesConditions));
-	connectivityMatrixBoundaryConditions = vector<int>(numBoundariesConditions);
+	uBoundaryData.fill(vector<double>(numBoundaries));
+	connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
 
-	for (uint i = 0; i < numBoundariesConditions; ++i) {
+	for (uint i = 0; i < numBoundaries; ++i) {
 		in.readLine();
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 2)
@@ -99,18 +102,9 @@ void readMeshData(QTextStream &in) {
 	for (int i = 0; i < 9; ++i)
 		meshData[i] = in.readLine().simplified().toInt();
 
-	numBoundaries = meshData[5];
 	numNodes = meshData[1];
 	numTriangles = meshData[2];
 	numEdges = meshData[3];
-	numTriangleEdge = meshData[7];
-	meshDataHelper = meshData[8] + 1;
-
-	if (connectivityMatrixBoundaryConditions.size() < numBoundaries)
-		connectivityMatrixBoundaryConditions.resize(numBoundaries);
-
-	if (meshData.size() < 65 * numNodes)
-		meshData.resize(65 * numNodes);
 
 	x = vector<double>(numNodes);
 	y = vector<double>(numNodes);
@@ -123,22 +117,23 @@ void readMeshData(QTextStream &in) {
 		y[i] = list[1].toDouble();
 	}
 
+	edgeData.fill(vector<int>(numEdges));
 	for (uint i = 0; i < numEdges; ++i) {
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 4)
 			throw std::invalid_argument("Invalid edge connectivity");
 
-		meshData[numTriangleEdge - 1 + 4 * i] = list[0].toInt();
-		meshData[numTriangleEdge - 1 + 4 * i + 1] = list[1].toInt();
-		meshData[numTriangleEdge - 1 + 4 * i + 2] = list[2].toInt();
-		meshData[numTriangleEdge - 1 + 4 * i + 3] = list[3].toInt();
+		edgeData[0][i] = list[0].toInt();
+		edgeData[1][i] = list[1].toInt();
+		edgeData[2][i] = list[2].toInt();
+		edgeData[3][i] = list[3].toInt();
 	}
 }
 
-void Reader::readMesh(QTextStream &in) {//{{{
-	const QStringList readTypes = {"INITIAL SOLUTION", "BOUNDARY CONDITIONS", "MESH DATA"};
+void readMesh(QTextStream &in) {
+	const QStringList readTypes = {"BOUNDARY CONDITIONS", "MESH DATA"};
 	// 3 = readTypes.size()
-	array<bool, 3> readFlags = {false, false, false};
+	array<bool, 3> readFlags = {false, false};
 	while (!in.atEnd()) {
 		auto line = in.readLine().simplified();
 		// line.replace(QRegularExpression("[\t ]+"), " ");
@@ -146,17 +141,12 @@ void Reader::readMesh(QTextStream &in) {//{{{
 
 		switch (readTypes.indexOf(line)) {
 
-			case 0: // initial solution
-				readInitialSolution(in);
-				readFlags[0] = true;
-				break;
-
-			case 1: // boundary conditions
+			case 0: // boundary conditions
 				readBoundaryConditions(in);
 				readFlags[1] = true;
 				break;
 
-			case 2: // mesh data
+			case 1: // mesh data
 				readMeshData(in);
 				readFlags[2] = true;
 				break;
@@ -166,10 +156,73 @@ void Reader::readMesh(QTextStream &in) {//{{{
 		}
 	}
 	// throw error if any of the flags is false
-	for (int i = 0; i < 3; ++i) {
+	for (uint i = 0; i < readFlags.size(); ++i) {
 		if (!readFlags[i]) {
 			throw std::invalid_argument("Invalid input file. Missing " + readTypes[i].toStdString() + " section");
 		}
 	}
 }
+}
+//}}}
+
+namespace Reader::Json {//{{{
+void readMesh(QString &filepath) {
+	// remove later
+	fstream file(filepath.toStdString());
+	json json = json::parse(file);
+
+	auto &metaData = json["metaData"];
+	numNodes = metaData["nodes"];
+	numTriangles = metaData["triangles"];
+	numEdges = metaData["edges"];
+
+	auto &mesh = json["mesh"];
+	x = vector<double>(numNodes);
+	y = vector<double>(numNodes);
+	for (uint i = 0; i < numNodes; ++i) {
+		x[i] = mesh["nodes"][i][0][0];
+		y[i] = mesh["nodes"][i][0][1];
+	}
+
+	edgeData.fill(vector<int>(numEdges));
+	for (uint i = 0; i < numEdges; ++i) {
+		edgeData[0][i] = mesh["edges"][i][0][0];
+		edgeData[1][i] = mesh["edges"][i][0][1];
+		edgeData[2][i] = mesh["edges"][i][1];
+		edgeData[3][i] = mesh["edges"][i][2];
+	}
+
+	
+	auto &conditions = json["conditions"];
+	uint numBoundaries = conditions["boundary"].size();
+	uBoundaryData.fill(vector<double>(numBoundaries));
+	connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
+
+	for (uint boundary = 0; boundary < numBoundaries; ++boundary) {
+		auto &condition = conditions["boundary"][boundary];
+		auto &boundaryCode = condition[0];
+		auto &boundaryType = condition[1];
+
+		connectivityMatrixBoundaryConditions[boundary] = boundaryCode;
+
+		const QStringList boundaryTypes = {"inlet", "outlet", "symmetry"};
+		switch (boundaryTypes.indexOf(QString::fromStdString(boundaryType))) {
+
+			case 0: // inlet
+				uBoundaryData[0][boundary] = condition[2];
+				break;
+			case 1: // outlet
+				break;
+			case 2: // symmetry
+				uBoundaryData[0][boundary] = condition[2];
+				uBoundaryData[1][boundary] = condition[3];
+				break;
+			default:
+				break;
+		}
+	}
+}
+}
+//}}}
+
 

@@ -34,13 +34,13 @@ inline std::vector<double> x;
 inline std::vector<double> y;
 inline std::vector<double> connectivityMatrixEdges;
 inline std::array<std::vector<double>, 4> uBoundaryData;
-inline std::array<double, 4> uInit;
+inline double uInit;
 
-inline uint numBoundaries;
 inline uint numNodes;
 inline uint numTriangles;
 inline uint numEdges;
 inline uint numTriangleEdge; // ? nl1
+inline std::array<std::vector<int>, 4> edgeData;
 inline uint meshDataHelper; // ? ihlp
 inline uint numBoundaryEdge; // nbl
 

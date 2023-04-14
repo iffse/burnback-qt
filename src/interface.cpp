@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <src/headers/interface.h>
-#include <src/headers/filesystem.h>
+#include "src/headers/iosystem.h"
 #include <src/headers/globals.h>
 #include <src/headers/coeficcientMatrix.h>
 #include <src/headers/operations.h>
@@ -47,6 +47,15 @@ void Actions::appendOutput(QString text) {
 
 void Actions::run()
 {
+	// clear data
+	numNodes = 0;
+	numTriangles = 0;
+	numEdges = 0;
+	numTriangleEdge = 0;
+	meshDataHelper = 0;
+	meshData.clear();
+	connectivityMatrixBoundaryConditions.clear();
+
 	appendOutput("--> Reading inputs");
 	try {
 		Reader::readInput();
@@ -75,36 +84,41 @@ void Actions::run()
 	if (filepath.startsWith(substring)) {
 		filepath.remove(0, substring.length());
 	}
-	QFile file(filepath);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		appendOutput("Error: Cannot open file");
+
+	const QString legacyExtension = ".dat";
+	const QString jsonExtension = ".json";
+
+	if (filepath.endsWith(legacyExtension)) {
+		QFile file(filepath);
+		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			appendOutput("Error: Cannot open file");
+			return;
+		}
+
+		QTextStream in(&file);
+		try {
+			Reader::Legacy::readMesh(in);
+		} catch (std::invalid_argument &e) {
+			appendOutput("Error: " + QString(e.what()));
+			file.close(); return;
+		} catch (...) {
+			appendOutput("Error: Unknown exception");
+			file.close(); return;
+		}
+		file.close();
+
+	} else if (filepath.endsWith(jsonExtension)) {
+		try {
+			Reader::Json::readMesh(filepath);
+		} catch (...) {
+			appendOutput("Error: Could not read file. Check if it is a valid JSON file.");
+			return;
+		}
+	} else {
+		appendOutput("Error: Unknown file extension");
 		return;
 	}
 
-	QTextStream in(&file);
-
-	// clear data
-	numBoundaries = 0;
-	numNodes = 0;
-	numTriangles = 0;
-	numEdges = 0;
-	numTriangleEdge = 0;
-	meshDataHelper = 0;
-	meshData.clear();
-	connectivityMatrixBoundaryConditions.clear();
-
-
-	try {
-		Reader::readMesh(in);
-	} catch (std::invalid_argument &e) {
-		appendOutput("Error: " + QString(e.what()));
-		file.close(); return;
-	} catch (...) {
-		appendOutput("Error: Unknown exception");
-		file.close(); return;
-	}
-
-	file.close();
 	std::thread thread(&Actions::worker, this);
 	thread.detach();
 }
@@ -190,7 +204,7 @@ void Actions::worker() {
 	setMetric();
 
 	emit newOutput("--> Starting subiteration loop");
-	uVertex = vector<double>(numNodes, uInit[0]);
+	uVertex = vector<double>(numNodes, uInit);
 
 	duVertex.fill(vector<double>(numNodes));
 	duVariable.fill(vector<double>(numTriangles));
