@@ -217,6 +217,7 @@ void Actions::worker() {
 	uint numItereations = 0;
 	QString linesToPrint = "";
 	auto clock = std::chrono::system_clock::now();
+	timeTotal = 0;
 
 	while (numItereations < minIter || (numItereations < maxIter && error > tolerance)) {
 		++numItereations;
