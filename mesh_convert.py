@@ -13,7 +13,6 @@ def print_help():
 
 output_name = ''
 filename = ''
-# filename = 'gmsh/conocyl-light.msh'
 loops = 0
 
 index = 1
@@ -56,14 +55,18 @@ conditions = {
 	'recession': [],
 }
 
+print('Reading mesh data...')
+
 for entry in mesh.cells_dict:
 	if entry not in data:
 		continue
 	data[entry]= mesh.cells_dict[entry].tolist()
 
+
 for node in mesh.points:
 	data['point'].append([node.tolist(), 0])
 
+print('Reading field conditions...')
 boundaries = []
 for field in mesh.field_data:
 	condition = field.split()
@@ -81,12 +84,14 @@ for field in mesh.field_data:
 		case 'recession':
 			conditions['recession'].append([condition_code, 'recession', float(condition[1])])
 
+print('Assining conditions to boundaries...')
+edges = {}
 for cell in mesh.cell_data_dict['gmsh:physical']:
 	for entry, condition in enumerate(mesh.cell_data_dict['gmsh:physical'][cell].tolist()):
 
 		if (condition in boundaries) and cell == 'line':
 			data['line'][entry].sort()
-			data['edge'].append([data['line'][entry], -condition])
+			edges[tuple(data['line'][entry])] = edges.get(tuple(data['line'][entry]), []) + [-condition]
 			continue
 
 		for rec in conditions['recession']:
@@ -96,40 +101,25 @@ for cell in mesh.cell_data_dict['gmsh:physical']:
 						data['point'][node][1] = condition
 				continue
 
-# creating connectivity for edges
-# each edge is a list of two nodes and two triangles that share the edge
+print('Creating edge connectivity')
 for entry, triangle in enumerate(data['triangle']):
-	for i in range(3):
-		nodes = [triangle[i], triangle[(i + 1) % 3]]
-		nodes.sort()
+	nodes = [tuple(sorted([triangle[i], triangle[(i + 1) % 3]])) for i in range(3)]
+	for node in nodes:
+		edges[node] = edges.get(node, []) + [entry]
 
-		existing_edge = False
-		for edge_entry, edge in enumerate(data['edge']):
-			# edge already exists
-			if nodes == edge[0]:
-				existing_edge = True
-				break
-
-		if existing_edge:
-			if entry not in data['edge'][edge_entry][1:3]:
-				edge.append(entry)
-		else:
-			data['edge'].append([nodes, entry])
+data['edge'] = [[list(node), *entries] for node, entries in edges.items()]
 
 # index corrections
+print('Correcting indices')
 for triangle in data['triangle']:
-	for i in range(3):
-		triangle[i] += 1
-for tetra in data['tetra']:
-	for i in range(4):
-		tetra[i] += 1
-for edge in data['edge']:
-	for i in range(2):
-		edge[0][i] += 1
-	for i in range(1, 3):
-		if edge[i] >= 0:
-			edge[i] += 1
+	triangle = list(map(lambda x: x+1, triangle))
 
+for tetra in data['tetra']:
+	tetra = list(map(lambda x: x+1, tetra))
+
+for edge in data['edge']:
+	edge[0] = list(map(lambda x: x+1, edge[0]))
+	edge[1:] = list(map(lambda x: x+1 if x >= 0 else x, edge[1:]))
 
 meshOut = {
 	'metaData': {
