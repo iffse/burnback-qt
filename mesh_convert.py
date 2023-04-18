@@ -128,7 +128,8 @@ meshOut = {
 		'tetrahedra': len(data['tetra']),
 		# Euler formula for planar graphs
 		# 'edges': len(data['point']) + len(data['triangle']) - len(data['tetra']) + loops - 1
-		'edges': len(data['edge'])
+		'edges': len(data['edge']),
+		'version': '0.1'
 	},
 	'mesh': {
 		'nodes': data['point'],
