@@ -52,7 +52,6 @@ void Actions::run()
 	numTriangles = 0;
 	numEdges = 0;
 	numTriangleEdge = 0;
-	meshDataHelper = 0;
 	meshData.clear();
 	connectivityMatrixBoundaryConditions.clear();
 
@@ -198,8 +197,8 @@ void Actions::worker() {
 
 	emit newOutput("--> Creating boundary matrix");
 	setBoundaryConditions();
-	emit newOutput("--> Creating alpha matrix");
-	setAlpha();
+	emit newOutput("--> Creating angles matrix");
+	setAngles();
 	emit newOutput("--> Creating metric matrix");
 	setMetric();
 
@@ -211,7 +210,6 @@ void Actions::worker() {
 	maxDuEdge.fill(vector<double>(numNodes));
 	flux.fill(vector<double>(numNodes));
 	eps = vector<double>(numNodes);
-	dt = vector<double>(numNodes);
 	double error = tolerance + 1;
 
 	uint numItereations = 0;

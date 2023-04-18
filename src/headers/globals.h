@@ -16,19 +16,6 @@ inline uint minIter;
 inline uint maxIter;
 inline double tolerance;
 
-// const auto maxNodes = 25000;
-// const auto maxTriangles = 2 * maxNodes;
-// const auto maxEdges = 3 * maxNodes;
-// const auto maxMeshData = 65 * maxNodes;
-// const auto maxBoundaries = 100;
-
-// inline std::array<double, maxMeshData> meshData;
-// inline std::array<double, maxNodes> x;
-// inline std::array<double, maxNodes> y;
-// inline std::array<double, maxBoundaries> connectivityMatrixEdges;
-// inline std::array<std::array<double, maxNodes>, 4> ubData;
-// inline std::array<double, 4> uInit;
-
 inline std::vector<int> meshData;
 inline std::vector<double> x;
 inline std::vector<double> y;
@@ -39,30 +26,33 @@ inline double uInit;
 inline uint numNodes;
 inline uint numTriangles;
 inline uint numEdges;
-inline uint numTriangleEdge; // ? nl1
+inline uint numTriangleEdge;
 inline std::array<std::vector<int>, 4> edgeData;
-inline uint meshDataHelper; // ? ihlp
-inline uint numBoundaryEdge; // nbl
+inline uint numBoundaryEdge;
 
 // connectivity matrix
-inline std::array<std::vector<int>, 3> connectivityMatrixNodeTriangle; // mcnt
-inline std::array<std::vector<int>, 2> connectivityMatrixNodeEdge; // mcnl
-inline std::array<std::vector<int>, 2> connectivityMatrixTriangleEdge; // mctl ?
-inline std::array<std::vector<int>, 2> connectivityMatrixNodeBoundary; // mcnb ?
-inline std::array<std::vector<int>, 2> connectivityMatrixVertexEdge; // mcvl ?
+inline std::array<std::vector<int>, 3> connectivityMatrixNodeTriangle;
+inline std::array<std::vector<int>, 2> connectivityMatrixNodeEdge;
+inline std::array<std::vector<int>, 2> connectivityMatrixTriangleEdge;
+inline std::array<std::vector<int>, 2> connectivityMatrixNodeBoundary;
+inline std::array<std::vector<int>, 2> connectivityMatrixVertexEdge;
 
 inline std::vector<int> connectivityMatrixBoundaryConditions;
 
 inline std::array<std::vector<double>, 8> alpha;
+// angle in each node of a edge
+inline std::array<std::vector<double>, 4> thetaEdge;
+// contribution of angles in each node of a edge
+inline std::array<std::vector<double>, 2> betaEdge;
+inline std::array<std::vector<double>, 2> directionEdge;
 inline std::vector<double> sector;
 inline std::vector<double> area;
 inline std::vector<double> height;
-inline std::array<std::vector<int>, 2> nodeBoundaryConditions; // ncc
-inline std::vector<double> dt; // time step
-inline std::vector<double> eps; // used in flux calculation
+inline std::array<std::vector<int>, 2> nodeBoundaryConditions;
+inline std::vector<double> eps;
 inline std::vector<double> uVertex;
-inline std::array<std::vector<double>, 2> duVariable; // variable triangle
-inline std::array<std::vector<double>, 2> duVertex; // variable vertex
+inline std::array<std::vector<double>, 2> duVariable; // gradient in the triangle
+inline std::array<std::vector<double>, 2> duVertex; // gradient in the vertex
 inline std::array<std::vector<double>, 2> maxDuEdge;
 inline std::array<std::vector<double>, 2> flux;
 

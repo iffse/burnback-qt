@@ -106,9 +106,11 @@ void setBoundaryConditions() {
 	}
 }
 
-void setAlpha() {
+void setAngles() {
 	sector = vector<double>(numNodes);
-	alpha.fill(vector<double>(numEdges));
+	thetaEdge.fill(vector<double>(numEdges));
+	betaEdge.fill(vector<double>(numEdges));
+	directionEdge.fill(vector<double>(numEdges));
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
 		auto node1 = connectivityMatrixNodeEdge[0][edge] - 1;
@@ -123,8 +125,8 @@ void setAlpha() {
 		vertexX1 /= vertexV1;
 		vertexY1 /= vertexV1;
 
-		alpha[6][edge] = vertexX1;
-		alpha[7][edge] = vertexY1;
+		directionEdge[0][edge] = vertexX1;
+		directionEdge[1][edge] = vertexY1;
 
 		if (nodeVertex1 >= 0) {
 			auto vertexX2 = x[nodeVertex1] - x[node1];
@@ -143,8 +145,8 @@ void setAlpha() {
 			vertexX5 /= vertexV5;
 			vertexY5 /= vertexV5;
 
-			alpha[0][edge] = acos(vertexX1 * vertexX2 + vertexY1 * vertexY2);
-			alpha[2][edge] = acos(-vertexX1 * vertexX5 - vertexY1 * vertexY5);
+			thetaEdge[0][edge] = acos(vertexX1 * vertexX2 + vertexY1 * vertexY2);
+			thetaEdge[2][edge] = acos(-vertexX1 * vertexX5 - vertexY1 * vertexY5);
 		}
 
 		if (nodeVertex2 >= 0) {
@@ -160,32 +162,31 @@ void setAlpha() {
 			vertexX4 /= vertexV4;
 			vertexY4 /= vertexV4;
 
-			alpha[1][edge] = acos(vertexX1 * vertexX3 + vertexY1 * vertexY3);
-			alpha[3][edge] = acos(-vertexX1 * vertexX4 - vertexY1 * vertexY4);
+			thetaEdge[1][edge] = acos(vertexX1 * vertexX3 + vertexY1 * vertexY3);
+			thetaEdge[3][edge] = acos(-vertexX1 * vertexX4 - vertexY1 * vertexY4);
 		}
 
 		// setting angular sector of each node
-		sector[node1] += alpha[0][edge] + alpha[1][edge];
-		sector[node2] += alpha[2][edge] + alpha[3][edge];
+		sector[node1] += thetaEdge[0][edge] + thetaEdge[1][edge];
+		sector[node2] += thetaEdge[2][edge] + thetaEdge[3][edge];
 
 		// setting the correct values of alpha 1, 2 ,3 and 4 in the boundaries
 		// -1 due to the substraction of 1 for indexing
 		if (nodeVertex1 < -1) {
-			alpha[0][edge] = alpha[1][edge];
-			alpha[2][edge] = alpha[3][edge];
+			thetaEdge[0][edge] = thetaEdge[1][edge];
+			thetaEdge[2][edge] = thetaEdge[3][edge];
 		}
 		if (nodeVertex2 < -1) {
-			alpha[1][edge] = alpha[0][edge];
-			alpha[3][edge] = alpha[2][edge];
+			thetaEdge[1][edge] = thetaEdge[0][edge];
+			thetaEdge[3][edge] = thetaEdge[2][edge];
 		}
 
-		// beta and beta prime
 		if (diffusiveMethod == Tizon) {
-			alpha[4][edge] = 2 * sin(alpha[0][edge] / 2) ;
-			alpha[5][edge] = 2 * sin(alpha[2][edge] / 2) ;
+			betaEdge[0][edge] = 2 * sin(thetaEdge[0][edge] / 2);
+			betaEdge[1][edge] = 2 * sin(thetaEdge[2][edge] / 2);
 		} else {
-			alpha[4][edge] = tan( 0.5 * alpha[0][edge] ) + tan( 0.5 * alpha[1][edge] );
-			alpha[5][edge] = tan( 0.5 * alpha[2][edge] ) + tan( 0.5 * alpha[3][edge] );
+			betaEdge[0][edge] = tan( 0.5 * thetaEdge[0][edge] ) + tan( 0.5 * thetaEdge[1][edge] );
+			betaEdge[1][edge] = tan( 0.5 * thetaEdge[2][edge] ) + tan( 0.5 * thetaEdge[3][edge] );
 		}
 	}
 
@@ -286,10 +287,10 @@ void setFlux() {
 		auto duy = 0.0;
 
 		if (triangle1 >= 0) {
-			duVertex[0][node1] += alpha[0][edge] * duVariable[0][triangle1];
-			duVertex[1][node1] += alpha[0][edge] * duVariable[1][triangle1];
-			duVertex[0][node2] += alpha[2][edge] * duVariable[0][triangle1];
-			duVertex[1][node2] += alpha[2][edge] * duVariable[1][triangle1];
+			duVertex[0][node1] += thetaEdge[0][edge] * duVariable[0][triangle1];
+			duVertex[1][node1] += thetaEdge[0][edge] * duVariable[1][triangle1];
+			duVertex[0][node2] += thetaEdge[2][edge] * duVariable[0][triangle1];
+			duVertex[1][node2] += thetaEdge[2][edge] * duVariable[1][triangle1];
 
 			dux += duVariable[0][triangle1];
 			duy += duVariable[1][triangle1];
@@ -304,10 +305,10 @@ void setFlux() {
 		}
 
 		if (triangle2 >= 0) {
-			duVertex[0][node1] += alpha[1][edge] * duVariable[0][triangle2];
-			duVertex[1][node1] += alpha[1][edge] * duVariable[1][triangle2];
-			duVertex[0][node2] += alpha[3][edge] * duVariable[0][triangle2];
-			duVertex[1][node2] += alpha[3][edge] * duVariable[1][triangle2];
+			duVertex[0][node1] += thetaEdge[1][edge] * duVariable[0][triangle2];
+			duVertex[1][node1] += thetaEdge[1][edge] * duVariable[1][triangle2];
+			duVertex[0][node2] += thetaEdge[3][edge] * duVariable[0][triangle2];
+			duVertex[1][node2] += thetaEdge[3][edge] * duVariable[1][triangle2];
 
 			dux += duVariable[0][triangle2];
 			duy += duVariable[1][triangle2];
@@ -324,11 +325,11 @@ void setFlux() {
 		}
 
 		// Uj and Uj+1 * n
-		dux *= 0.5 * alpha[6][edge];
-		duy *= 0.5 * alpha[7][edge];
+		dux *= 0.5 * directionEdge[0][edge];
+		duy *= 0.5 * directionEdge[1][edge];
 
-		flux[1][node1] += alpha[4][edge] * (dux + duy);
-		flux[1][node2] -= alpha[5][edge] * (dux + duy);
+		flux[1][node1] += betaEdge[0][edge] * (dux + duy);
+		flux[1][node2] -= betaEdge[1][edge] * (dux + duy);
 	}
 
 	for (uint node = 0; node < numNodes; ++node) {

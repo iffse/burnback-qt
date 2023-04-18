@@ -3,7 +3,7 @@
 void reorder();
 void regenerateMeshData();
 void setBoundaryConditions();
-void setAlpha();
+void setAngles();
 void setMetric();
 void setduVarriable();
 void setFlux();

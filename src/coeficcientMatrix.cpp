@@ -76,9 +76,9 @@ void NodeTriangles() {
 void NodeEdge() {
 	connectivityMatrixNodeEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
-	for (uint i = 0; i < numEdges; ++i) {
-		connectivityMatrixNodeEdge[0][i] = edgeData[0][i];
-		connectivityMatrixNodeEdge[1][i] = edgeData[1][i];
+	for (uint edge = 0; edge < numEdges; ++edge) {
+		connectivityMatrixNodeEdge[0][edge] = edgeData[0][edge];
+		connectivityMatrixNodeEdge[1][edge] = edgeData[1][edge];
 	}
 }
 
@@ -86,28 +86,27 @@ void NodeEdge() {
 void TriangleEdge() {
 	connectivityMatrixTriangleEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
-	for (uint i = 0; i < numEdges; ++i) {
-		connectivityMatrixTriangleEdge[0][i] = edgeData[2][i];
-		connectivityMatrixTriangleEdge[1][i] = edgeData[3][i];
+	for (uint edge = 0; edge < numEdges; ++edge) {
+		connectivityMatrixTriangleEdge[0][edge] = edgeData[2][edge];
+		connectivityMatrixTriangleEdge[1][edge] = edgeData[3][edge];
 	}
 }
 
 void createVertexEdge() {
 	connectivityMatrixVertexEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
-	for (uint i = 0; i < numEdges; ++i) {
-		// Search for two identical nodes of two neighbourhood, writtin in the mcvl
-		const int triangle1 = connectivityMatrixTriangleEdge[0][i];
-		const int triangle2 = connectivityMatrixTriangleEdge[1][i];
-		const int node1 = connectivityMatrixNodeEdge[0][i];
-		const int node2 = connectivityMatrixNodeEdge[1][i];
+	for (uint edge = 0; edge < numEdges; ++edge) {
+		// Search for two identical nodes of two neighbourhood
+		const int &triangle1 = connectivityMatrixTriangleEdge[0][edge];
+		const int &triangle2 = connectivityMatrixTriangleEdge[1][edge];
+		const int &node1 = connectivityMatrixNodeEdge[0][edge];
+		const int &node2 = connectivityMatrixNodeEdge[1][edge];
 		int node3;
 
 		if (triangle1 > 0) {
-			// ? nh
-			const int neighbourhood1 = connectivityMatrixNodeTriangle[0][triangle1 - 1];
-			const int neighbourhood2 = connectivityMatrixNodeTriangle[1][triangle1 - 1];
-			const int neighbourhood3 = connectivityMatrixNodeTriangle[2][triangle1 - 1];
+			const int &neighbourhood1 = connectivityMatrixNodeTriangle[0][triangle1 - 1];
+			const int &neighbourhood2 = connectivityMatrixNodeTriangle[1][triangle1 - 1];
+			const int &neighbourhood3 = connectivityMatrixNodeTriangle[2][triangle1 - 1];
 
 			if (node1 == neighbourhood1) {
 				node3 = node2 == neighbourhood2 ? neighbourhood3 : neighbourhood2;
@@ -118,14 +117,14 @@ void createVertexEdge() {
 			} else {
 				throw std::runtime_error("Error in createVertexEdge(). Node1 is not equal to any of the neighbourhood nodes of triangle1.");
 			}
-			connectivityMatrixVertexEdge[0][i] = node3;
+			connectivityMatrixVertexEdge[0][edge] = node3;
 		} else {
-			connectivityMatrixVertexEdge[0][i] = triangle1;
+			connectivityMatrixVertexEdge[0][edge] = triangle1;
 			// search for 2 identical nodes of 2 neighbourhood triangles
 			// the adequate third node of the first and only real triangle is written in the mcvl
-			const int neighbourhood1 = connectivityMatrixNodeTriangle[0][triangle2 - 1];
-			const int neighbourhood2 = connectivityMatrixNodeTriangle[1][triangle2 - 1];
-			const int neighbourhood3 = connectivityMatrixNodeTriangle[2][triangle2 - 1];
+			const int &neighbourhood1 = connectivityMatrixNodeTriangle[0][triangle2 - 1];
+			const int &neighbourhood2 = connectivityMatrixNodeTriangle[1][triangle2 - 1];
+			const int &neighbourhood3 = connectivityMatrixNodeTriangle[2][triangle2 - 1];
 
 			if (node1 == neighbourhood1) {
 				node3 = node2 == neighbourhood2 ? neighbourhood3 : neighbourhood2;
@@ -136,13 +135,13 @@ void createVertexEdge() {
 			} else {
 				throw std::runtime_error("Error in createVertexEdge(). Node1 is not equal to any of the neighbourhood nodes of triangle2.");
 			}
-			connectivityMatrixVertexEdge[1][i] = node3;
+			connectivityMatrixVertexEdge[1][edge] = node3;
 		}
 		if (triangle2 > 0) {
 			if (triangle1 > 0) {
-				const int neighbourhood1 = connectivityMatrixNodeTriangle[0][triangle2 - 1];
-				const int neighbourhood2 = connectivityMatrixNodeTriangle[1][triangle2 - 1];
-				const int neighbourhood3 = connectivityMatrixNodeTriangle[2][triangle2 - 1];
+				const int &neighbourhood1 = connectivityMatrixNodeTriangle[0][triangle2 - 1];
+				const int &neighbourhood2 = connectivityMatrixNodeTriangle[1][triangle2 - 1];
+				const int &neighbourhood3 = connectivityMatrixNodeTriangle[2][triangle2 - 1];
 
 				if (node1 == neighbourhood1) {
 					node3 = node2 == neighbourhood2 ? neighbourhood3 : neighbourhood2;
@@ -153,42 +152,42 @@ void createVertexEdge() {
 				} else {
 					throw std::runtime_error("Error in createVertexEdge(). Node1 is not equal to any of the neighbourhood nodes of triangle2.");
 				}
-				connectivityMatrixVertexEdge[1][i] = node3;
+				connectivityMatrixVertexEdge[1][edge] = node3;
 			}
 		} else {
-			connectivityMatrixVertexEdge[1][i] = triangle2;
+			connectivityMatrixVertexEdge[1][edge] = triangle2;
 		}
 	}
 }
 
 void reorder() {
-	for (uint i = 0; i < numEdges; ++i) {
-		const int triangle1 = connectivityMatrixTriangleEdge[0][i] - 1;
-		const int triangle2 = connectivityMatrixTriangleEdge[1][i] - 1;
-		const int node1 = connectivityMatrixNodeEdge[0][i] - 1;
-		const int node2 = connectivityMatrixNodeEdge[1][i] - 1;
+	for (uint edge = 0; edge < numEdges; ++edge) {
+		const int triangle1 = connectivityMatrixTriangleEdge[0][edge] - 1;
+		const int triangle2 = connectivityMatrixTriangleEdge[1][edge] - 1;
+		const int node1 = connectivityMatrixNodeEdge[0][edge] - 1;
+		const int node2 = connectivityMatrixNodeEdge[1][edge] - 1;
 
-		const int nodeVertex1 = connectivityMatrixVertexEdge[0][i] - 1;
-		const int nodeVertex2 = connectivityMatrixVertexEdge[1][i] - 1;
+		const int nodeVertex1 = connectivityMatrixVertexEdge[0][edge] - 1;
+		const int nodeVertex2 = connectivityMatrixVertexEdge[1][edge] - 1;
 
 		if (triangle1 >= 0) {
 			int difference1 = ( x[nodeVertex1] - x[node1] ) * ( y[node2] - y[node1] );
 			int difference2 = ( x[node2] - x[node1] ) * ( y[nodeVertex1] - y[node1] );
 			if (difference1 > difference2) {
-				connectivityMatrixTriangleEdge[0][i] = triangle2 + 1; // naming correction
-				connectivityMatrixTriangleEdge[1][i] = triangle1 + 1;
-				connectivityMatrixVertexEdge[0][i] = nodeVertex2 + 1;
-				connectivityMatrixVertexEdge[1][i] = nodeVertex1 + 1;
+				connectivityMatrixTriangleEdge[0][edge] = triangle2 + 1; // naming correction
+				connectivityMatrixTriangleEdge[1][edge] = triangle1 + 1;
+				connectivityMatrixVertexEdge[0][edge] = nodeVertex2 + 1;
+				connectivityMatrixVertexEdge[1][edge] = nodeVertex1 + 1;
 			}
 		} else {
 			int difference1 = ( x[nodeVertex2] - x[node1] ) * ( y[node2] - y[node1] );
 			int difference2 = ( x[node2] -  x[node1] ) * ( y[nodeVertex2] - y[node1] );
 
 			if (difference1 < difference2) {
-				connectivityMatrixTriangleEdge[0][i] = triangle2 + 1;
-				connectivityMatrixTriangleEdge[1][i] = triangle1 + 1;
-				connectivityMatrixVertexEdge[0][i] = nodeVertex2 + 1;
-				connectivityMatrixVertexEdge[1][i] = nodeVertex1 + 1;
+				connectivityMatrixTriangleEdge[0][edge] = triangle2 + 1;
+				connectivityMatrixTriangleEdge[1][edge] = triangle1 + 1;
+				connectivityMatrixVertexEdge[0][edge] = nodeVertex2 + 1;
+				connectivityMatrixVertexEdge[1][edge] = nodeVertex1 + 1;
 			}
 		}
 	}
