@@ -214,8 +214,8 @@ void readMesh(QString &filepath) {
 			case 1: // outlet
 				break;
 			case 2: // symmetry
-				uBoundaryData[0][boundary] = condition[2];
-				uBoundaryData[1][boundary] = condition[3];
+				uBoundaryData[0][boundary] = condition[2][0];
+				uBoundaryData[1][boundary] = condition[2][1];
 				break;
 			default:
 				break;
