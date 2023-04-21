@@ -10,16 +10,16 @@ Supports both light and dark theme. Should use accordingly to your system theme.
 
 First, you will need a mesh in order to use the program for analysis. For instance, [Gmsh](https://gmsh.info/) is an open source meshing software that can generate 2D and 3D finite element mesh.
 
-Once you have the mesh, you will need to convert into a Json file with edge based information. A python script that converts Gmsh mesh to this format using [meshio](https://github.com/nschloe/meshio) can be found at tools directory: [mesh_convert.py](./tools/mesh_convert.py). The script is optimized for speed and can convert a mesh with 200K nodes in seconds. If you are using another meshing tool, feel free to edit it (probable you will only need to change the cell names).
+Once you have the mesh, you will have to convert it into a Json file with edge based information. A python script that converts Gmsh mesh to this format using [meshio](https://github.com/nschloe/meshio) can be found at tools directory: [mesh_convert.py](./tools/mesh_convert.py). The script is optimized for speed and can convert a mesh with 200K nodes in seconds. If you are using another meshing tool, feel free to edit it (probable you will only need to change the cell names).
 
-When using Gmsh and the script, you can define boundary conditions with physical groups with the following naming conditions:
+When using Gmsh and the script, you can define boundary conditions with physical groups with the following naming conventions:
 
 - `inlet 0`: The boundary is an inlet, where the propellant starts to burn. The number after the condition is the initial condition applied in that boundary.
 - `outlet`: Used for boundaries where the combustion ends, like the shell of the container.
 - `symmetry 1 0`: Used to indicate that a boundary defines a symmetry. Numbers after the condition defines the x and y vectors that defines the symmetry line.
 - `recession 1` (optional): Used to indicate the recession velocity of a node, defaults to 1.
 
-Example files of Gmsh can be found at [examples/gmesh](./examples/gmsh). The commands to be executed to obtain the Json file are:
+Example files of Gmsh can be found at [examples/gmsh](./examples/gmsh). The commands to be executed to obtain the Json file are:
 ```shell
 gmsh -2 mesh.geo
 python meth_convert.py mesh.msh
