@@ -1,4 +1,0 @@
-[submodule "submodules/nlohmann/json"]
-	path = submodules/nlohmann/json
-	url = https://github.com/nlohmann/json/
-	shallow = true
