@@ -132,8 +132,7 @@ void readMeshData(QTextStream &in) {
 
 void readMesh(QTextStream &in) {
 	const QStringList readTypes = {"BOUNDARY CONDITIONS", "MESH DATA"};
-	// 3 = readTypes.size()
-	array<bool, 3> readFlags = {false, false};
+	array<bool, 2> readFlags = {false, false};
 	while (!in.atEnd()) {
 		auto line = in.readLine().simplified();
 		// line.replace(QRegularExpression("[\t ]+"), " ");
@@ -143,12 +142,12 @@ void readMesh(QTextStream &in) {
 
 			case 0: // boundary conditions
 				readBoundaryConditions(in);
-				readFlags[1] = true;
+				readFlags[0] = true;
 				break;
 
 			case 1: // mesh data
 				readMeshData(in);
-				readFlags[2] = true;
+				readFlags[1] = true;
 				break;
 
 			default:

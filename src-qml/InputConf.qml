@@ -18,7 +18,7 @@ ScrollView {
 
 				Label {
 					id: meshLabel
-					text: qsTr("Click \"import\" and select a mesh file (*.dat or *.json)")
+					text: qsTr("Click \"import\" and select a mesh file (*.json)")
 					width: parent.width
 					wrapMode: Text.Wrap
 				}
@@ -33,7 +33,7 @@ ScrollView {
 					selectExisting: true
 					selectFolder: false
 					folder: ""
-					nameFilters: ["Mesh files (*.dat, *.json)"]
+					nameFilters: ["Mesh files (*.json *.dat)", "All files (*)"]
 					onAccepted: {
 						meshLabel.text = ("Current selection:\n" + basename(fileUrl.toString()))
 					}
