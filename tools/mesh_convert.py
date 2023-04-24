@@ -125,7 +125,7 @@ meshOut = {
 	'metaData': {
 		'nodes': len(data['point']),
 		'triangles': len(data['triangle']),
-		'tetrahedra': len(data['tetra']),
+		# 'tetrahedra': len(data['tetra']),
 		# Euler formula for planar graphs
 		# 'edges': len(data['point']) + len(data['triangle']) - len(data['tetra']) + loops - 1
 		'edges': len(data['edge']),
@@ -133,8 +133,8 @@ meshOut = {
 	},
 	'mesh': {
 		'nodes': data['point'],
-		'triangles': data['triangle'],
-		'tetrahedra': data['tetra'],
+		# 'triangles': data['triangle'],
+		# 'tetrahedra': data['tetra'],
 		'edges': data['edge']
 	},
 	'conditions': conditions,
