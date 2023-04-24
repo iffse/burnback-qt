@@ -2,9 +2,9 @@
 
 Analysis of 2D burn surfaces (3D only when axisymmetric) for solid propellant rockets using Time Marching Method as an alternative of the Level Set Method.
 
-Built binaries can be found at [releases](https://github.com/iffse/burnback-qt/releases).
+Built binaries for Windows and MacOS can be found at [releases](https://github.com/iffse/burnback-qt/releases). For Linux is advisable to compile from source due to Qt has no compatibility across different distributions.
 
-Supports both light and dark theme. Should use accordingly to your system theme. If you want dark theme and it isn't, add `QT_QUICK_CONTROLS_MATERIAL_THEME=Dark` to your environment variables.
+Supports both light and dark theme. Should use accordingly to your system theme. If you want dark theme, and it isn't, add `QT_QUICK_CONTROLS_MATERIAL_THEME=Dark` to your environment variables.
 
 ## Usage
 
@@ -28,6 +28,12 @@ python meth_convert.py mesh.msh
 ## Compiling
 
 Can be compiled by either using command line or using the QtCreator. Binaries should be found at `<Project Dir>/target/debug|release`. When building with QtCreator, `<Project Dir>` equals to where the build location is set.
+
+Qt modules dependencies:
+
+- qt-charts
+- qt-declaratives
+- qt-quickcontrols2
 
 ### Using command line
 
