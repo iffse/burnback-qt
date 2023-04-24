@@ -109,11 +109,14 @@ void Actions::run()
 	} else if (filepath.endsWith(jsonExtension)) {
 		try {
 			Reader::Json::readMesh(filepath);
+		} catch (std::invalid_argument &e) {
+			appendOutput("Error: " + QString(e.what()));
+			return;
 		} catch (...) {
-			appendOutput("Error: Could not read file. Check if it is a valid JSON file.");
+			appendOutput("Error: Unknown exception when reading mesh");
 			return;
 		}
-	} else {
+		} else {
 		appendOutput("Error: Unknown file extension");
 		return;
 	}
