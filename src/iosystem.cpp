@@ -166,59 +166,85 @@ void readMesh(QTextStream &in) {
 
 namespace Reader::Json {//{{{
 void readMesh(QString &filepath) {
-	// remove later
 	fstream file(filepath.toStdString());
-	json json = json::parse(file);
+	json json;
 
-	auto &metaData = json["metaData"];
-	numNodes = metaData["nodes"];
-	numTriangles = metaData["triangles"];
-	numEdges = metaData["edges"];
-
-	auto &mesh = json["mesh"];
-	x = vector<double>(numNodes);
-	y = vector<double>(numNodes);
-	for (uint i = 0; i < numNodes; ++i) {
-		x[i] = mesh["nodes"][i][0][0];
-		y[i] = mesh["nodes"][i][0][1];
+	try {
+		json = json::parse(file);
+	} catch (...) {
+		throw std::invalid_argument("Unable to parse Json file. Invalid JSON file?");
+		return;
 	}
 
-	edgeData.fill(vector<int>(numEdges));
-	for (uint i = 0; i < numEdges; ++i) {
-		edgeData[0][i] = mesh["edges"][i][0][0];
-		edgeData[1][i] = mesh["edges"][i][0][1];
-		edgeData[2][i] = mesh["edges"][i][1];
-		edgeData[3][i] = mesh["edges"][i][2];
+	try {
+		auto &metaData = json["metaData"];
+		numNodes = metaData["nodes"];
+		numTriangles = metaData["triangles"];
+		numEdges = metaData["edges"];
+	} catch (...) {
+		throw std::invalid_argument("Unable to read mesh data from Json file. Missing data field?");
+		return;
 	}
 
-	
-	auto &conditions = json["conditions"];
-	uint numBoundaries = conditions["boundary"].size();
-	uBoundaryData.fill(vector<double>(numBoundaries));
-	connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
-
-	for (uint boundary = 0; boundary < numBoundaries; ++boundary) {
-		auto &condition = conditions["boundary"][boundary];
-		auto &boundaryCode = condition[0];
-		auto &boundaryType = condition[1];
-
-		connectivityMatrixBoundaryConditions[boundary] = boundaryCode;
-
-		const QStringList boundaryTypes = {"inlet", "outlet", "symmetry"};
-		switch (boundaryTypes.indexOf(QString::fromStdString(boundaryType))) {
-
-			case 0: // inlet
-				uBoundaryData[0][boundary] = condition[2];
-				break;
-			case 1: // outlet
-				break;
-			case 2: // symmetry
-				uBoundaryData[0][boundary] = condition[2][0];
-				uBoundaryData[1][boundary] = condition[2][1];
-				break;
-			default:
-				break;
+	try {
+		auto &mesh = json["mesh"];
+		x = vector<double>(numNodes);
+		y = vector<double>(numNodes);
+		for (uint i = 0; i < numNodes; ++i) {
+			x[i] = mesh["nodes"][i][0][0];
+			y[i] = mesh["nodes"][i][0][1];
 		}
+	} catch (...) {
+		throw std::invalid_argument("Unable to read node coordinates from Json file. Missing nodes field or wrong format?");
+		return;
+	}
+
+	try {
+		auto &mesh = json["mesh"];
+		edgeData.fill(vector<int>(numEdges));
+		for (uint i = 0; i < numEdges; ++i) {
+			edgeData[0][i] = mesh["edges"][i][0][0];
+			edgeData[1][i] = mesh["edges"][i][0][1];
+			edgeData[2][i] = mesh["edges"][i][1];
+			edgeData[3][i] = mesh["edges"][i][2];
+		}
+	} catch (...) {
+		throw std::invalid_argument("Unable to read edge connectivity from Json file. Missing edges field or wrong format?");
+		return;
+	}
+
+	try {
+		auto &conditions = json["conditions"];
+		uint numBoundaries = conditions["boundary"].size();
+		uBoundaryData.fill(vector<double>(numBoundaries));
+		connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
+
+		for (uint boundary = 0; boundary < numBoundaries; ++boundary) {
+			auto &condition = conditions["boundary"][boundary];
+			auto &boundaryCode = condition[0];
+			auto &boundaryType = condition[1];
+
+			connectivityMatrixBoundaryConditions[boundary] = boundaryCode;
+
+			const QStringList boundaryTypes = {"inlet", "outlet", "symmetry"};
+			switch (boundaryTypes.indexOf(QString::fromStdString(boundaryType))) {
+
+				case 0: // inlet
+					uBoundaryData[0][boundary] = condition[2];
+					break;
+				case 1: // outlet
+					break;
+				case 2: // symmetry
+					uBoundaryData[0][boundary] = condition[2][0];
+					uBoundaryData[1][boundary] = condition[2][1];
+					break;
+				default:
+					break;
+			}
+		}
+	} catch(...) {
+		throw std::invalid_argument("Unable to read boundary conditions from Json file. Missing boundary field or wrong format?");
+		return;
 	}
 }
 }
