@@ -16,15 +16,14 @@ void NodeTriangles() {
 
 	// creation of table
 	// loop over edges
-	for (uint i = 0; i < numEdges; ++i) {
+	for (uint edge = 0; edge < numEdges; ++edge) {
 		int index1 = 0;
 		int index2 = 0;
-		int node1 = edgeData[0][i];
-		int node2 = edgeData[1][i];
 
-		// nt
-		int triangle1 = edgeData[2][i];
-		int triangle2 = edgeData[3][i];
+		int node1 = edgeData[edge][0];
+		int node2 = edgeData[edge][1];
+		int triangle1 = edgeData[edge][2];
+		int triangle2 = edgeData[edge][3];
 
 		if (triangle1 > 0) {
 			// check if node already exist in cells of mcnt(x, nodeT1)
@@ -77,8 +76,8 @@ void NodeEdge() {
 	connectivityMatrixNodeEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
-		connectivityMatrixNodeEdge[0][edge] = edgeData[0][edge];
-		connectivityMatrixNodeEdge[1][edge] = edgeData[1][edge];
+		connectivityMatrixNodeEdge[0][edge] = edgeData[edge][0];
+		connectivityMatrixNodeEdge[1][edge] = edgeData[edge][1];
 	}
 }
 
@@ -87,8 +86,8 @@ void TriangleEdge() {
 	connectivityMatrixTriangleEdge = array<vector<int>, 2>({vector<int>(numEdges), vector<int>(numEdges)});
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
-		connectivityMatrixTriangleEdge[0][edge] = edgeData[2][edge];
-		connectivityMatrixTriangleEdge[1][edge] = edgeData[3][edge];
+		connectivityMatrixTriangleEdge[0][edge] = edgeData[edge][2];
+		connectivityMatrixTriangleEdge[1][edge] = edgeData[edge][3];
 	}
 }
 

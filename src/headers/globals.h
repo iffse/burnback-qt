@@ -8,7 +8,6 @@ inline QObject* root;
 
 inline uint numberArea;
 inline bool axisymmetric;
-inline bool resume;
 
 inline double cfl;
 inline double cflViscous;
@@ -27,7 +26,7 @@ inline uint numNodes;
 inline uint numTriangles;
 inline uint numEdges;
 inline uint numTriangleEdge;
-inline std::array<std::vector<int>, 4> edgeData;
+inline std::vector<std::array<int, 4>>edgeData;
 inline uint numBoundaryEdge;
 
 // connectivity matrix

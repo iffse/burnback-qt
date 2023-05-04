@@ -4,16 +4,17 @@ import meshio
 
 def print_help():
 	print('''
-			Usage: python mesh_convert.py [options] filename
-			Options:
-				-f, --format: Output format (pretty), defaults to compact
-				-o, --output: Output file name, defaults to input file name with json extension name
-				-h, --help: Show this help
+Usage: python mesh_convert.py [options] filename
+Options:
+	-p, --pretty: Using pretty output
+	-o, --output: Output file name, defaults to input file name with json extension name
+	-h, --help: Show this help
 ''')
 
 output_name = ''
 filename = ''
 loops = 0
+pretty = False
 
 index = 1
 while index < len(sys.argv):
@@ -21,9 +22,9 @@ while index < len(sys.argv):
 		case '-h' | '--help':
 			print_help()
 			exit()
-		case '-f' | '--format':
-			format = sys.argv[index + 1]
-			index += 2
+		case '-p' | '--pretty':
+			pretty = True
+			index += 1
 		case '-o' | '--output':
 			output_name = sys.argv[index + 1]
 			index += 2
@@ -107,7 +108,7 @@ for entry, triangle in enumerate(data['triangle']):
 	for node in nodes:
 		edges[node] = edges.get(node, []) + [entry]
 
-data['edge'] = [[list(node), *entries] for node, entries in edges.items()]
+data['edge'] = [list(node) + [*entries] for node, entries in edges.items()]
 
 # index corrections
 print('Correcting indices')
@@ -118,8 +119,8 @@ for tetra in data['tetra']:
 	tetra = list(map(lambda x: x+1, tetra))
 
 for edge in data['edge']:
-	edge[0] = list(map(lambda x: x+1, edge[0]))
-	edge[1:] = list(map(lambda x: x+1 if x >= 0 else x, edge[1:]))
+	edge[0:2] = list(map(lambda x: x+1, edge[0:2]))
+	edge[2:4] = list(map(lambda x: x+1 if x >= 0 else x, edge[2:4]))
 
 meshOut = {
 	'metaData': {
@@ -144,12 +145,10 @@ if output_name == '':
 	output_name = filename.split('.')[0] + '.json'
 
 with open(output_name, 'w') as file:
-	if format == 'pretty':
+	if pretty:
 		json.dump(meshOut, file, indent=4)
 	else:
 		json.dump(meshOut, file)
 
 print('Mesh converted to ' + output_name + ' successfully')
-
-
 
