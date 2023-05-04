@@ -10,9 +10,11 @@ ifeq ($(OS),Windows_NT)
 	SANITIZER := $(SANITIZER)/$(EXECUTABLE)
 	RELEASE := $(RELEASE)/$(EXECUTABLE)
 	MAKE_COMMAND := nmake /F
+	REMOVE_COMMAND := del /s
 else
 	UNAME_S := $(shell uname -s)
 	MAKE_COMMAND := make -f
+	REMOVE_COMMAND := rm -rf
 	ifeq ($(UNAME_S),Linux)
 		DEBUG := $(DEBUG)/$(EXECUTABLE)
 		RELEASE := $(RELEASE)/$(EXECUTABLE)
@@ -49,7 +51,7 @@ $(RELEASE): ./src ./src-qml ./.qmake-release
 	$(MAKE_COMMAND) .qmake-release
 
 sanitizer: ./src ./src-qml ./.qmake-saint-debug
-	make -f .qmake-saint-debug
+	$(MAKE_COMMAND) -f .qmake-saint-debug
 
 clean:
-	rm -rf ./.qmake-debug ./.qmake-release ./target/ ./..qmake.stash ./.cache
+	$(REMOVE_COMMAND) ./.qmake-debug ./.qmake-release ./target/ ./..qmake.stash ./.cache
