@@ -22,7 +22,6 @@ void Reader::readInput() {//{{{
 			throw std::invalid_argument("Initial condition must be greater than 0");
 
 	axisymmetric = root->findChild<QObject*>("axisymmetric")->property("checked").toBool();
-	resume = root->findChild<QObject*>("resume")->property("checked").toBool();
 
 	cfl = root->findChild<QObject*>("cfl")->property("text").toDouble();
 	if (cfl < 0)
@@ -117,16 +116,16 @@ void readMeshData(QTextStream &in) {
 		y[i] = list[1].toDouble();
 	}
 
-	edgeData.fill(vector<int>(numEdges));
+	edgeData = vector<array<int, 4>>(numEdges);
 	for (uint i = 0; i < numEdges; ++i) {
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 4)
 			throw std::invalid_argument("Invalid edge connectivity");
 
-		edgeData[0][i] = list[0].toInt();
-		edgeData[1][i] = list[1].toInt();
-		edgeData[2][i] = list[2].toInt();
-		edgeData[3][i] = list[3].toInt();
+		edgeData[i][0] = list[0].toInt();
+		edgeData[i][1] = list[1].toInt();
+		edgeData[i][2] = list[2].toInt();
+		edgeData[i][3] = list[3].toInt();
 	}
 }
 
@@ -201,13 +200,7 @@ void readMesh(QString &filepath) {
 
 	try {
 		auto &mesh = json["mesh"];
-		edgeData.fill(vector<int>(numEdges));
-		for (uint i = 0; i < numEdges; ++i) {
-			edgeData[0][i] = mesh["edges"][i][0][0];
-			edgeData[1][i] = mesh["edges"][i][0][1];
-			edgeData[2][i] = mesh["edges"][i][1];
-			edgeData[3][i] = mesh["edges"][i][2];
-		}
+		edgeData = edgeData = mesh["edges"];
 	} catch (...) {
 		throw std::invalid_argument("Unable to read edge connectivity from Json file. Missing edges field or wrong format?");
 		return;

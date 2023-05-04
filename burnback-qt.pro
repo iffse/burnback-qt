@@ -26,9 +26,24 @@ UI_DIR = $$DESTDIR/ui
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
-HEADERS += src/headers/*.h
-SOURCES += src/*.cpp
-RESOURCES += src-qml/qml.qrc
+HEADERS += \
+	src/headers/globals.h \
+	src/headers/operations.h \
+	src/headers/coeficcientMatrix.h \
+	src/headers/iosystem.h \
+	src/headers/interface.h \
+	src/headers/iterations.h \
+	src/headers/plotData.h
+SOURCES += \
+	src/main.cpp \
+	src/operations.cpp \
+	src/coeficcientMatrix.cpp \
+	src/iosystem.cpp \
+	src/interface.cpp \
+	src/iterations.cpp \
+	src/plotData.cpp
+RESOURCES += \
+	src-qml/qml.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
