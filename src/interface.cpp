@@ -45,8 +45,7 @@ void Actions::appendOutput(QString text) {
 	output->setProperty("text", setText);
 }
 
-void Actions::run()
-{
+void Actions::run() {
 	// clear data
 	numNodes = 0;
 	numTriangles = 0;
@@ -256,4 +255,30 @@ void Actions::worker() {
 	emit newOutput("Error: " + QString::number(100 * abs(areag - areap) / areag) + "%");
 
 	afterWorker();
+}
+
+void Actions::exportData(QString filepath, QString origin) {
+#ifdef _WIN32
+	const QString substring = "file:///";
+#else
+	const QString substring = "file://";
+#endif
+
+	auto cleanSubstring = [&substring](QString &str) {
+		if (str.startsWith(substring)) {
+			str.remove(0, substring.length());
+		}
+	};
+
+	cleanSubstring(filepath);
+	cleanSubstring(origin);
+
+	appendOutput("Exporting data to " + filepath);
+	try {
+		Writer::Json::writeData(filepath, origin);
+	} catch (const std::exception &e) {
+		appendOutput("Error while exporting data: " + QString(e.what()));
+	} catch (...) {
+		appendOutput("Error while exporting data");
+	}
 }

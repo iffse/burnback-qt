@@ -13,5 +13,8 @@
 		<file>Output.qml</file>
 		<file>Footer.qml</file>
 		<file>LabelInput.qml</file>
+		<file>BoundaryPanel.qml</file>
+		<file>BoundaryCondition.qml</file>
+		<file>RecessionPanel.qml</file>
 	</qresource>
 </RCC>

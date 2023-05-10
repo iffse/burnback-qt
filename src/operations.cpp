@@ -384,12 +384,6 @@ void boundaryFlux() {
 	}
 }
 
-void setdt() {
-	// for (uint node = 0; node < numNodes; ++node)
-		// dt[node] = 1.570796 * cfl * height[node] / eps[node];
-		// dt[node] = cfl * height[node];
-}
-
 void eulerExplicit() {
 	// const auto &dtMin = *min_element(dt.begin(), dt.end());
 	const auto dtMin = cfl * *min_element(height.begin(), height.end());

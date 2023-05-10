@@ -20,7 +20,8 @@ signals:
 
 public slots:
 	void run();
-	void appendOutput(QString output);
+	void appendOutput(QString text);
 	void worker();
 	void afterWorker();
+	void exportData(QString filepath, QString origin);
 };
