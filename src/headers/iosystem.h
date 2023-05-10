@@ -9,12 +9,12 @@ void readMesh(QTextStream &in);
 }
 
 namespace Json {
-void readMesh(QString &filepath);;
+void readMesh(QString &filepath);
 }
 }
 
 namespace Writer {
-	void writeiData();
-	void writerData();
-	void outResult();
+namespace Json {
+void writeData(QString &filepath, QString &origin);
+}
 }

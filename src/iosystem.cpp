@@ -241,6 +241,33 @@ void readMesh(QString &filepath) {
 	}
 }
 }
+
+namespace Writer::Json {
+void writeData(QString &filepath, QString &origin) {
+	fstream originalFile(origin.toStdString());
+	json jsonFile;
+	try {
+		jsonFile = json::parse(originalFile);
+	} catch (...) {
+		throw std::invalid_argument("Unable to parse Json file. Invalid JSON file?");
+		return;
+	}
+
+	json results;
+	results["uVertex"] = uVertex;
+	results["duVertex"] = duVertex;
+	results["fluxes"] = flux;
+	results["burningArea"] = burningArea;
+	results["timeStep"] = cfl * *min_element(height.begin(), height.end());
+	results["timeTotal"] = timeTotal;
+
+	jsonFile["burnbackResults"] = results;
+
+	// save file
+	ofstream file(filepath.toStdString());
+	file << setw(4) << jsonFile << endl;
+}
+}
 //}}}
 
 

@@ -8,7 +8,6 @@ void setMetric();
 void setduVarriable();
 void setFlux();
 void boundaryFlux();
-void setdt();
 
 void eulerExplicit();
 

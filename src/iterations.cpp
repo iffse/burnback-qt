@@ -13,7 +13,6 @@ void subIteration() {
 	setduVarriable();
 	setFlux();
 	boundaryFlux();
-	setdt();
 	eulerExplicit();
 }
 

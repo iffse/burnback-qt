@@ -15,7 +15,7 @@ Item{
 	}
 
 	StackLayout {
-		id: barCotent
+		id: barContent
 		width: parent.width
 		height: parent.height - bar.height
 		currentIndex: bar.currentIndex
