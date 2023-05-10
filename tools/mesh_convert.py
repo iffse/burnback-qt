@@ -1,3 +1,4 @@
+import numpy as np
 import sys
 import json
 import meshio
@@ -81,7 +82,8 @@ for field in mesh.field_data:
 		case 'outlet':
 			conditions['boundary'].append([condition_code, 'outlet'])
 		case 'symmetry':
-			conditions['boundary'].append([condition_code, 'symmetry', [float(condition[1]), float(condition[2])]])
+			angle = np.deg2rad(float(condition[1]))
+			conditions['boundary'].append([condition_code, 'symmetry', [np.sin(angle), np.cos(angle)]])
 		case 'recession':
 			conditions['recession'].append([condition_code, 'recession', float(condition[1])])
 
@@ -142,7 +144,8 @@ meshOut = {
 }
 
 if output_name == '':
-	output_name = filename.split('.')[0] + '.json'
+	output_name = filename[:filename.rfind('.')] + '.json'
+
 
 with open(output_name, 'w') as file:
 	if pretty:
