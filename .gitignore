@@ -6,3 +6,7 @@ compile_commands.json
 release
 debug
 docs/doxygen
+
+*.dat
+*.json
+*.msh
