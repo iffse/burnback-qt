@@ -106,6 +106,8 @@ void readMeshData(QTextStream &in) {
 	numNodes = meshData[1];
 	numTriangles = meshData[2];
 	numEdges = meshData[3];
+	recession = vector<double>(numNodes, 1);
+
 
 	x = vector<double>(numNodes);
 	y = vector<double>(numNodes);
