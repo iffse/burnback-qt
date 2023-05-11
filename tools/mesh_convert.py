@@ -99,11 +99,12 @@ for cell in mesh.cell_data_dict['gmsh:physical']:
 		if (condition in recessions) and cell == 'triangle':
 			triangle[condition] = triangle.get(condition, []) + [data['triangle'][entry]]
 
-conditions['recession'] = [0] * len(data['point'])
-for condition in triangle:
-	nodes = list(set([node for triangle in triangle[condition] for node in triangle]))
-	for node in nodes:
-		conditions['recession'][node] = recessions[condition]
+if recessions != []:
+	conditions['recession'] = [0] * len(data['point'])
+	for condition in triangle:
+		nodes = list(set([node for triangle in triangle[condition] for node in triangle]))
+		for node in nodes:
+			conditions['recession'][node] = recessions[condition]
 
 print('Creating edge connectivity')
 for entry, triangle in enumerate(data['triangle']):
@@ -112,11 +113,6 @@ for entry, triangle in enumerate(data['triangle']):
 		edges[node] = edges.get(node, []) + [entry]
 
 data['edge'] = [list(node) + [*entries] for node, entries in edges.items()]
-
-print('Adding recession conditions...')
-
-
-
 
 # index corrections
 print('Correcting indices')

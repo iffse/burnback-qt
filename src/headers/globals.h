@@ -55,6 +55,7 @@ inline std::array<std::vector<double>, 2> duVariable; // gradient in the triangl
 inline std::array<std::vector<double>, 2> duVertex; // gradient in the vertex
 inline std::array<std::vector<double>, 2> maxDuEdge;
 inline std::array<std::vector<double>, 2> flux;
+inline std::vector<double> recession;
 
 inline std::vector<double> burningArea;
 inline std::vector<double> burningWay;
