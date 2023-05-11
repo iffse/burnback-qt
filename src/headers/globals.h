@@ -3,6 +3,7 @@
 #include <QQmlApplicationEngine>
 #include <array>
 #include <vector>
+#include <map>
 
 inline QObject* root;
 
@@ -19,7 +20,7 @@ inline std::vector<int> meshData;
 inline std::vector<double> x;
 inline std::vector<double> y;
 inline std::vector<double> connectivityMatrixEdges;
-inline std::array<std::vector<double>, 4> uBoundaryData;
+inline std::map<int, std::array<double, 2>> uBoundaryData;
 inline double uInit;
 
 inline uint numNodes;
@@ -36,7 +37,7 @@ inline std::array<std::vector<int>, 2> connectivityMatrixTriangleEdge;
 inline std::array<std::vector<int>, 2> connectivityMatrixNodeBoundary;
 inline std::array<std::vector<int>, 2> connectivityMatrixVertexEdge;
 
-inline std::vector<int> connectivityMatrixBoundaryConditions;
+inline std::map<int, int> connectivityMatrixBoundaryConditions;
 
 inline std::array<std::vector<double>, 8> alpha;
 // angle in each node of a edge

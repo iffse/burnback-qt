@@ -65,15 +65,17 @@ for entry in mesh.cells_dict:
 	data[entry]= mesh.cells_dict[entry].tolist()
 
 
-for node in mesh.points:
-	data['point'].append([node.tolist(), 0])
+data['point'] = mesh.points.tolist()
 
 print('Reading field conditions...')
 boundaries = []
+recessions = {}
 for field in mesh.field_data:
 	condition = field.split()
 	if condition[0] in ['inlet', 'outlet', 'symmetry']:
 		boundaries.append(mesh.field_data[field][0])
+	elif condition[0] == 'recession':
+		recessions[mesh.field_data[field][0]] = float(condition[1])
 
 	condition_code = mesh.field_data[field][0].item()
 	match condition[0]:
@@ -83,34 +85,38 @@ for field in mesh.field_data:
 			conditions['boundary'].append([condition_code, 'outlet'])
 		case 'symmetry':
 			angle = np.deg2rad(float(condition[1]))
-			conditions['boundary'].append([condition_code, 'symmetry', [np.sin(angle), np.cos(angle)]])
-		case 'recession':
-			conditions['recession'].append([condition_code, 'recession', float(condition[1])])
+			conditions['boundary'].append([condition_code, 'symmetry', [np.cos(angle), np.sin(angle)]])
 
-print('Assining conditions to boundaries...')
+print('Assining conditions to boundaries and recession nodes...')
 edges = {}
+triangle = {}
 for cell in mesh.cell_data_dict['gmsh:physical']:
 	for entry, condition in enumerate(mesh.cell_data_dict['gmsh:physical'][cell].tolist()):
-
 		if (condition in boundaries) and cell == 'line':
 			data['line'][entry].sort()
 			edges[tuple(data['line'][entry])] = edges.get(tuple(data['line'][entry]), []) + [-condition]
-			continue
 
-		for rec in conditions['recession']:
-			if rec[0] == condition and cell == 'triangle':
-				for node in data['triangle'][entry]:
-					if data['point'][node][1] == 0:
-						data['point'][node][1] = condition
-				continue
+		if (condition in recessions) and cell == 'triangle':
+			triangle[condition] = triangle.get(condition, []) + [data['triangle'][entry]]
+
+conditions['recession'] = [0] * len(data['point'])
+for condition in triangle:
+	nodes = list(set([node for triangle in triangle[condition] for node in triangle]))
+	for node in nodes:
+		conditions['recession'][node] = recessions[condition]
 
 print('Creating edge connectivity')
 for entry, triangle in enumerate(data['triangle']):
-	nodes = [tuple(sorted([triangle[i], triangle[(i + 1) % 3]])) for i in range(3)]
-	for node in nodes:
+	triangle = [tuple(sorted([triangle[i], triangle[(i + 1) % 3]])) for i in range(3)]
+	for node in triangle:
 		edges[node] = edges.get(node, []) + [entry]
 
 data['edge'] = [list(node) + [*entries] for node, entries in edges.items()]
+
+print('Adding recession conditions...')
+
+
+
 
 # index corrections
 print('Correcting indices')

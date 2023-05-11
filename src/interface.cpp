@@ -11,6 +11,10 @@
 #include <src/headers/iterations.h>
 #include <src/headers/plotData.h>
 
+#ifdef DEBUG
+#include <fenv.h>
+#endif
+
 using namespace std;
 
 Actions::Actions(QObject *parent) : QObject(parent) {
@@ -53,6 +57,7 @@ void Actions::run() {
 	numTriangleEdge = 0;
 	meshData.clear();
 	connectivityMatrixBoundaryConditions.clear();
+	uBoundaryData.clear();
 
 	appendOutput("--> Reading inputs");
 	try {
@@ -138,22 +143,22 @@ void Actions::afterWorker() {
 
 	auto canvasHeight = uint(1.5 * (ymax - ymin) * scale);
 	auto canvasWidth = uint(1.5 * (xmax - xmin) * scale);
-	auto shiftX = uint(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
-	auto shiftY = uint(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
+    auto shiftX = int(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
+    auto shiftY = int(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
 
-	setCanvasSize(canvasWidth, canvasHeight);
+    emit setCanvasSize(canvasWidth, canvasHeight);
 
 	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
 	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
 
-	graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
+    emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
 
 	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
 	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
 
-	clearCanvas();
+    emit clearCanvas();
 
-	paintCanvas(plotData::contourData(shiftX, shiftY, scale), "#000000");
+    emit paintCanvas(plotData::contourData(shiftX, shiftY, scale), "#000000");
 
 	auto step = (uVertexMax - uVertexMin)/numLines;
 
@@ -173,13 +178,16 @@ void Actions::afterWorker() {
 		};
 
 		// paintCanvas(plotData::isocolourData(value), color);
-		paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
+        emit paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
 		value += step;
 
 	}
 }
 
 void Actions::worker() {
+	#ifdef DEBUG
+	std::feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+	#endif
 	emit newOutput("--> Creating connectivity matrix");
 	ConnectivityMatrix::NodeTriangles();
 	ConnectivityMatrix::TriangleEdge();
@@ -272,6 +280,10 @@ void Actions::exportData(QString filepath, QString origin) {
 
 	cleanSubstring(filepath);
 	cleanSubstring(origin);
+
+	// add .json if filepath doesn't have it
+	if (!filepath.endsWith(".json"))
+		filepath += ".json";
 
 	appendOutput("Exporting data to " + filepath);
 	try {

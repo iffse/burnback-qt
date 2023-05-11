@@ -55,34 +55,36 @@ void readBoundaryConditions(QTextStream &in) {
 	in.readLine();
 	uint numBoundaries = in.readLine().simplified().toInt();
 
-	uBoundaryData.fill(vector<double>(numBoundaries));
-	connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
-
+	// uBoundaryData.fill(vector<double>(numBoundaries));
 	for (uint i = 0; i < numBoundaries; ++i) {
 		in.readLine();
 		auto list = in.readLine().simplified().split(" ");
 		if (list.size() != 2)
 			throw std::invalid_argument("Invalid boundary conditions");
 
-		auto boundary = list[0].toInt() - 1; // -1 because the nodes are numbered from 1
+		auto boundary = list[0].toInt();
 		auto boundaryCode = list[1].toInt();
-		connectivityMatrixBoundaryConditions[boundary] = boundaryCode;
+		connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundary, boundaryCode));
 
 		switch (boundaryCode) {
 			case 4: case 3: { // Symmetry boundary
 				auto list = in.readLine().simplified().split(" ");
 				if (list.size() != 2)
 					throw std::invalid_argument("Invalid symmetry boundary conditions");
-
-				uBoundaryData[0][boundary] = list[0].toDouble();
-				uBoundaryData[1][boundary] = list[1].toDouble();
+				uBoundaryData.insert(pair<int, array<double, 2>>(boundary, {list[0].toDouble(), list[1].toDouble()}));
+				// uBoundaryData[boundary][0] = list[0].toDouble();
+				// uBoundaryData[boundary][1] = list[0].toDouble();
+				// uBoundaryData[0][boundary] = list[0].toDouble();
+				// uBoundaryData[1][boundary] = list[1].toDouble();
 				break;
 			}
 			case 6: case 1: { // Source boundary
-				uBoundaryData[0][boundary] = in.readLine().simplified().toDouble();
+				// uBoundaryData[boundary][0] = in.readLine().simplified().toDouble();
+				uBoundaryData.insert(pair<int, array<double, 2>>(boundary, {in.readLine().simplified().toDouble(), 0}));
 				break;
 			}
 			case 7: case 2: { // free boundary
+				uBoundaryData.insert(pair<int, array<double, 2>>(boundary, {0, 0}));
 				in.readLine();
 				break;
 			}
@@ -190,8 +192,8 @@ void readMesh(QString &filepath) {
 		x = vector<double>(numNodes);
 		y = vector<double>(numNodes);
 		for (uint i = 0; i < numNodes; ++i) {
-			x[i] = mesh["nodes"][i][0][0];
-			y[i] = mesh["nodes"][i][0][1];
+			x[i] = mesh["nodes"][i][0];
+			y[i] = mesh["nodes"][i][1];
 		}
 	} catch (...) {
 		throw std::invalid_argument("Unable to read node coordinates from Json file. Missing nodes field or wrong format?");
@@ -209,27 +211,27 @@ void readMesh(QString &filepath) {
 	try {
 		auto &conditions = json["conditions"];
 		uint numBoundaries = conditions["boundary"].size();
-		uBoundaryData.fill(vector<double>(numBoundaries));
-		connectivityMatrixBoundaryConditions = vector<int>(numBoundaries);
 
 		for (uint boundary = 0; boundary < numBoundaries; ++boundary) {
 			auto &condition = conditions["boundary"][boundary];
-			auto &boundaryCode = condition[0];
+			auto &boundaryTag = condition[0];
 			auto &boundaryType = condition[1];
-
-			connectivityMatrixBoundaryConditions[boundary] = boundaryCode;
 
 			const QStringList boundaryTypes = {"inlet", "outlet", "symmetry"};
 			switch (boundaryTypes.indexOf(QString::fromStdString(boundaryType))) {
-
 				case 0: // inlet
-					uBoundaryData[0][boundary] = condition[2];
+					uBoundaryData.insert(pair<int, array<double, 2>>(boundaryTag, {condition[2], 0}));
+					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 1));
+					// uBoundaryData[boundary][0] = condition[2];
 					break;
 				case 1: // outlet
+					uBoundaryData.insert(pair<int, array<double, 2>>(boundaryTag, {0, 0}));
+					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 2));
 					break;
 				case 2: // symmetry
-					uBoundaryData[0][boundary] = condition[2][0];
-					uBoundaryData[1][boundary] = condition[2][1];
+					uBoundaryData.insert(pair<int, array<double, 2>>(boundaryTag, {condition[2][0], condition[2][1]}));
+					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 3));
+					qDebug() << uBoundaryData[boundaryTag][0] << uBoundaryData[boundaryTag][1];
 					break;
 				default:
 					break;
@@ -263,7 +265,6 @@ void writeData(QString &filepath, QString &origin) {
 
 	jsonFile["burnbackResults"] = results;
 
-	// save file
 	ofstream file(filepath.toStdString());
 	file << setw(4) << jsonFile << endl;
 }

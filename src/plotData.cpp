@@ -62,7 +62,7 @@ double lerp(double x1, double x2, double t) {
 }
 #endif
 
-vector<double> isocolourData(double value, uint shiftX, uint shiftY, double scale) {
+vector<double> isocolourData(double value, int shiftX, int shiftY, double scale) {
 	vector<double> data;
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
@@ -127,7 +127,7 @@ vector<double> isocolourData(double value, uint shiftX, uint shiftY, double scal
 	return data;
 }
 
-vector<double> contourData(uint shiftX, uint shiftY, double scale) {
+vector<double> contourData(int shiftX, int shiftY, double scale) {
 
 	vector<double> data = vector<double>(4 * numBoundaryEdge);
 
@@ -147,7 +147,6 @@ vector<double> contourData(uint shiftX, uint shiftY, double scale) {
 	}
 
 	return data;
-
 }
 
 QVariant burningAreaData() {
