@@ -208,8 +208,8 @@ void readMesh(QString &filepath) {
 		return;
 	}
 
+	auto &conditions = json["conditions"];
 	try {
-		auto &conditions = json["conditions"];
 		uint numBoundaries = conditions["boundary"].size();
 
 		for (uint boundary = 0; boundary < numBoundaries; ++boundary) {
@@ -231,7 +231,6 @@ void readMesh(QString &filepath) {
 				case 2: // symmetry
 					uBoundaryData.insert(pair<int, array<double, 2>>(boundaryTag, {condition[2][0], condition[2][1]}));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 3));
-					qDebug() << uBoundaryData[boundaryTag][0] << uBoundaryData[boundaryTag][1];
 					break;
 				default:
 					break;
@@ -239,6 +238,16 @@ void readMesh(QString &filepath) {
 		}
 	} catch(...) {
 		throw std::invalid_argument("Unable to read boundary conditions from Json file. Missing boundary field or wrong format?");
+		return;
+	}
+	try {
+		auto &recessionCondition = conditions["recession"];
+		if (recessionCondition.size() == 0)
+			recession = vector<double>(numNodes, 1);
+		else
+			recession = recessionCondition.get<vector<double>>();
+	} catch(...) {
+		throw std::invalid_argument("Unable to read recession from Json file. Missing recession field or wrong format?");
 		return;
 	}
 }
@@ -270,5 +279,4 @@ void writeData(QString &filepath, QString &origin) {
 }
 }
 //}}}
-
 

@@ -228,6 +228,8 @@ void setMetric() {
 void setduVarriable() {
 	if (diffusiveMethod == ZhangShu)
 		maxDuEdge.fill(vector<double>(numNodes));
+	else
+		maxDuEdge.fill(vector<double>(0));
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
 
@@ -264,7 +266,7 @@ void setduVarriable() {
 
 			if (abs(ux/uMod) > maxDuEdge[0][node])
 				maxDuEdge[0][node] = abs(ux/uMod);
-			if (uy/uMod > maxDuEdge[1][node])
+			if (abs(uy/uMod) > maxDuEdge[1][node])
 				maxDuEdge[1][node] = abs(uy/uMod);
 		}
 
@@ -351,7 +353,7 @@ void boundaryFlux() {
 		switch (condition) {
 			// not a boundary
 			case none: {
-				flux[0][node] = 1 - abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
 			break;
 			}
 			// sourceBoundaries
@@ -362,7 +364,7 @@ void boundaryFlux() {
 			}
 			// freeBoundaries
 			case outlet: case free2: {
-				flux[0][node] = 1 - abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
 				flux[1][node] *= 2;
 				break;
 			}
@@ -373,7 +375,7 @@ void boundaryFlux() {
 
 				duVertex[0][node] = duVer * uBoundaryData[boundary][0] / ubNorm;
 				duVertex[1][node] = duVer * uBoundaryData[boundary][1] / ubNorm;
-				flux[0][node] = 1 - abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
 				flux[1][node] *= 2;
 				break;
 			}
@@ -396,7 +398,7 @@ void eulerExplicit() {
 				break;
 			}
 			case ZhangShu: {
-				auto alf = max(maxDuEdge[0][node], maxDuEdge[1][node]);
+				auto alf = recession[node] * max(maxDuEdge[0][node], maxDuEdge[1][node]);
 				diffWeight *= alf;
 				break;
 			}
