@@ -99,8 +99,8 @@ for cell in mesh.cell_data_dict['gmsh:physical']:
 		if (condition in recessions) and cell == 'triangle':
 			triangle[condition] = triangle.get(condition, []) + [data['triangle'][entry]]
 
-if recessions != []:
-	conditions['recession'] = [0] * len(data['point'])
+if recessions != {}:
+	conditions['recession'] = [1] * len(data['point'])
 	for condition in triangle:
 		nodes = list(set([node for triangle in triangle[condition] for node in triangle]))
 		for node in nodes:
