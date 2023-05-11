@@ -52,10 +52,10 @@ void setBoundaryConditions() {
 
 		if (triangle1 < 0) {
 			boundary = - triangle1;
-			condition = connectivityMatrixBoundaryConditions[boundary - 1];
+			condition = connectivityMatrixBoundaryConditions[boundary];
 		} else if (triangle2 < 0) {
 			boundary = - triangle2;
-			condition = connectivityMatrixBoundaryConditions[boundary - 1];
+			condition = connectivityMatrixBoundaryConditions[boundary];
 		}
 
 		if (condition != 0) {
@@ -343,7 +343,7 @@ void setFlux() {
 void boundaryFlux() {
 	for (uint node = 0; node < numNodes; ++node) {
 		const auto &condition = nodeBoundaryConditions[0][node];
-		const auto boundary = nodeBoundaryConditions[1][node] - 1;
+		const auto boundary = nodeBoundaryConditions[1][node];
 
 		duVertex[0][node] /= sector[node];
 		duVertex[1][node] /= sector[node];
@@ -368,11 +368,11 @@ void boundaryFlux() {
 			}
 			// symmetryBoundaries
 			case symmetry: case outletSymmetry: case symmetry2: {
-				auto ubNorm = abs(complex<double>(uBoundaryData[0][boundary], uBoundaryData[1][boundary]));
-				auto duVer = duVertex[0][node] * uBoundaryData[0][boundary] + duVertex[1][node] * uBoundaryData[1][boundary];
+				auto ubNorm = abs(complex<double>(uBoundaryData[boundary][0], uBoundaryData[boundary][1]));
+				auto duVer = duVertex[0][node] * uBoundaryData[boundary][0] + duVertex[1][node] * uBoundaryData[boundary][1];
 
-				duVertex[0][node] = duVer * uBoundaryData[0][boundary] / ubNorm;
-				duVertex[1][node] = duVer * uBoundaryData[1][boundary] / ubNorm;
+				duVertex[0][node] = duVer * uBoundaryData[boundary][0] / ubNorm;
+				duVertex[1][node] = duVer * uBoundaryData[boundary][1] / ubNorm;
 				flux[0][node] = 1 - abs(complex<double>(duVertex[0][node], duVertex[1][node]));
 				flux[1][node] *= 2;
 				break;
