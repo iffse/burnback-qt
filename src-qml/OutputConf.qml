@@ -20,7 +20,7 @@ ScrollView {
 					id: diffusiveMethod
 					objectName: "diffusiveMethod"
 					width: parent.width
-					currentIndex: 0
+					currentIndex: 2
 					model: [
 						"Abgrall",
 						"Tizón",

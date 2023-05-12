@@ -62,20 +62,31 @@ ApplicationWindow {
 		GroupBox {
 			title: qsTr("Options")
 			Layout.fillHeight: true
-			Button {
-				text: qsTr("Load")
-				onClicked: {
-					fileDialogRecession.open();
-				}
-			}
 
-			FileDialog {
-				id: fileDialogRecession
-				objectName: "fileDialogRecession"
-				selectExisting: true
-				selectFolder: false
-				folder: ""
-				nameFilters: ["text files (*.txt)", "All files (*)"]
+			Column {
+				Button {
+					text: qsTr("Load")
+					onClicked: {
+						fileDialogRecession.open();
+					}
+				}
+
+				FileDialog {
+					id: fileDialogRecession
+					objectName: "fileDialogRecession"
+					selectExisting: true
+					selectFolder: false
+					folder: ""
+					nameFilters: ["text files (*.txt)", "All files (*)"]
+				}
+
+				Button {
+					text: qsTr("Save")
+				}
+				CheckBox {
+					text: qsTr("Save to file")
+				}
+
 			}
 		}
 	}
