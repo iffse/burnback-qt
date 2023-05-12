@@ -16,5 +16,6 @@ void readMesh(QString &filepath);
 namespace Writer {
 namespace Json {
 void writeData(QString &filepath, QString &origin, bool &pretty);
+void updateBoundaries(QString &filepath, bool &pretty);
 }
 }

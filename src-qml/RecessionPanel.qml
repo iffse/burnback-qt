@@ -88,9 +88,19 @@ ApplicationWindow {
 
 				Button {
 					text: qsTr("Save")
+					onClicked: {
+						actions.updateRecession(textArea, saveToFile.checked, savePretty.checked);
+					}
 				}
 				CheckBox {
+					id: saveToFile
 					text: qsTr("Save to file")
+				}
+
+				CheckBox {
+					id: savePretty
+					text: qsTr("Save pretty")
+					visible: saveToFile.checked
 				}
 
 			}
