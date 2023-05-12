@@ -11,12 +11,20 @@ ApplicationWindow {
 	title: qsTr("Boundary Panel")
 
 	Component.onCompleted: {
-		for (var i = 1; i < 20; i++) {
+		var boundaries = actions.getBoundaries();
+		for (var i = 0; i < boundaries.length; i+=4) {
 			var button = buttonDelegate.createObject(grid);
-			button.text = i;
+			button.text = boundaries[i];
+			button.objectName = "boundaryButton" + boundaries[i];
 			var comboBox = comboBoxDelegate.createObject(grid);
+			comboBox.currentIndex = boundaries[i+1];
+			comboBox.objectName = "boundaryComboBox" + boundaries[i];
 			var value = valueDelegate.createObject(grid);
+			value.text = boundaries[i+2];
+			value.objectName = "boundaryValue" + boundaries[i];
 			var description = descriptionDelegate.createObject(grid);
+			description.text = boundaries[i+3];
+			description.objectName = "boundaryDescription" + boundaries[i];
 		}
 	}
 
@@ -48,7 +56,7 @@ ApplicationWindow {
 					Component {
 						id: comboBoxDelegate
 						ComboBox {
-							model: ["---Condition---", "Inlet", "Outlet", "Symmetry"]
+							model: ["Inlet", "Outlet", "Symmetry"]
 							Layout.preferredWidth: 150
 						}
 					}
@@ -86,6 +94,12 @@ ApplicationWindow {
 		rightPadding: 10
 		spacing: 10
 
+		Button {
+			text: qsTr("Cancel")
+			onClicked: {
+				boundaryPanel.close();
+			}
+		}
 		Button {
 			text: qsTr("Save")
 		}

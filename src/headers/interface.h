@@ -29,4 +29,5 @@ public slots:
 	void worker();
 	void afterWorker();
 	void exportData(QString filepath, bool pretty);
+	std::vector<QString> getBoundaries();
 };

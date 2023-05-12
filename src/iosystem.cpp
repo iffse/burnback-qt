@@ -64,24 +64,26 @@ void readBoundaryConditions(QTextStream &in) {
 
 		auto boundary = list[0].toInt();
 		auto boundaryCode = list[1].toInt();
-		connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundary, boundaryCode));
 
 		switch (boundaryCode) {
+			case 6: case 1: { // Source boundary
+				uBoundaryData.insert(pair<int, double>(boundary, in.readLine().simplified().toDouble()));
+				connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundary, 1));
+				break;
+			}
+			case 7: case 2: { // free boundary
+				connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundary, 2));
+				uBoundaryData.insert(pair<int, double>(boundary, 0));
+				in.readLine();
+				break;
+			}
 			case 4: case 3: { // Symmetry boundary
 				auto list = in.readLine().simplified().split(" ");
 				if (list.size() != 2)
 					throw std::invalid_argument("Invalid symmetry boundary conditions");
 				auto angle = atan(list[1].toDouble() / list[0].toDouble());
 				uBoundaryData.insert(pair<int, double>(boundary, angle));
-				break;
-			}
-			case 6: case 1: { // Source boundary
-				uBoundaryData.insert(pair<int, double>(boundary, in.readLine().simplified().toDouble()));
-				break;
-			}
-			case 7: case 2: { // free boundary
-				uBoundaryData.insert(pair<int, double>(boundary, 0));
-				in.readLine();
+				connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundary, 3));
 				break;
 			}
 
@@ -214,7 +216,12 @@ void readMesh(QString &filepath) {
 			auto &condition = conditions["boundary"][boundary];
 			auto &boundaryTag = condition["tag"];
 			auto &boundaryType = condition["type"];
-
+			try {
+				auto &boundaryDescription = condition["description"];
+				boundaryDescriptions.insert(pair<int, QString>(boundaryTag, QString::fromStdString(boundaryDescription)));
+			} catch (...) {
+				boundaryDescriptions.insert(pair<int, QString>(boundaryTag, QString::fromStdString("")));
+			}
 			const QStringList boundaryTypes = {"inlet", "outlet", "symmetry"};
 			switch (boundaryTypes.indexOf(QString::fromStdString(boundaryType))) {
 				case 0: // inlet

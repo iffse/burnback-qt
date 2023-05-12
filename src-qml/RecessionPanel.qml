@@ -65,6 +65,12 @@ ApplicationWindow {
 
 			Column {
 				Button {
+					text: qsTr("Cancel")
+					onClicked: {
+						recessionPanel.close();
+					}
+				}
+				Button {
 					text: qsTr("Load")
 					onClicked: {
 						fileDialogRecession.open();
