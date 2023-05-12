@@ -299,6 +299,7 @@ void updateBoundaries(QString &filepath, bool &pretty) {
 	for (auto &boundary : uBoundaryData) {
 		auto &boundaryTag = boundary.first;
 		auto boundaryValue = boundary.second;
+		auto boundaryType = "";
 		switch (connectivityMatrixBoundaryConditions[boundaryTag]) {
 			case 1:
 				boundaryType = "inlet";
