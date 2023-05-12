@@ -29,7 +29,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 HEADERS += \
 	src/headers/globals.h \
 	src/headers/operations.h \
-	src/headers/coeficcientMatrix.h \
+	src/headers/connectivityMatrix.h \
 	src/headers/iosystem.h \
 	src/headers/interface.h \
 	src/headers/iterations.h \
@@ -37,7 +37,7 @@ HEADERS += \
 SOURCES += \
 	src/main.cpp \
 	src/operations.cpp \
-	src/coeficcientMatrix.cpp \
+	src/connectivityMatrix.cpp \
 	src/iosystem.cpp \
 	src/interface.cpp \
 	src/iterations.cpp \

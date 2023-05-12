@@ -6,7 +6,7 @@
 #include <src/headers/interface.h>
 #include "src/headers/iosystem.h"
 #include <src/headers/globals.h>
-#include <src/headers/coeficcientMatrix.h>
+#include <src/headers/connectivityMatrix.h>
 #include <src/headers/operations.h>
 #include <src/headers/iterations.h>
 #include <src/headers/plotData.h>
@@ -260,7 +260,7 @@ void Actions::worker() {
 	emit newOutput("--> Main loop ended");
 	emit newOutput("Area of the propellant: " + QString::number(areag));
 	emit newOutput("Propellant burnt: " + QString::number(areap));
-	emit newOutput("Error: " + QString::number(100 * abs(areag - areap) / areag) + "%");
+	emit newOutput("Error with respect to minimum distance function with recession speed 1: " + QString::number(100 * abs(areag - areap) / areag) + "%");
 
 	afterWorker();
 }
