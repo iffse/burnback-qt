@@ -28,7 +28,6 @@ ApplicationWindow {
 		}
 	}
 
-
 	contentData: RowLayout {
 		anchors.fill: parent
 		anchors.margins: 10
@@ -97,14 +96,30 @@ ApplicationWindow {
 		Button {
 			text: qsTr("Cancel")
 			onClicked: {
+				for (var i = 0; i < grid.children.length; i++) {
+					grid.children[i].destroy();
+				}
 				boundaryPanel.close();
 			}
 		}
 		Button {
 			text: qsTr("Save")
+			onClicked: {
+				actions.updateBoundaries(saveToFile.checked, savePretty.checked);
+				for (var i = 0; i < grid.children.length; i++) {
+					grid.children[i].destroy();
+				}
+				boundaryPanel.close();
+			}
 		}
 		CheckBox {
+			id: saveToFile
 			text: qsTr("Save to file")
+		}
+		CheckBox {
+			id: savePretty
+			text: qsTr("Save pretty")
+			visible: saveToFile.checked
 		}
 	}
 }

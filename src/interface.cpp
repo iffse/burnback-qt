@@ -354,12 +354,17 @@ vector<QString> Actions::getBoundaries() {
 		boundaries[index] = QString::number(key);
 		boundaries[index + 1] = QString::number(connectivityMatrixBoundaryConditions[key] - 1);
 		try {
-			if (boundaries[index + 1] == "0")
-				boundaries[index + 2] = QString::number(value);
-			else if (boundaries[index + 1] == "1")
-				boundaries[index + 2] = "";
-			else
-				boundaries[index + 2] = QString::number(value * 180 / M_PI);
+			switch (connectivityMatrixBoundaryConditions[key]){
+				case 1:
+					boundaries[index + 2] = QString::number(value);
+					break;
+				case 2:
+					boundaries[index + 2] = "";
+					break;
+				case 3:
+					boundaries[index + 2] = QString::number(value * 180 / M_PI);
+					break;
+			}
 		} catch (...) {
 			boundaries[index + 2] = "";
 		}
@@ -371,4 +376,46 @@ vector<QString> Actions::getBoundaries() {
 		index += 4;
 	}
 	return boundaries;
+}
+
+void Actions::updateBoundaries(bool saveToFile, bool pretty) {
+	for (const auto &[key, _]: uBoundaryData) {
+		auto type = root->findChild<QObject*>("boundaryComboBox" + QString::number(key))->property("currentIndex").toInt() + 1;
+		auto value = root->findChild<QObject*>("boundaryValue" + QString::number(key))->property("text").toDouble();
+		if (type == 3)
+			value *= M_PI / 180;
+		auto description = root->findChild<QObject*>("boundaryDescription" + QString::number(key))->property("text").toString();
+
+		boundaryDescriptions[key] = description;
+		uBoundaryData[key] = value;
+		connectivityMatrixBoundaryConditions[key] = type;
+	}
+
+	appendOutput("Boundaries updated");
+
+	if (saveToFile){
+#ifdef _WIN32
+		const QString substring = "file:///";
+#else
+		const QString substring = "file://";
+#endif
+
+		auto cleanSubstring = [&substring](QString &str) {
+			if (str.startsWith(substring)) {
+				str.remove(0, substring.length());
+			}
+		};
+
+		auto filepath = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
+		cleanSubstring(filepath);
+
+		try {
+			Writer::Json::updateBoundaries(filepath, pretty);
+			appendOutput("Updated to " + filepath);
+		} catch (const std::exception &e) {
+			appendOutput("Error while updating boundaries: " + QString(e.what()));
+		} catch (...) {
+			appendOutput("Error while updating boundaries");
+		}
+	}
 }

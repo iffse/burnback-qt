@@ -227,14 +227,13 @@ void readMesh(QString &filepath) {
 				case 0: // inlet
 					uBoundaryData.insert(pair<int, double>(boundaryTag, condition["value"]));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 1));
-					// uBoundaryData[boundary][0] = condition[2];
 					break;
 				case 1: // outlet
 					uBoundaryData.insert(pair<int, double>(boundaryTag, 0));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 2));
 					break;
 				case 2: // symmetry
-					uBoundaryData.insert(pair<int, double>(boundaryTag, condition["value"]));
+					uBoundaryData.insert(pair<int, double>(boundaryTag, double(condition["value"]) * M_PI / 180));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 3));
 					break;
 				default:
@@ -278,6 +277,45 @@ void writeData(QString &filepath, QString &origin, bool &pretty) {
 	results["timeTotal"] = timeTotal;
 
 	jsonFile["burnbackResults"] = results;
+
+	ofstream file(filepath.toStdString());
+	if (pretty)
+		file << setw(4) << jsonFile << endl;
+	else
+		file << jsonFile << endl;
+}
+
+void updateBoundaries(QString &filepath, bool &pretty) {
+	fstream originalFile(filepath.toStdString());
+	json jsonFile;
+	try {
+		jsonFile = json::parse(originalFile);
+	} catch (...) {
+		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file?");
+		return;
+	}
+
+	json updatedBoundaries;
+	for (auto &boundary : uBoundaryData) {
+		auto &boundaryTag = boundary.first;
+		auto boundaryValue = boundary.second;
+		switch (connectivityMatrixBoundaryConditions[boundaryTag]) {
+			case 1:
+				boundaryType = "inlet";
+				break;
+			case 2:
+				boundaryType = "outlet";
+				break;
+			case 3:
+				boundaryType = "symmetry";
+				boundaryValue = boundaryValue * 180 / M_PI;
+				break;
+		};
+
+		auto &boundaryDescription = boundaryDescriptions[boundaryTag];
+		updatedBoundaries.push_back({{"tag", boundaryTag}, {"type", boundaryType}, {"value", boundaryValue}, {"description", boundaryDescription.toStdString()}});
+	}
+	jsonFile["conditions"]["boundary"] = updatedBoundaries;
 
 	ofstream file(filepath.toStdString());
 	if (pretty)
