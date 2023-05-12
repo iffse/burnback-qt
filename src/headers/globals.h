@@ -22,6 +22,7 @@ inline std::vector<double> x;
 inline std::vector<double> y;
 inline std::vector<double> connectivityMatrixEdges;
 inline std::map<int, double> uBoundaryData;
+inline std::map<int, QString> boundaryDescriptions;
 inline double uInit;
 
 inline uint numNodes;

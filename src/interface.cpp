@@ -1,4 +1,9 @@
+#ifdef _WIN32
+#define _USE_MATH_DEFINES
+#endif
+
 #include <chrono>
+#include <cmath>
 #include <thread>
 #include <QFile>
 #include <vector>
@@ -58,6 +63,7 @@ void Actions::readMeshWorker(QString filepath) {
 	meshData.clear();
 	connectivityMatrixBoundaryConditions.clear();
 	uBoundaryData.clear();
+	boundaryDescriptions.clear();
 
 	const QString legacyExtension = ".dat";
 	const QString jsonExtension = ".json";
@@ -337,4 +343,32 @@ void Actions::exportData(QString filepath, bool pretty) {
 	} catch (...) {
 		appendOutput("Error while exporting data");
 	}
+}
+
+vector<QString> Actions::getBoundaries() {
+	auto numBoundaries = uBoundaryData.size();
+	vector<QString> boundaries = vector<QString>(numBoundaries * 4);
+
+	auto index = 0;
+	for (const auto &[key, value]: uBoundaryData) {
+		boundaries[index] = QString::number(key);
+		boundaries[index + 1] = QString::number(connectivityMatrixBoundaryConditions[key] - 1);
+		try {
+			if (boundaries[index + 1] == "0")
+				boundaries[index + 2] = QString::number(value);
+			else if (boundaries[index + 1] == "1")
+				boundaries[index + 2] = "";
+			else
+				boundaries[index + 2] = QString::number(value * 180 / M_PI);
+		} catch (...) {
+			boundaries[index + 2] = "";
+		}
+		try {
+			boundaries[index + 3] = boundaryDescriptions[key];
+		} catch (...) {
+			boundaries[index + 3] = "";
+		}
+		index += 4;
+	}
+	return boundaries;
 }

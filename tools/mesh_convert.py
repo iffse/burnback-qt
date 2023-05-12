@@ -84,13 +84,13 @@ for field in mesh.field_data:
 				'tag': condition_code,
 				'type': 'inlet',
 				'value': float(condition[1]),
-				'description': condition[2:]
+				'description': condition[2:] if len(condition) > 2 else ''
 			})
 		case 'outlet':
 			conditions['boundary'].append({
 				'tag': condition_code,
 				'type': 'outlet',
-				'description': condition[1:]
+				'description': condition[1:] if len(condition) > 1 else ''
 			})
 		case 'symmetry':
 			angle = np.deg2rad(float(condition[1]))
@@ -98,7 +98,7 @@ for field in mesh.field_data:
 				'tag': condition_code,
 				'type': 'symmetry',
 				'value': angle,
-				'description': condition[2:]
+				'description': condition[2:] if len(condition) > 2 else ''
 			})
 
 print('Assining conditions to boundaries and recession nodes...')
