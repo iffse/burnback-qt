@@ -1,4 +1,4 @@
-#include <src/headers/coeficcientMatrix.h>
+#include <src/headers/connectivityMatrix.h>
 #include <src/headers/globals.h>
 
 #include <array>
