@@ -30,42 +30,46 @@ ApplicationWindow {
 			title: qsTr("Boundary conditions")
 			Layout.fillHeight: true
 			Layout.fillWidth: true
-			GridLayout {
-				id: grid
-				columns: 4
-				width: parent.width
+			ScrollView {
+				anchors.fill: parent
 				clip: true
+				GridLayout {
+					id: grid
+					columns: 4
+					width: parent.parent.width
+					// clip: true
 
-				Component {
-					id: buttonDelegate
-					Button {
-						Layout.preferredWidth: 50
+					Component {
+						id: buttonDelegate
+						Button {
+							Layout.preferredWidth: 50
+						}
 					}
-				}
 
-				Component {
-					id: comboBoxDelegate
-					ComboBox {
-						model: ["---Condition---", "Inlet", "Outlet", "Symmetry"]
-						Layout.preferredWidth: 150
+					Component {
+						id: comboBoxDelegate
+						ComboBox {
+							model: ["---Condition---", "Inlet", "Outlet", "Symmetry"]
+							Layout.preferredWidth: 150
+						}
 					}
-				}
 
-				Component {
-					id: valueDelegate
-					TextField {
-						placeholderText: qsTr("value")
-						validator: DoubleValidator {}
-						Layout.preferredWidth: 200
-						Component.onCompleted: cursorPosition = 0
+					Component {
+						id: valueDelegate
+						TextField {
+							placeholderText: qsTr("value")
+							validator: DoubleValidator {}
+							Layout.preferredWidth: 200
+							Component.onCompleted: cursorPosition = 0
+						}
 					}
-				}
 
-				Component {
-					id: descriptionDelegate
-					TextField {
-						placeholderText: qsTr("description")
-						Layout.fillWidth: true
+					Component {
+						id: descriptionDelegate
+						TextField {
+							placeholderText: qsTr("description")
+							Layout.fillWidth: true
+						}
 					}
 				}
 			}
