@@ -10,6 +10,12 @@ ApplicationWindow {
 	visible: true
 	title: qsTr("Boundary Panel")
 
+	onClosing: {
+		for (var i = 0; i < grid.children.length; i++) {
+			grid.children[i].destroy();
+		}
+	}
+
 	Component.onCompleted: {
 		var boundaries = actions.getBoundaries();
 		for (var i = 0; i < boundaries.length; i+=4) {
@@ -95,20 +101,11 @@ ApplicationWindow {
 
 		Button {
 			text: qsTr("Cancel")
-			onClicked: {
-				for (var i = 0; i < grid.children.length; i++) {
-					grid.children[i].destroy();
-				}
-				boundaryPanel.close();
-			}
 		}
 		Button {
 			text: qsTr("Save")
 			onClicked: {
 				actions.updateBoundaries(saveToFile.checked, savePretty.checked);
-				for (var i = 0; i < grid.children.length; i++) {
-					grid.children[i].destroy();
-				}
 				boundaryPanel.close();
 			}
 		}
