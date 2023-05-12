@@ -21,7 +21,7 @@ inline std::vector<int> meshData;
 inline std::vector<double> x;
 inline std::vector<double> y;
 inline std::vector<double> connectivityMatrixEdges;
-inline std::map<int, std::array<double, 2>> uBoundaryData;
+inline std::map<int, double> uBoundaryData;
 inline double uInit;
 
 inline uint numNodes;

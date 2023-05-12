@@ -370,11 +370,10 @@ void boundaryFlux() {
 			}
 			// symmetryBoundaries
 			case symmetry: case outletSymmetry: case symmetry2: {
-				auto ubNorm = abs(complex<double>(uBoundaryData[boundary][0], uBoundaryData[boundary][1]));
-				auto duVer = duVertex[0][node] * uBoundaryData[boundary][0] + duVertex[1][node] * uBoundaryData[boundary][1];
+				auto duVer = duVertex[0][node] * cos(uBoundaryData[boundary]) + duVertex[1][node] * sin(uBoundaryData[boundary]);
 
-				duVertex[0][node] = duVer * uBoundaryData[boundary][0] / ubNorm;
-				duVertex[1][node] = duVer * uBoundaryData[boundary][1] / ubNorm;
+				duVertex[0][node] = duVer * cos(uBoundaryData[boundary]);
+				duVertex[1][node] = duVer * sin(uBoundaryData[boundary]);
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
 				flux[1][node] *= 2;
 				break;

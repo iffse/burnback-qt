@@ -71,20 +71,16 @@ void readBoundaryConditions(QTextStream &in) {
 				auto list = in.readLine().simplified().split(" ");
 				if (list.size() != 2)
 					throw std::invalid_argument("Invalid symmetry boundary conditions");
-				uBoundaryData.insert(pair<int, array<double, 2>>(boundary, {list[0].toDouble(), list[1].toDouble()}));
-				// uBoundaryData[boundary][0] = list[0].toDouble();
-				// uBoundaryData[boundary][1] = list[0].toDouble();
-				// uBoundaryData[0][boundary] = list[0].toDouble();
-				// uBoundaryData[1][boundary] = list[1].toDouble();
+				auto angle = atan(list[1].toDouble() / list[0].toDouble());
+				uBoundaryData.insert(pair<int, double>(boundary, angle));
 				break;
 			}
 			case 6: case 1: { // Source boundary
-				// uBoundaryData[boundary][0] = in.readLine().simplified().toDouble();
-				uBoundaryData.insert(pair<int, array<double, 2>>(boundary, {in.readLine().simplified().toDouble(), 0}));
+				uBoundaryData.insert(pair<int, double>(boundary, in.readLine().simplified().toDouble()));
 				break;
 			}
 			case 7: case 2: { // free boundary
-				uBoundaryData.insert(pair<int, array<double, 2>>(boundary, {0, 0}));
+				uBoundaryData.insert(pair<int, double>(boundary, 0));
 				in.readLine();
 				break;
 			}
@@ -185,7 +181,7 @@ void readMesh(QString &filepath) {
 		numTriangles = metaData["triangles"];
 		numEdges = metaData["edges"];
 	} catch (...) {
-		throw std::invalid_argument("Unable to read mesh data from Json file. Missing data field?");
+		throw std::invalid_argument("Unable to read mesh data from JSON file. Missing data field?");
 		return;
 	}
 
@@ -198,7 +194,7 @@ void readMesh(QString &filepath) {
 			y[i] = mesh["nodes"][i][1];
 		}
 	} catch (...) {
-		throw std::invalid_argument("Unable to read node coordinates from Json file. Missing nodes field or wrong format?");
+		throw std::invalid_argument("Unable to read node coordinates from JSON file. Missing nodes field or wrong format?");
 		return;
 	}
 
@@ -206,7 +202,7 @@ void readMesh(QString &filepath) {
 		auto &mesh = json["mesh"];
 		edgeData = edgeData = mesh["edges"];
 	} catch (...) {
-		throw std::invalid_argument("Unable to read edge connectivity from Json file. Missing edges field or wrong format?");
+		throw std::invalid_argument("Unable to read edge connectivity from JSON file. Missing edges field or wrong format?");
 		return;
 	}
 
@@ -216,22 +212,22 @@ void readMesh(QString &filepath) {
 
 		for (uint boundary = 0; boundary < numBoundaries; ++boundary) {
 			auto &condition = conditions["boundary"][boundary];
-			auto &boundaryTag = condition[0];
-			auto &boundaryType = condition[1];
+			auto &boundaryTag = condition["tag"];
+			auto &boundaryType = condition["type"];
 
 			const QStringList boundaryTypes = {"inlet", "outlet", "symmetry"};
 			switch (boundaryTypes.indexOf(QString::fromStdString(boundaryType))) {
 				case 0: // inlet
-					uBoundaryData.insert(pair<int, array<double, 2>>(boundaryTag, {condition[2], 0}));
+					uBoundaryData.insert(pair<int, double>(boundaryTag, condition["value"]));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 1));
 					// uBoundaryData[boundary][0] = condition[2];
 					break;
 				case 1: // outlet
-					uBoundaryData.insert(pair<int, array<double, 2>>(boundaryTag, {0, 0}));
+					uBoundaryData.insert(pair<int, double>(boundaryTag, 0));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 2));
 					break;
 				case 2: // symmetry
-					uBoundaryData.insert(pair<int, array<double, 2>>(boundaryTag, {condition[2][0], condition[2][1]}));
+					uBoundaryData.insert(pair<int, double>(boundaryTag, condition["value"]));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 3));
 					break;
 				default:
@@ -239,7 +235,7 @@ void readMesh(QString &filepath) {
 			}
 		}
 	} catch(...) {
-		throw std::invalid_argument("Unable to read boundary conditions from Json file. Missing boundary field or wrong format?");
+		throw std::invalid_argument("Unable to read boundary conditions from JSON file. Missing boundary field or wrong format?");
 		return;
 	}
 	try {
@@ -249,7 +245,7 @@ void readMesh(QString &filepath) {
 		else
 			recession = recessionCondition.get<vector<double>>();
 	} catch(...) {
-		throw std::invalid_argument("Unable to read recession from Json file. Missing recession field or wrong format?");
+		throw std::invalid_argument("Unable to read recession from JSON file. Missing recession field or wrong format?");
 		return;
 	}
 }

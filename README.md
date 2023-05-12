@@ -12,12 +12,17 @@ First, you will need a mesh in order to use the program for analysis. For instan
 
 Once you have the mesh, you will have to convert it into a Json file with edge based information. A python script that converts Gmsh mesh to this format using [meshio](https://github.com/nschloe/meshio) can be found at tools directory: [mesh_convert.py](./tools/mesh_convert.py). The script is optimized for speed and can convert a mesh with 200K nodes in seconds. If you are using another meshing tool, feel free to edit it (probable you will only need to change the cell names).
 
-When using Gmsh and the script, you can define boundary conditions with physical groups with the following naming conventions:
+When using Gmsh and the script, you can define boundary conditions with physical groups with the following naming conventions in curves:
 
 - `inlet 0`: The boundary is an inlet, where the propellant starts to burn. The number after the condition is the initial condition applied in that boundary.
 - `outlet`: Used for boundaries where the combustion ends, like the shell of the container.
 - `symmetry 45`: Used to indicate that a boundary defines a symmetry. Numbers after the condition is the angle of the symmetry line with respect to the x asis.
+
+In surfaces, you can define recession velocities:
+
 - `recession 1` (optional): Used to indicate the recession velocity of a node, defaults to 1.
+
+Everything after the names above will be added to a description field.
 
 Example files of Gmsh can be found at [examples/gmsh](./examples/gmsh). The commands to be executed to obtain the Json file are:
 ```shell
