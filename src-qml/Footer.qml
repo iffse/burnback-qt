@@ -19,8 +19,16 @@ RowLayout {
 	}
 	Button {
 		id: runButton
+		enabled: false
+		objectName: "runButton"
 		text: "Run"
-		onClicked: actions.run()
+		onClicked: {
+			if (runButton.text == "Run") {
+				actions.run()
+			} else {
+				actions.stop()
+			}
+		}
 	}
 
 	Connections {

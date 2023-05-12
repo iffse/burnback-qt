@@ -19,6 +19,7 @@ using namespace std;
 
 Actions::Actions(QObject *parent) : QObject(parent) {
 	connect(this, &Actions::newOutput, this, &Actions::appendOutput);
+	connect(this, &Actions::readFinished, this, &Actions::afterReadMesh);
 }
 
 void Actions::appendOutput(QString text) {
@@ -49,8 +50,7 @@ void Actions::appendOutput(QString text) {
 	output->setProperty("text", setText);
 }
 
-void Actions::run() {
-	// clear data
+void Actions::readMeshWorker(QString filepath) {
 	numNodes = 0;
 	numTriangles = 0;
 	numEdges = 0;
@@ -59,53 +59,28 @@ void Actions::run() {
 	connectivityMatrixBoundaryConditions.clear();
 	uBoundaryData.clear();
 
-	appendOutput("--> Reading inputs");
-	try {
-		Reader::readInput();
-	} catch (std::invalid_argument &e) {
-		appendOutput("Error: " + QString(e.what()));
-		return;
-	} catch (...) {
-		appendOutput("Error: Unknown exception");
-		return;
-	}
-
-	appendOutput("--> Reading mesh");
-	auto *fileDialog = root->findChild<QObject*>("fileDialog");
-	auto filepath = fileDialog->property("fileUrl").toString();
-	if (filepath.isEmpty()) {
-		appendOutput("Error: No file selected");
-		return;
-	}
-
-#ifdef _WIN32
-	const QString substring = "file:///";
-#else
-	const QString substring = "file://";
-#endif
-
-	if (filepath.startsWith(substring)) {
-		filepath.remove(0, substring.length());
-	}
-
 	const QString legacyExtension = ".dat";
 	const QString jsonExtension = ".json";
 
 	if (filepath.endsWith(legacyExtension)) {
 		QFile file(filepath);
 		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-			appendOutput("Error: Cannot open file");
+			emit newOutput("Error: Cannot open file");
+			emit readFinished(false);
 			return;
 		}
 
 		QTextStream in(&file);
 		try {
 			Reader::Legacy::readMesh(in);
+			emit readFinished(true);
 		} catch (std::invalid_argument &e) {
-			appendOutput("Error: " + QString(e.what()));
+			emit newOutput("Error: " + QString(e.what()));
+			emit readFinished(false);
 			file.close(); return;
 		} catch (...) {
-			appendOutput("Error: Unknown exception");
+			emit newOutput("Error: Unknown exception");
+			emit readFinished(false);
 			file.close(); return;
 		}
 		file.close();
@@ -114,80 +89,20 @@ void Actions::run() {
 		try {
 			Reader::Json::readMesh(filepath);
 		} catch (std::invalid_argument &e) {
-			appendOutput("Error: " + QString(e.what()));
+			emit newOutput("Error: " + QString(e.what()));
+			emit readFinished(false);
 			return;
 		} catch (...) {
-			appendOutput("Error: Unknown exception when reading mesh");
+			emit newOutput("Error: Unknown exception when reading mesh");
+			emit readFinished(false);
 			return;
 		}
-		} else {
-		appendOutput("Error: Unknown file extension");
+	} else {
+		emit newOutput("Error: Unknown file extension");
+		emit readFinished(false);
 		return;
 	}
 
-	std::thread thread(&Actions::worker, this);
-	thread.detach();
-}
-
-void Actions::afterWorker() {
-	// plotData::generateData();
-	auto numLines = numIsocontourLines;
-	++numLines;
-
-	auto &xmin = *min_element(x.begin(), x.end());
-	auto &xmax = *max_element(x.begin(), x.end());
-	auto &ymin = *min_element(y.begin(), y.end());
-	auto &ymax = *max_element(y.begin(), y.end());
-
-	auto scale = isocontourSize/max(xmax - xmin, ymax - ymin);
-
-	auto canvasHeight = uint(1.5 * (ymax - ymin) * scale);
-	auto canvasWidth = uint(1.5 * (xmax - xmin) * scale);
-    auto shiftX = int(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
-    auto shiftY = int(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
-
-    emit setCanvasSize(canvasWidth, canvasHeight);
-
-	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
-	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
-
-    emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
-
-	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
-	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
-
-    emit clearCanvas();
-
-    emit paintCanvas(plotData::contourData(shiftX, shiftY, scale), "#000000");
-
-	auto step = (uVertexMax - uVertexMin)/numLines;
-
-	auto value = step;
-	for (uint line = 1; line < numLines; ++line) {
-
-		auto pickColor = [](double region) {
-			if (region < 0.25) {
-				return QString("rgb(%1, %2, %3)").arg(255).arg(255*region*4).arg(0);
-			} else if (region < 0.5) {
-				return QString("rgb(%1, %2, %3)").arg(255*(1-(region-0.25)*4)).arg(255).arg(0);
-			} else if (region < 0.75) {
-				return QString("rgb(%1, %2, %3)").arg(0).arg(255).arg(255*(region-0.5)*4);
-			} else {
-				return QString("rgb(%1, %2, %3)").arg(0).arg(255*(1-(region-0.75)*4)).arg(255);
-			}
-		};
-
-		// paintCanvas(plotData::isocolourData(value), color);
-        emit paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
-		value += step;
-
-	}
-}
-
-void Actions::worker() {
-	#ifdef DEBUG
-	std::feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-	#endif
 	emit newOutput("--> Creating connectivity matrix");
 	ConnectivityMatrix::NodeTriangles();
 	ConnectivityMatrix::TriangleEdge();
@@ -212,6 +127,72 @@ void Actions::worker() {
 	emit newOutput("--> Creating metric matrix");
 	setMetric();
 
+	emit readFinished(true);
+}
+
+void Actions::readMesh(QString filepath) {
+	running = false;
+	root->findChild<QObject*>("runButton")->setProperty("enabled", false);
+	appendOutput("--> Reading mesh");
+	if (filepath.isEmpty()) {
+		appendOutput("Error: No file selected");
+		return;
+	}
+
+#ifdef _WIN32
+	const QString substring = "file:///";
+#else
+	const QString substring = "file://";
+#endif
+
+	if (filepath.startsWith(substring)) {
+		filepath.remove(0, substring.length());
+	}
+
+	std::thread thread(&Actions::readMeshWorker, this, filepath);
+	thread.detach();
+}
+
+
+void Actions::afterReadMesh(bool sucess) {
+	if (!sucess) {
+		appendOutput("Error: Failed to read mesh");
+		return;
+	}
+
+	root->findChild<QObject*>("runButton")->setProperty("enabled", true);
+	appendOutput("--> Mesh read sucessfully");
+}
+
+void Actions::run() {
+	running = true;
+	root->findChild<QObject*>("runButton")->setProperty("text", "Stop");
+	// clear data
+	appendOutput("--> Reading inputs");
+	try {
+		Reader::readInput();
+	} catch (std::invalid_argument &e) {
+		appendOutput("Error: " + QString(e.what()));
+		root->findChild<QObject*>("runButton")->setProperty("text", "Run");
+		return;
+	} catch (...) {
+		appendOutput("Error: Unknown exception");
+		root->findChild<QObject*>("runButton")->setProperty("text", "Run");
+		return;
+	}
+
+	std::thread thread(&Actions::worker, this);
+	thread.detach();
+}
+
+void Actions::stop() {
+	running = false;
+}
+
+void Actions::worker() {
+	#ifdef DEBUG
+	std::feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+	#endif
 	emit newOutput("--> Starting subiteration loop");
 	uVertex = vector<double>(numNodes, uInit);
 
@@ -228,6 +209,11 @@ void Actions::worker() {
 	timeTotal = 0;
 
 	while (numItereations < minIter || (numItereations < maxIter && error > tolerance)) {
+		if (!running) {
+			emit newOutput("--> Stopped");
+			root->findChild<QObject*>("runButton")->setProperty("text", "Run");
+			return;
+		}
 		++numItereations;
 		Iterations::subIteration();
 		error = getError();
@@ -255,22 +241,80 @@ void Actions::worker() {
 	setqbnd();
 	setBurningArea();
 
-	auto [areag, areap] = Iterations::mainLoop();
+	auto [areaGeometric, areaMDF] = Iterations::mainLoop();
 
 	emit newOutput("--> Main loop ended");
-	emit newOutput("Area of the propellant: " + QString::number(areag));
-	emit newOutput("Propellant burnt: " + QString::number(areap));
-	emit newOutput("Error with respect to minimum distance function with recession speed 1: " + QString::number(100 * abs(areag - areap) / areag) + "%");
+	emit newOutput("Geometry area: " + QString::number(areaGeometric));
+	emit newOutput("Burn area using minimum distance function: " + QString::number(areaMDF));
+	emit newOutput("Error with respect to minimum distance function with recession speed 1: " + QString::number(100 * abs(areaGeometric - areaMDF) / areaGeometric) + "%");
 
 	afterWorker();
 }
 
-void Actions::exportData(QString filepath, QString origin) {
+void Actions::afterWorker() {
+	// plotData::generateData();
+	root->findChild<QObject*>("runButton")->setProperty("text", "Run");
+	auto numLines = numIsocontourLines;
+	++numLines;
+
+	auto &xmin = *min_element(x.begin(), x.end());
+	auto &xmax = *max_element(x.begin(), x.end());
+	auto &ymin = *min_element(y.begin(), y.end());
+	auto &ymax = *max_element(y.begin(), y.end());
+
+	auto scale = isocontourSize/max(xmax - xmin, ymax - ymin);
+
+	auto canvasHeight = uint(1.5 * (ymax - ymin) * scale);
+	auto canvasWidth = uint(1.5 * (xmax - xmin) * scale);
+	auto shiftX = int(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
+	auto shiftY = int(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
+
+	emit setCanvasSize(canvasWidth, canvasHeight);
+
+	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
+	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
+
+	emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
+
+	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
+	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
+
+	emit clearCanvas();
+
+	emit paintCanvas(plotData::contourData(shiftX, shiftY, scale), "#000000");
+
+	auto step = (uVertexMax - uVertexMin)/numLines;
+
+	auto value = step;
+	for (uint line = 1; line < numLines; ++line) {
+
+		auto pickColor = [](double region) {
+			if (region < 0.25) {
+				return QString("rgb(%1, %2, %3)").arg(255).arg(255*region*4).arg(0);
+			} else if (region < 0.5) {
+				return QString("rgb(%1, %2, %3)").arg(255*(1-(region-0.25)*4)).arg(255).arg(0);
+			} else if (region < 0.75) {
+				return QString("rgb(%1, %2, %3)").arg(0).arg(255).arg(255*(region-0.5)*4);
+			} else {
+				return QString("rgb(%1, %2, %3)").arg(0).arg(255*(1-(region-0.75)*4)).arg(255);
+			}
+		};
+
+		// paintCanvas(plotData::isocolourData(value), color);
+        emit paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
+		value += step;
+
+	}
+}
+
+void Actions::exportData(QString filepath, bool pretty) {
 #ifdef _WIN32
 	const QString substring = "file:///";
 #else
 	const QString substring = "file://";
 #endif
+
+	auto origin = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
 
 	auto cleanSubstring = [&substring](QString &str) {
 		if (str.startsWith(substring)) {
@@ -287,7 +331,7 @@ void Actions::exportData(QString filepath, QString origin) {
 
 	appendOutput("Exporting data to " + filepath);
 	try {
-		Writer::Json::writeData(filepath, origin);
+		Writer::Json::writeData(filepath, origin, pretty);
 	} catch (const std::exception &e) {
 		appendOutput("Error while exporting data: " + QString(e.what()));
 	} catch (...) {

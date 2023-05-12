@@ -17,11 +17,16 @@ signals:
 	void graphBurningArea(QVariant points, double xMax, double yMax);
 	void updateProgress(uint progress, uint total);
 	void finished();
+	void readFinished(bool success);
 
 public slots:
+	void readMesh(QString filepath);
+	void readMeshWorker(QString filepath);
+	void afterReadMesh(bool success);
 	void run();
+	void stop();
 	void appendOutput(QString text);
 	void worker();
 	void afterWorker();
-	void exportData(QString filepath, QString origin);
+	void exportData(QString filepath, bool pretty);
 };
