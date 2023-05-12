@@ -60,7 +60,7 @@ ScrollView {
 					placeholderText: "Enter a number"
 					toolTipText: "Influence the number of segments used to draw the geometry of the solution"
 					objName: "areas"
-					decimals: true
+					decimals: false
 				}
 
 				LabelInput {

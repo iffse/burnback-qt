@@ -26,13 +26,13 @@ Column {
 	}
 
 	TextField {
+		property var intValidator: IntValidator {}
+		property var doubleValidator: DoubleValidator {}
 		placeholderText: parent.placeholderText
 		selectByMouse: true
 		objectName: parent.objName
 		width: parent.width
 		text: parent.defaultInput
-		// validator: RegExpValidator {
-		// 	regExp: parent.decimals ? /^-?\d*\.?\d*$/ : /^-?\d*$/
-		// }
+		validator: parent.decimals ? doubleValidator : intValidator
 	}
 }
