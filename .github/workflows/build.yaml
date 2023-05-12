@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest]
-        qt: [5.15.2]
+        qt: [6.2.*]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Qt ${{ matrix.qt }} on ${{ matrix.os }}
@@ -32,7 +32,8 @@ jobs:
     - name: Build (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        qmake -config release
+
+        qmake CONFIG+=release,qtquickcompiler
         nmake
         mkdir target\distribution
         mv target/release/burnback-qt.exe target/distribution/
@@ -43,12 +44,18 @@ jobs:
     - name: Build (MacOS)
       if: matrix.os == 'macos-latest'
       run: |
-        qmake -config release
+        qmake CONFIG+=release,qtquickcompiler
+
         make
         mkdir target/distribution
         mv target/release/burnback-qt.app target/distribution/
         cd target/distribution
         macdeployqt burnback-qt.app -qmldir=../../src-qml
+
+    - name: Move additional files
+      run: |
+        cp -r examples target/distribution/
+        cp -r tools target/distribution/
 
     - name: Zipping files
       uses: vimtor/action-zip@v1.1

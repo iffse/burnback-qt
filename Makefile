@@ -42,7 +42,7 @@ release: $(RELEASE)
 	qmake -makefile -o .qmake-release CONFIG+=release
 
 ./.qmake-saint-debug:
-	qmake -makefile -o .qmake-saint-debug CONFIG+=debug CONFIG+=sanitizer
+	qmake -makefile -o .qmake-saint-debug CONFIG+=debug,sanitizer
 
 $(DEBUG): ./src ./src-qml ./.qmake-debug
 	$(MAKE_COMMAND) .qmake-debug
@@ -51,7 +51,7 @@ $(RELEASE): ./src ./src-qml ./.qmake-release
 	$(MAKE_COMMAND) .qmake-release
 
 sanitizer: ./src ./src-qml ./.qmake-saint-debug
-	$(MAKE_COMMAND) -f .qmake-saint-debug
+	$(MAKE_COMMAND) .qmake-saint-debug
 
 clean:
 	$(REMOVE_COMMAND) ./.qmake-debug ./.qmake-release ./target/ ./..qmake.stash ./.cache
