@@ -37,7 +37,7 @@ ScrollView {
 					nameFilters: ["Mesh files (*.json *.dat)", "All files (*)"]
 					onAccepted: {
 						meshLabel.text = ("Current selection:\n" + basename(fileUrl.toString()))
-						root.inputUrl = fileUrl
+						actions.readMesh(fileUrl)
 					}
 					function basename(path) {
 						path.slice(path.lastIndexOf("\\") + 1)

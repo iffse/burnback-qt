@@ -37,7 +37,6 @@ ApplicationWindow {
 					id: grid
 					columns: 4
 					width: parent.parent.width
-					// clip: true
 
 					Component {
 						id: buttonDelegate

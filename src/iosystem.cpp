@@ -256,13 +256,13 @@ void readMesh(QString &filepath) {
 }
 
 namespace Writer::Json {
-void writeData(QString &filepath, QString &origin) {
+void writeData(QString &filepath, QString &origin, bool &pretty) {
 	fstream originalFile(origin.toStdString());
 	json jsonFile;
 	try {
 		jsonFile = json::parse(originalFile);
 	} catch (...) {
-		throw std::invalid_argument("Unable to parse Json file. Invalid JSON file?");
+		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file?");
 		return;
 	}
 
@@ -277,7 +277,10 @@ void writeData(QString &filepath, QString &origin) {
 	jsonFile["burnbackResults"] = results;
 
 	ofstream file(filepath.toStdString());
-	file << setw(4) << jsonFile << endl;
+	if (pretty)
+		file << setw(4) << jsonFile << endl;
+	else
+		file << jsonFile << endl;
 }
 }
 //}}}

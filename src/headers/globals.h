@@ -6,6 +6,7 @@
 #include <map>
 
 inline QObject* root;
+inline bool running = false;
 
 inline uint numberArea;
 inline bool axisymmetric;

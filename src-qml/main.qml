@@ -11,8 +11,6 @@ ApplicationWindow {
 	visible: true
 	title: qsTr("Burnback")
 
-	property string inputUrl: ""
-
 	menuBar: AplicationMenu {}
 
 	contentData: RowLayout {

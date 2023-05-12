@@ -18,14 +18,21 @@ MenuBar {
 		Action {
 			text: qsTr("Export results")
 			onTriggered: {
-				if (root.inputUrl === "") {
-					noInputFileMessage.open()
-					return
-				}
+				exportDialog.exportPretty = false
 				exportDialog.open()
 			}
 		}
+
+		Action {
+			text: qsTr("Export results (pretty)")
+			onTriggered: {
+				exportDialog.exportPretty = true
+				exportDialog.open()
+			}
+		}
+
 		FileDialog {
+			property bool exportPretty: false
 			id: exportDialog
 			title: qsTr("Export results")
 			objectName: "exportDialog"
@@ -33,15 +40,7 @@ MenuBar {
 			selectFolder: false
 			folder: ""
 			nameFilters: ["JSON file (*.json)", "All files (*)"]
-			defaultSuffix: "json"
-			onAccepted: actions.exportData(exportDialog.fileUrl, root.inputUrl)
-		}
-		MessageDialog {
-			id: noInputFileMessage
-			title: qsTr("No input file")
-			text: qsTr("Please open an input file first and run the simulation.")
-			standardButtons: StandardButton.Ok
-			icon: StandardIcon.Warning
+			onAccepted: actions.exportData(exportDialog.fileUrl, exportDialog.exportPretty)
 		}
 		MenuSeparator {}
 		Action {
