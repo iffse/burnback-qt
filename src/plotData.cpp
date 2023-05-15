@@ -1,6 +1,9 @@
+#include "qnamespace.h"
 #include <QFile>
 #include <QTextStream>
-#include "QPointF"
+#include <algorithm>
+#include <iterator>
+#include <QPointF>
 
 #if __cplusplus >= 202002L
 #include <cmath>
@@ -149,6 +152,52 @@ vector<double> contourData(int shiftX, int shiftY, double scale) {
 	return data;
 }
 
+// Same as contourData, but returns a dictionary to be handle in the preview directly
+void generateContourDataDict(int shiftX, int shiftY, double scale) {
+	
+	map<uint, vector<double>> data;
+
+	for_each(edgeData.begin(), edgeData.end(), [&data, &scale, &shiftX, &shiftY](auto &edge) {
+		int boundary = 0;
+
+		if (edge[2] < 0) {
+			boundary = -edge[2];
+		} else if (edge[3] < 0) {
+			boundary = -edge[3];
+		} else {
+			return;
+		}
+
+		auto node1 = edge[0] - 1;
+		auto node2 = edge[1] - 1;
+		auto x1 = x[node1] * scale + shiftX;
+		auto y1 = y[node1] * scale + shiftY;
+		auto x2 = x[node2] * scale + shiftX;
+		auto y2 = y[node2] * scale + shiftY;
+
+		auto list = vector<double>{x1, y1, x2, y2};
+
+		if (data.find(boundary) == data.end())
+			data[boundary] = list;
+		else
+			data[boundary].insert(data[boundary].end(), list.begin(), list.end());
+	});
+
+	// separate the data in two lists
+	auto boundaryTags = vector<uint>{};
+	auto boundaryCoordinates = vector<vector<double>>{};
+
+	for (auto &boundary : data) {
+		boundaryTags.push_back(boundary.first);
+		boundaryCoordinates.push_back(boundary.second);
+	}
+
+	auto canvas = root->findChild<QObject*>("previewCanvas");
+	canvas->setProperty("boundaryTags", QVariant::fromValue(boundaryTags));
+	canvas->setProperty("boundaryCoordinates", QVariant::fromValue(boundaryCoordinates));
+	return;
+}
+
 QVariant burningAreaData() {
 
 	QVariantList data;
@@ -159,5 +208,4 @@ QVariant burningAreaData() {
 
 	return QVariant::fromValue(data);
 }
-
 }

@@ -419,3 +419,25 @@ void Actions::updateBoundaries(bool saveToFile, bool pretty) {
 		}
 	}
 }
+
+void Actions::contourDataPreviewGenerate(int width) {
+
+	QObject *canvas = root->findChild<QObject*>("previewCanvas");
+
+	auto &xmin = *min_element(x.begin(), x.end());
+	auto &xmax = *max_element(x.begin(), x.end());
+	auto &ymin = *min_element(y.begin(), y.end());
+	auto &ymax = *max_element(y.begin(), y.end());
+	width -= 5;
+	auto scale = width/max(xmax - xmin, ymax - ymin);
+	auto height = int((ymax - ymin) * scale);
+	height -= 5;
+	canvas->setProperty("height", height + 10);
+
+	auto shiftX = int((-xmin + 1) * scale + (width - (xmax - xmin) * scale) / 2);
+	auto shiftY = int((-ymin + 2) * scale + (height - (ymax - ymin) * scale) / 2);
+
+	plotData::generateContourDataDict(shiftX, shiftY, scale);
+	return;
+}
+
