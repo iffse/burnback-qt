@@ -1,4 +1,6 @@
-// #include <QRegularExpression>
+#ifdef _WIN32
+#define _USE_MATH_DEFINES
+#endif
 
 #include <src/headers/iosystem.h>
 #include <src/headers/globals.h>
