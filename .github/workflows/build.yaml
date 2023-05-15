@@ -33,7 +33,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       run: |
 
-        qmake CONFIG+=release,qtquickcompiler
+        qmake CONFIG+=release
         nmake
         mkdir target\distribution
         mv target/release/burnback-qt.exe target/distribution/
@@ -44,7 +44,7 @@ jobs:
     - name: Build (MacOS)
       if: matrix.os == 'macos-latest'
       run: |
-        qmake CONFIG+=release,qtquickcompiler
+        qmake CONFIG+=release
 
         make
         mkdir target/distribution
