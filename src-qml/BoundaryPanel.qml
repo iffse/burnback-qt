@@ -97,6 +97,7 @@ ApplicationWindow {
 			ScrollView {
 				id: scroll
 				clip: true
+				anchors.fill: parent
 
 				contentHeight: canvas.height
 				contentWidth: canvas.width
