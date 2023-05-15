@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.15
 import QtQuick.Layouts 1.15
 
 ApplicationWindow {
@@ -14,6 +15,7 @@ ApplicationWindow {
 		for (var i = 0; i < grid.children.length; i++) {
 			grid.children[i].destroy();
 		}
+		canvas.destroy();
 	}
 
 	Component.onCompleted: {
@@ -54,7 +56,7 @@ ApplicationWindow {
 					Component {
 						id: buttonDelegate
 						Button {
-							Layout.preferredWidth: 50
+							onClicked: canvas.drawBoundary(this);
 						}
 					}
 
@@ -87,9 +89,54 @@ ApplicationWindow {
 			}
 		}
 		GroupBox {
+			id: previewRoot
 			title: qsTr("Preview")
 			Layout.fillHeight: true
 			contentWidth: 350
+
+			ScrollView {
+				id: scroll
+				clip: true
+
+				contentHeight: canvas.height
+				contentWidth: canvas.width
+				Canvas {
+					id: canvas
+					height: 1000
+					objectName: "previewCanvas"
+					width: previewRoot.contentWidth
+					property var boundaryTags: []
+					property var boundaryCoordinates: []
+
+					Component.onCompleted: {
+						if (grid.children.length === 0) {
+							return;
+						}
+						actions.contourDataPreviewGenerate(width);
+					}
+
+					function drawBoundary(sender) {
+						var ctx = getContext("2d");
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						for (var i = 0; i < boundaryTags.length; i++) {
+							ctx.beginPath();
+							if (boundaryTags[i] == sender.text) {
+								ctx.strokeStyle = "red";
+								ctx.lineWidth = 3;
+							} else {
+								ctx.strokeStyle = Material.theme == Material.Dark ? "white" : "black";
+								ctx.lineWidth = 1;
+							}
+							for (var j = 0; j < boundaryCoordinates[i].length; j+=4) {
+								ctx.moveTo(boundaryCoordinates[i][j], canvas.height - boundaryCoordinates[i][j+1]);
+								ctx.lineTo(boundaryCoordinates[i][j+2], canvas.height - boundaryCoordinates[i][j+3]);
+							}
+							ctx.stroke();
+						}
+						canvas.requestPaint();
+					}
+				}
+			}
 		}
 	}
 
@@ -101,6 +148,7 @@ ApplicationWindow {
 
 		Button {
 			text: qsTr("Cancel")
+			onClicked: boundaryPanel.close();
 		}
 		Button {
 			text: qsTr("Save")

@@ -31,4 +31,5 @@ public slots:
 	void exportData(QString filepath, bool pretty);
 	std::vector<QString> getBoundaries();
 	void updateBoundaries(bool saveToFile, bool pretty);
+	void contourDataPreviewGenerate(int width);
 };
