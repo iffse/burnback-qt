@@ -16,35 +16,13 @@ using json = nlohmann::json;
 void Reader::readInput() {//{{{
 
 	numberArea = root->findChild<QObject*>("areas")->property("text").toInt();
-	if (numberArea < 1)
-		throw std::invalid_argument("Number of areas must be greater than 0");
-
 	uInit = root->findChild<QObject*>("initialCondition")->property("text").toDouble();
-		if (uInit < 0)
-			throw std::invalid_argument("Initial condition must be greater than 0");
-
 	axisymmetric = root->findChild<QObject*>("axisymmetric")->property("checked").toBool();
 	resume = root->findChild<QObject*>("resume")->property("checked").toBool();
-
 	cfl = root->findChild<QObject*>("cfl")->property("text").toDouble();
-	if (cfl < 0)
-		throw std::invalid_argument("CFL number must be greater than 0");
-
 	cflViscous = root->findChild<QObject*>("viscousCFL")->property("text").toDouble();
-	if (cflViscous < 0)
-		throw std::invalid_argument("Viscous CFL number must be greater than 0");
-
-	minIter = root->findChild<QObject*>("minIter")->property("text").toInt();
-	if (minIter < 1)
-		throw std::invalid_argument("Minimum number of iterations must be greater than 0");
-
-	maxIter = root->findChild<QObject*>("maxIter")->property("text").toInt();
-	if (maxIter < minIter)
-		throw std::invalid_argument("Maximum number of iterations must be greater than minimum number of iterations");
-
+	targetIter = root->findChild<QObject*>("targetIter")->property("text").toInt();
 	tolerance = root->findChild<QObject*>("tolerance")->property("text").toDouble();
-	if (tolerance < 0)
-		throw std::invalid_argument("Tolerance must be greater than 0");
 
 	diffusiveWeight = root->findChild<QObject*>("diffusiveWeight")->property("text").toDouble();
 	diffusiveMethod = root->findChild<QObject*>("diffusiveMethod")->property("currentIndex").toInt();

@@ -215,15 +215,15 @@ void Actions::worker() {
 		errorIter.clear();
 	}
 	emit newOutput("--> Starting subiteration loop");
-	if (currentIter < maxIter)
-		errorIter.resize(maxIter);
+	if (currentIter < targetIter)
+		errorIter.resize(targetIter);
 
 	double error = tolerance + 1;
 	QString linesToPrint = "";
 	auto clock = std::chrono::system_clock::now();
 	timeTotal = 0;
 
-	while (currentIter < minIter || (currentIter < maxIter && error > tolerance)) {
+	while (currentIter < targetIter && error > tolerance) {
 		++currentIter;
 		Iterations::subIteration();
 		errorIter[currentIter - 1] = getError();
@@ -236,7 +236,7 @@ void Actions::worker() {
 		if (error > 1) {
 			if (linesToPrint != "") {
 				emit newOutput(linesToPrint);
-				emit updateProgress(currentIter, maxIter);
+				emit updateProgress(currentIter, targetIter);
 			}
 			emit newOutput("Error: Divergence detected. Stopping. Try reducing the CFL.");
 			emit newOutput("--> Stopped");
@@ -250,7 +250,7 @@ void Actions::worker() {
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
 			clock = now;
 			emit newOutput(linesToPrint);
-			emit updateProgress(currentIter, maxIter);
+			emit updateProgress(currentIter, targetIter);
 			linesToPrint = "";
 			if (!running) {
 				emit newOutput("--> Stopped");
@@ -264,7 +264,7 @@ void Actions::worker() {
 
 	if (linesToPrint != "") {
 		emit newOutput(linesToPrint);
-		emit updateProgress(currentIter, maxIter);
+		emit updateProgress(currentIter, targetIter);
 	}
 
 	emit newOutput("--> Subiteration ended");

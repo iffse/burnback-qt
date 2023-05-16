@@ -14,8 +14,7 @@ inline bool resume;
 
 inline double cfl;
 inline double cflViscous;
-inline uint minIter;
-inline uint maxIter;
+inline uint targetIter;
 inline uint currentIter;
 inline double tolerance;
 inline std::vector<double> errorIter;

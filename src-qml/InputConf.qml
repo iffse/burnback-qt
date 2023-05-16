@@ -58,9 +58,10 @@ ScrollView {
 				LabelInput {
 					text: "Number of areas"
 					placeholderText: "Enter a number"
-					toolTipText: "Influence the number of segments used to draw the geometry of the solution"
+					toolTipText: "Number of areas used to graph the burning area\n\nLeave empty to not graph the burning area"
 					objName: "areas"
 					decimals: false
+					negative: false
 				}
 
 				LabelInput {
@@ -103,31 +104,26 @@ ScrollView {
 				LabelInput {
 					text: "CFL"
 					placeholderText: "Enter a number"
-					toolTipText: "Adimensional time. (CFL = c * dt / dx = Speed of sound / Element size)"
+					toolTipText: "Non-dimensional time. The smaller the more accurate the solution but the longer the computation time\n\nUse a value between 0 and 0.5 (both non-inclusive) for a stable and monotonous solution\nException: Zhang and Shu's scheme is stable for CFL < 2.5 (empirical value) when the diffusive weight is 1. Resulting in a very fast computation with high precision"
 					objName: "cfl"
 					decimals: true
 				}
 
 				LabelInput {
-					text: "Minimum iterations"
+					text: "Target iterations"
 					placeholderText: "Enter a number"
-					toolTipText: "Minimum number of iterations for the computation"
-					objName: "minIter"
-				}
-
-				LabelInput {
-					text: "Maximum iterations"
-					placeholderText: "Enter a number"
-					toolTipText: "Maximum number of iterations for the computation"
-					objName: "maxIter"
+					toolTipText: "Maximum number of iterations to perform"
+					objName: "targetIter"
+					negative: false
 				}
 
 				LabelInput {
 					text: "Tolerance"
 					placeholderText: "Enter a number"
-					toolTipText: "Maximum error admitted for the computation"
+					toolTipText: "Tolerance for the convergence of the solution.\nThe computation will stop before reaching the target iterations if the error of the solution at the end of the iteration is less than the tolerance\n\nLeave empty to disable this feature"
 					objName: "tolerance"
 					decimals: true
+					negative: false
 				}
 			}
 		}

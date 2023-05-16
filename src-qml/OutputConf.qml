@@ -32,21 +32,23 @@ ScrollView {
 					width: parent.width
 					text: "Weight"
 					placeholderText: "Enter a number"
-					toolTipText: "."
+					toolTipText: "Weight of the diffusive term. The higher the weight, the more diffusive the method is.\n\nDiffusion must be applied, therefore the weight must be greater than 0."
 					objName: "diffusiveWeight"
 					defaultInput: "1"
 					decimals: true
+					negative: false
 				}
 
 				LabelInput {
 					visible: diffusiveMethod.currentIndex == 1
 					width: parent.width
-					text: "Viscous CFL"
+					text: "Viscous CFL, only used in Tizón's method"
 					placeholderText: "Enter a number"
 					toolTipText: "Viscous CFL number."
 					objName: "viscousCFL"
 					defaultInput: "1"
 					decimals: true
+					negative: false
 				}
 			}
 		}
@@ -66,6 +68,7 @@ ScrollView {
 					objName: "isocontourSize"
 					defaultInput: "500"
 					decimals: false
+					negative: false
 				}
 
 				LabelInput {
@@ -76,6 +79,7 @@ ScrollView {
 					objName: "numIsocontourLines"
 					defaultInput: "10"
 					decimals: false
+					negative: false
 				}
 
 				ComboBox {
