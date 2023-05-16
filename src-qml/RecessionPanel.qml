@@ -53,6 +53,7 @@ ApplicationWindow {
 						}
 						Component.onCompleted: {
 							lineNumber.updateLineNumbers();
+							textArea.text = actions.getRecession();
 						}
 					}
 				}
@@ -84,12 +85,18 @@ ApplicationWindow {
 					selectFolder: false
 					folder: ""
 					nameFilters: ["text files (*.txt)", "All files (*)"]
+					onAccepted: {
+						var file = fileDialogRecession.fileUrl;
+						if (file != "") {
+							textArea.text = actions.getRecession(file);
+						}
+					}
 				}
 
 				Button {
 					text: qsTr("Save")
 					onClicked: {
-						actions.updateRecession(textArea, saveToFile.checked, savePretty.checked);
+						actions.updateRecession(textArea.text, saveToFile.checked, savePretty.checked);
 					}
 				}
 				CheckBox {
