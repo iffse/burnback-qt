@@ -54,7 +54,6 @@ inline std::vector<double> sector;
 inline std::vector<double> area;
 inline std::vector<double> height;
 inline std::array<std::vector<int>, 2> nodeBoundaryConditions;
-inline std::vector<double> eps;
 inline std::vector<double> uVertex;
 inline std::array<std::vector<double>, 2> duVariable; // gradient in the triangle
 inline std::array<std::vector<double>, 2> duVertex; // gradient in the vertex

@@ -276,7 +276,10 @@ void setduVarriable() {
 void setFlux() {
 	flux[1] = vector<double>(numNodes);
 	duVertex.fill(vector<double>(numNodes));
-	eps = vector<double>(numNodes, 1);
+	auto lipschitz = vector<double>();
+	if (diffusiveMethod == Abgrall) {
+		lipschitz = vector<double>(numNodes, 1);
+	}
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
 		const auto triangle1 = connectivityMatrixTriangleEdge[0][edge] - 1;
@@ -298,10 +301,10 @@ void setFlux() {
 
 			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 			if (diffusiveMethod == Abgrall) {
-				if (duMod > eps[node1])
-					eps[node1] = duMod;
-				if (duMod > eps[node2])
-					eps[node2] = duMod;
+				if (duMod > lipschitz[node1])
+					lipschitz[node1] = duMod;
+				if (duMod > lipschitz[node2])
+					lipschitz[node2] = duMod;
 			}
 		}
 
@@ -317,10 +320,10 @@ void setFlux() {
 			// ?
 			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 			if (diffusiveMethod == Abgrall) {
-				if (duMod > eps[node1])
-					eps[node1] = duMod;
-				if (duMod > eps[node2])
-					eps[node2] = duMod;
+				if (duMod > lipschitz[node1])
+					lipschitz[node1] = duMod;
+				if (duMod > lipschitz[node2])
+					lipschitz[node2] = duMod;
 			}
 
 		}
@@ -334,8 +337,9 @@ void setFlux() {
 	}
 
 	for (uint node = 0; node < numNodes; ++node) {
-		eps[node] /= 2 * M_PI;
-		flux[1][node] *= eps[node];
+		if (diffusiveMethod == Abgrall)
+			flux[1][node] *= lipschitz[node];
+		flux[1][node] /= 2 * M_PI;
 		duVertex[0][node] *= 0.5;
 		duVertex[1][node] *= 0.5;
 	}
