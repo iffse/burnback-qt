@@ -225,13 +225,13 @@ void readMesh(QString &filepath) {
 			} catch (...) {
 				boundaryDescriptions.insert(pair<int, QString>(boundaryTag, QString::fromStdString("")));
 			}
-			const QStringList boundaryTypes = {"inlet", "outlet", "symmetry"};
+			const QStringList boundaryTypes = {"inlet", "outlet", "symmetry", "condition"};
 			switch (boundaryTypes.indexOf(QString::fromStdString(boundaryType))) {
 				case 0: // inlet
 					uBoundaryData.insert(pair<int, double>(boundaryTag, condition["value"]));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 1));
 					break;
-				case 1: // outlet
+				case 1: case 3: // outlet
 					uBoundaryData.insert(pair<int, double>(boundaryTag, 0));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 2));
 					break;
@@ -263,14 +263,6 @@ void readMesh(QString &filepath) {
 namespace Writer::Json {
 void writeData(QString &filepath, QString &origin, bool &pretty) {
 	fstream originalFile(origin.toStdString());
-	json jsonFile;
-	try {
-		jsonFile = json::parse(originalFile);
-	} catch (...) {
-		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file?");
-		return;
-	}
-
 	json results;
 	results["uVertex"] = uVertex;
 	results["duVertex"] = duVertex;
@@ -279,13 +271,25 @@ void writeData(QString &filepath, QString &origin, bool &pretty) {
 	results["timeStep"] = cfl * *min_element(height.begin(), height.end());
 	results["timeTotal"] = timeTotal;
 
-	jsonFile["burnbackResults"] = results;
+	try {
+		json jsonFile = json::parse(originalFile);
+		jsonFile["burnbackResults"] = results;
 
-	ofstream file(filepath.toStdString());
-	if (pretty)
-		file << setw(4) << jsonFile << endl;
-	else
+		ofstream file(filepath.toStdString());
+		if (pretty)
+			file << setw(4) << jsonFile << endl;
+		else
 		file << jsonFile << endl;
+	} catch (...) {
+		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file? A file with only results is created.");
+		ofstream file(filepath.toStdString());
+		if (pretty)
+			file << setw(4) << results << endl;
+		else
+			file << results << endl;
+		return;
+	}
+
 }
 
 void updateBoundaries(QString &filepath, bool &pretty) {
