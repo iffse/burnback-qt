@@ -78,10 +78,22 @@ ScrollView {
 					decimals: false
 				}
 
+				ComboBox {
+					id: isocontourColor
+					objectName: "isocontourColor"
+					width: parent.width
+					currentIndex: 0
+					model: [
+						"5 colors",
+						"2 colors",
+						"black and white"
+					]
+				}
+
 				Button {
 					text: "Redraw"
 					onClicked: {
-						actions.redrawIsocontourLines(isocontourSize.input, numIsocontourLines.input);
+						actions.redrawIsocontourLines(isocontourSize.input, numIsocontourLines.input, isocontourColor.currentIndex);
 					}
 				}
 			}

@@ -50,6 +50,7 @@ void Reader::readInput() {//{{{
 	diffusiveMethod = root->findChild<QObject*>("diffusiveMethod")->property("currentIndex").toInt();
 	numIsocontourLines = root->findChild<QObject*>("numIsocontourLines")->property("text").toInt();
 	isocontourSize = root->findChild<QObject*>("isocontourSize")->property("text").toInt();
+	isocontourColor = root->findChild<QObject*>("isocontourColor")->property("currentIndex").toInt();
 }
 //}}}
 

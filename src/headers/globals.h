@@ -70,4 +70,5 @@ inline double diffusiveWeight;
 inline uint diffusiveMethod;
 inline uint numIsocontourLines;
 inline uint isocontourSize;
+inline uint isocontourColor;
 inline std::map<uint, std::vector<double>> boundaryDataDict;

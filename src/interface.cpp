@@ -215,7 +215,7 @@ void Actions::worker() {
 		errorIter.clear();
 	}
 	emit newOutput("--> Starting subiteration loop");
-	if (errorIter.size() < maxIter)
+	if (currentIter < maxIter)
 		errorIter.resize(maxIter);
 
 	double error = tolerance + 1;
@@ -286,7 +286,10 @@ void Actions::afterWorker() {
 	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
 
 	emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
-	emit graphErrorIter(errorIter, *max_element(errorIter.begin(), errorIter.end()));
+	emit graphErrorIter(
+		vector<double>(errorIter.begin(), errorIter.begin() + currentIter),
+		*max_element(errorIter.begin(), errorIter.end())
+	);
 	drawIsocontourLines(isocontourSize, numIsocontourLines);
 }
 
@@ -450,24 +453,30 @@ void Actions::drawIsocontourLines(uint maxSize, uint numLines) {
 
 		auto value = step;
 		for (uint line = 1; line < numLines; ++line) {
-
 			auto pickColor = [](double region) {
-				if (region < 0.25) {
-					return QString("rgb(%1, %2, %3)").arg(255).arg(255*region*4).arg(0);
-				} else if (region < 0.5) {
-					return QString("rgb(%1, %2, %3)").arg(255*(1-(region-0.25)*4)).arg(255).arg(0);
-				} else if (region < 0.75) {
-					return QString("rgb(%1, %2, %3)").arg(0).arg(255).arg(255*(region-0.5)*4);
-				} else {
-					return QString("rgb(%1, %2, %3)").arg(0).arg(255*(1-(region-0.75)*4)).arg(255);
+				switch (isocontourColor) {
+					case 0: { // 5 colors
+						auto hue = (1 - region) * 240;
+						return QString("hsl(") + QString::number(hue) + ", 100%, 50%)";
+					}
+					case 1: { // 2 colors
+						auto hue = 240 + 120 * region;
+						return QString("hsl(") + QString::number(hue) + ", 100%, 50%)";
+					}
+					case 2: { // black and white
+						auto lightness = 100 * region;
+						return QString("hsl(0, 0%, ") + QString::number(lightness) + "%)";
+					}
+					default:
+						return QString("#000000");
 				}
 			};
 
 			// paintCanvas(plotData::isocolourData(value), color);
 			emit paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
 			value += step;
-
 		}
+		emit newOutput("Isocontour lines drawn with a step of " + QString::number(step) + " from " + QString::number(uVertexMin) + " to " + QString::number(uVertexMax));
 	} catch (const std::exception &e) {
 		emit newOutput("Error while drawing isocontour lines: " + QString(e.what()));
 	} catch (...) {
@@ -476,7 +485,8 @@ void Actions::drawIsocontourLines(uint maxSize, uint numLines) {
 	return;
 }
 
-void Actions::redrawIsocontourLines(uint maxSize, uint numLines) {
+void Actions::redrawIsocontourLines(uint maxSize, uint numLines, uint colorIndex) {
+	isocontourColor = colorIndex;
 	std::thread thread(&Actions::drawIsocontourLines, this, maxSize, numLines);
 	thread.detach();
 }
