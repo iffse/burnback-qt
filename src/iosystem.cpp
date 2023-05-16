@@ -24,6 +24,7 @@ void Reader::readInput() {//{{{
 			throw std::invalid_argument("Initial condition must be greater than 0");
 
 	axisymmetric = root->findChild<QObject*>("axisymmetric")->property("checked").toBool();
+	resume = root->findChild<QObject*>("resume")->property("checked").toBool();
 
 	cfl = root->findChild<QObject*>("cfl")->property("text").toDouble();
 	if (cfl < 0)

@@ -35,4 +35,5 @@ public slots:
 	QString getRecession();
 	QString getRecession(QString filepath);
 	void drawIsocontourLines(uint maxSize, uint numLines);
+	void redrawIsocontourLines(uint maxSize, uint numLines);
 };

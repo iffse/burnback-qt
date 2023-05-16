@@ -10,11 +10,13 @@ inline bool running = false;
 
 inline uint numberArea;
 inline bool axisymmetric;
+inline bool resume;
 
 inline double cfl;
 inline double cflViscous;
 inline uint minIter;
 inline uint maxIter;
+inline uint currentIter;
 inline double tolerance;
 
 inline std::vector<int> meshData;

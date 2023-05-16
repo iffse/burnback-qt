@@ -6,6 +6,7 @@ Column {
 	spacing: 0
 	property string text: ""
 	property string defaultInput: ""
+	property string input: inputField.text
 	property string objName: ""
 	property string placeholderText: ""
 	property string toolTipText: ""
@@ -26,6 +27,7 @@ Column {
 	}
 
 	TextField {
+		id: inputField
 		property var intValidator: IntValidator {}
 		property var doubleValidator: DoubleValidator {}
 		placeholderText: parent.placeholderText

@@ -27,6 +27,18 @@ Actions::Actions(QObject *parent) : QObject(parent) {
 	connect(this, &Actions::readFinished, this, &Actions::afterReadMesh);
 }
 
+void clearSubstring(QString &str) {
+#ifdef _WIN32
+	const QString substring = "file:///";
+#else
+	const QString substring = "file://";
+#endif
+
+	if (str.startsWith(substring)) {
+		str.remove(0, substring.length());
+	}
+}
+
 void Actions::appendOutput(QString text) {
 	QObject *output = root->findChild<QObject*>("output");
 	auto currentText = output->property("text").toString();
@@ -145,15 +157,7 @@ void Actions::readMesh(QString filepath) {
 		return;
 	}
 
-#ifdef _WIN32
-	const QString substring = "file:///";
-#else
-	const QString substring = "file://";
-#endif
-
-	if (filepath.startsWith(substring)) {
-		filepath.remove(0, substring.length());
-	}
+	clearSubstring(filepath);
 
 	std::thread thread(&Actions::readMeshWorker, this, filepath);
 	thread.detach();
@@ -200,46 +204,48 @@ void Actions::worker() {
 	std::feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 	#endif
 	emit newOutput("--> Starting subiteration loop");
-	uVertex = vector<double>(numNodes, uInit);
+	if (!resume) {
+		uVertex = vector<double>(numNodes, uInit);
 
-	duVertex.fill(vector<double>(numNodes));
-	duVariable.fill(vector<double>(numTriangles));
-	maxDuEdge.fill(vector<double>(numNodes));
-	flux.fill(vector<double>(numNodes));
-	eps = vector<double>(numNodes);
+		duVertex.fill(vector<double>(numNodes));
+		duVariable.fill(vector<double>(numTriangles));
+		maxDuEdge.fill(vector<double>(numNodes));
+		flux.fill(vector<double>(numNodes));
+		eps = vector<double>(numNodes);
+		currentIter = 0;
+	}
+
 	double error = tolerance + 1;
-
-	uint numItereations = 0;
 	QString linesToPrint = "";
 	auto clock = std::chrono::system_clock::now();
 	timeTotal = 0;
 
-	while (numItereations < minIter || (numItereations < maxIter && error > tolerance)) {
+	while (currentIter < minIter || (currentIter < maxIter && error > tolerance)) {
 		if (!running) {
 			emit newOutput("--> Stopped");
 			root->findChild<QObject*>("runButton")->setProperty("text", "Run");
 			return;
 		}
-		++numItereations;
+		++currentIter;
 		Iterations::subIteration();
 		error = getError();
 
 		if (linesToPrint != "")
 			linesToPrint += "\n";
-		linesToPrint += "Iteration: " + QString::number(numItereations) + " Time: " + QString::number(timeTotal) + " Error: " + QString::number(error * 100) + "%";
+		linesToPrint += "Iteration: " + QString::number(currentIter) + " Time: " + QString::number(timeTotal) + " Error: " + QString::number(error * 100) + "%";
 
 		auto now = std::chrono::system_clock::now();
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
 			clock = now;
 			emit newOutput(linesToPrint);
-			updateProgress(numItereations, maxIter);
+			updateProgress(currentIter, maxIter);
 			linesToPrint = "";
 		}
 	}
 
 	if (linesToPrint != "") {
 		emit newOutput(linesToPrint);
-		updateProgress(numItereations, maxIter);
+		updateProgress(currentIter, maxIter);
 	}
 
 	emit newOutput("--> Subiteration ended");
@@ -258,59 +264,12 @@ void Actions::worker() {
 }
 
 void Actions::afterWorker() {
-	// plotData::generateData();
 	root->findChild<QObject*>("runButton")->setProperty("text", "Run");
-	auto numLines = numIsocontourLines;
-	++numLines;
-
-	auto &xmin = *min_element(x.begin(), x.end());
-	auto &xmax = *max_element(x.begin(), x.end());
-	auto &ymin = *min_element(y.begin(), y.end());
-	auto &ymax = *max_element(y.begin(), y.end());
-
-	auto scale = isocontourSize/max(xmax - xmin, ymax - ymin);
-
-	auto canvasHeight = uint(1.5 * (ymax - ymin) * scale);
-	auto canvasWidth = uint(1.5 * (xmax - xmin) * scale);
-	auto shiftX = int(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
-	auto shiftY = int(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
-
-	emit setCanvasSize(canvasWidth, canvasHeight);
-
 	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
 	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
 
 	emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
-
-	double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
-	double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
-
-	emit clearCanvas();
-
-	emit paintCanvas(plotData::contourData(shiftX, shiftY, scale), "#000000");
-
-	auto step = (uVertexMax - uVertexMin)/numLines;
-
-	auto value = step;
-	for (uint line = 1; line < numLines; ++line) {
-
-		auto pickColor = [](double region) {
-			if (region < 0.25) {
-				return QString("rgb(%1, %2, %3)").arg(255).arg(255*region*4).arg(0);
-			} else if (region < 0.5) {
-				return QString("rgb(%1, %2, %3)").arg(255*(1-(region-0.25)*4)).arg(255).arg(0);
-			} else if (region < 0.75) {
-				return QString("rgb(%1, %2, %3)").arg(0).arg(255).arg(255*(region-0.5)*4);
-			} else {
-				return QString("rgb(%1, %2, %3)").arg(0).arg(255*(1-(region-0.75)*4)).arg(255);
-			}
-		};
-
-		// paintCanvas(plotData::isocolourData(value), color);
-        emit paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
-		value += step;
-
-	}
+	drawIsocontourLines(isocontourSize, numIsocontourLines);
 }
 
 void Actions::exportData(QString filepath, bool pretty) {
@@ -322,14 +281,8 @@ void Actions::exportData(QString filepath, bool pretty) {
 
 	auto origin = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
 
-	auto cleanSubstring = [&substring](QString &str) {
-		if (str.startsWith(substring)) {
-			str.remove(0, substring.length());
-		}
-	};
-
-	cleanSubstring(filepath);
-	cleanSubstring(origin);
+	clearSubstring(filepath);
+	clearSubstring(origin);
 
 	// add .json if filepath doesn't have it
 	if (!filepath.endsWith(".json"))
@@ -400,14 +353,9 @@ void Actions::updateBoundaries(bool saveToFile, bool pretty) {
 		const QString substring = "file://";
 #endif
 
-		auto cleanSubstring = [&substring](QString &str) {
-			if (str.startsWith(substring)) {
-				str.remove(0, substring.length());
-			}
-		};
 
 		auto filepath = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
-		cleanSubstring(filepath);
+		clearSubstring(filepath);
 
 		try {
 			Writer::Json::updateBoundaries(filepath, pretty);
@@ -421,7 +369,6 @@ void Actions::updateBoundaries(bool saveToFile, bool pretty) {
 }
 
 void Actions::contourDataPreviewGenerate(int width) {
-
 	QObject *canvas = root->findChild<QObject*>("previewCanvas");
 
 	auto &xmin = *min_element(x.begin(), x.end());
@@ -439,5 +386,93 @@ void Actions::contourDataPreviewGenerate(int width) {
 
 	plotData::generateContourDataDict(shiftX, shiftY, scale);
 	return;
+}
+
+QString Actions::getRecession() {
+	QString output = "";
+	for (const auto &value: recession) {
+		output +=  QString::number(value) + "\n";
+	}
+	output.chop(1);
+	return output;
+}
+QString Actions::getRecession(QString filepath) {
+	QString output = "";
+	clearSubstring(filepath);
+	QFile file(filepath);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		appendOutput("Error while opening file " + filepath);
+		return "";
+	}
+	QTextStream in(&file);
+	while (!in.atEnd()) {
+		output += in.readLine() + "\n";
+	}
+	file.close();
+	output.chop(1);
+	return output;
+}
+
+void Actions::drawIsocontourLines(uint maxSize, uint numLines) {
+	if (x.empty() || y.empty() || uVertex.empty()) {
+		emit newOutput("No data to draw");
+		return;
+	}
+
+	try {
+		++numLines;
+		auto &xmin = *min_element(x.begin(), x.end());
+		auto &xmax = *max_element(x.begin(), x.end());
+		auto &ymin = *min_element(y.begin(), y.end());
+		auto &ymax = *max_element(y.begin(), y.end());
+
+		auto scale = maxSize/max(xmax - xmin, ymax - ymin);
+
+		emit clearCanvas();
+		auto canvasHeight = uint(1.5 * (ymax - ymin) * scale);
+		auto canvasWidth = uint(1.5 * (xmax - xmin) * scale);
+		auto shiftX = int(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
+		auto shiftY = int(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
+
+		emit setCanvasSize(canvasWidth, canvasHeight);
+
+		double &uVertexMax = *max_element(uVertex.begin(), uVertex.end());
+		double &uVertexMin = *min_element(uVertex.begin(), uVertex.end());
+
+		emit paintCanvas(plotData::contourData(shiftX, shiftY, scale), "#000000");
+
+		auto step = (uVertexMax - uVertexMin)/numLines;
+
+		auto value = step;
+		for (uint line = 1; line < numLines; ++line) {
+
+			auto pickColor = [](double region) {
+				if (region < 0.25) {
+					return QString("rgb(%1, %2, %3)").arg(255).arg(255*region*4).arg(0);
+				} else if (region < 0.5) {
+					return QString("rgb(%1, %2, %3)").arg(255*(1-(region-0.25)*4)).arg(255).arg(0);
+				} else if (region < 0.75) {
+					return QString("rgb(%1, %2, %3)").arg(0).arg(255).arg(255*(region-0.5)*4);
+				} else {
+					return QString("rgb(%1, %2, %3)").arg(0).arg(255*(1-(region-0.75)*4)).arg(255);
+				}
+			};
+
+			// paintCanvas(plotData::isocolourData(value), color);
+			emit paintCanvas(plotData::isocolourData(value, shiftX, shiftY, scale), pickColor(double(line-1)/(numLines-1)));
+			value += step;
+
+		}
+	} catch (const std::exception &e) {
+		emit newOutput("Error while drawing isocontour lines: " + QString(e.what()));
+	} catch (...) {
+		emit newOutput("Error while drawing isocontour lines");
+	}
+	return;
+}
+
+void Actions::redrawIsocontourLines(uint maxSize, uint numLines) {
+	std::thread thread(&Actions::drawIsocontourLines, this, maxSize, numLines);
+	thread.detach();
 }
 
