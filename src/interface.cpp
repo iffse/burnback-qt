@@ -215,7 +215,8 @@ void Actions::worker() {
 		errorIter.clear();
 	}
 	emit newOutput("--> Starting subiteration loop");
-	errorIter.resize(maxIter);
+	if (errorIter.size() < maxIter)
+		errorIter.resize(maxIter);
 
 	double error = tolerance + 1;
 	QString linesToPrint = "";
