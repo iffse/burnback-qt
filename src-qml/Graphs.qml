@@ -69,6 +69,7 @@ Item {
 				id: errorXAxis
 				min: 0
 				max: 1
+				labelFormat: "%i"
 			}
 
 			ValueAxis {
