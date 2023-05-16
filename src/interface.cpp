@@ -294,7 +294,7 @@ void Actions::afterWorker() {
 	else {
 		double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
 		double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
-		emit graphBurningArea(plotData::burningAreaData(), burningWayMax * 1.05, burningAreaMax * 1.05);
+		emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax * 1.05);
 	}
 }
 
