@@ -379,13 +379,13 @@ void Actions::contourDataPreviewGenerate(int width) {
 	auto &ymin = *min_element(y.begin(), y.end());
 	auto &ymax = *max_element(y.begin(), y.end());
 	width -= 5;
-	auto scale = width/max(xmax - xmin, ymax - ymin);
+	auto scale = width/(xmax - xmin);
 	auto height = int((ymax - ymin) * scale);
 	height -= 5;
 	canvas->setProperty("height", height + 10);
 
-	auto shiftX = int((-xmin + 1) * scale + (width - (xmax - xmin) * scale) / 2);
-	auto shiftY = int((-ymin + 2) * scale + (height - (ymax - ymin) * scale) / 2);
+	auto shiftX = int(width/2.0 - scale * ((xmax - xmin)/2 + xmin)) + 2;
+	auto shiftY = int(height/2.0 - scale * ((ymax - ymin)/2 + ymin)) + 3;
 
 	plotData::generateContourDataDict(shiftX, shiftY, scale);
 	return;
@@ -434,8 +434,8 @@ void Actions::drawIsocontourLines(uint maxSize, uint numLines) {
 		emit clearCanvas();
 		auto canvasHeight = uint(1.5 * (ymax - ymin) * scale);
 		auto canvasWidth = uint(1.5 * (xmax - xmin) * scale);
-		auto shiftX = int(-xmin * scale + (canvasWidth - (xmax - xmin) * scale) / 2);
-		auto shiftY = int(-ymin * scale + (canvasHeight - (ymax - ymin) * scale) / 2);
+		auto shiftX = int(canvasWidth / 2.0 - scale * ((xmax - xmin) / 2 + xmin));
+		auto shiftY = int(canvasHeight / 2.0 - scale * ((ymax - ymin) / 2 + ymin));
 
 		emit setCanvasSize(canvasWidth, canvasHeight);
 
