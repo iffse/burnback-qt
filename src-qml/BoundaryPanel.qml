@@ -108,6 +108,23 @@ ApplicationWindow {
 					width: previewRoot.contentWidth
 					property var boundaryTags: []
 					property var boundaryCoordinates: []
+					onAvailableChanged: {
+						var ctx = getContext("2d");
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						ctx.fillStyle = Material.theme == Material.Dark ? "white" : "black";
+						ctx.textAlign = "center";
+						var font = ctx.font.split(",")[0];
+						console.log(font)
+						ctx.font = "16px " + font;
+
+						if (grid.children.length === 0) {
+							ctx.fillText(qsTr("No boundary"), canvas.width / 2, 50);
+							canvas.requestPaint();
+							return;
+						}
+						ctx.fillText(qsTr("Click on a boundary button"), canvas.width / 2, 50);
+						canvas.requestPaint();
+					}
 
 					Component.onCompleted: {
 						if (grid.children.length === 0) {
