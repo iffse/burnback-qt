@@ -17,6 +17,8 @@ jobs:
         qt: [5.15.2]
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
     - name: Set up Qt ${{ matrix.qt }} on ${{ matrix.os }}
       uses: jurplel/install-qt-action@v3
       with:
