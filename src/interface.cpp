@@ -202,6 +202,8 @@ void Actions::worker() {
 		setAngles();
 		emit newOutput("--> Creating metric matrix");
 		setMetric();
+		emit newOutput("--> Creating boundary matrix");
+		setBoundary();
 
 		uVertex = vector<double>(numNodes, uInit);
 
@@ -211,6 +213,7 @@ void Actions::worker() {
 		flux.fill(vector<double>(numNodes));
 		eps = vector<double>(numNodes);
 		currentIter = 0;
+		errorIter.clear();
 	}
 	emit newOutput("--> Starting subiteration loop");
 	errorIter.resize(maxIter);
@@ -221,11 +224,6 @@ void Actions::worker() {
 	timeTotal = 0;
 
 	while (currentIter < minIter || (currentIter < maxIter && error > tolerance)) {
-		if (!running) {
-			emit newOutput("--> Stopped");
-			root->findChild<QObject*>("runButton")->setProperty("text", "Run");
-			return;
-		}
 		++currentIter;
 		Iterations::subIteration();
 		errorIter[currentIter - 1] = getError();
@@ -239,21 +237,26 @@ void Actions::worker() {
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
 			clock = now;
 			emit newOutput(linesToPrint);
-            emit updateProgress(currentIter, maxIter);
+			emit updateProgress(currentIter, maxIter);
 			linesToPrint = "";
+			if (!running) {
+				emit newOutput("--> Stopped");
+				root->findChild<QObject*>("runButton")->setProperty("text", "Run");
+				setBurningArea();
+				afterWorker();
+				return;
+		}
 		}
 	}
 
 	if (linesToPrint != "") {
 		emit newOutput(linesToPrint);
-        emit updateProgress(currentIter, maxIter);
+		emit updateProgress(currentIter, maxIter);
 	}
 
 	emit newOutput("--> Subiteration ended");
 
-	setqbnd();
 	setBurningArea();
-
 	auto [areaGeometric, areaMDF] = Iterations::mainLoop();
 
 	emit newOutput("--> Main loop ended");

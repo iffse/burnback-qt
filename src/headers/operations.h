@@ -13,7 +13,7 @@ void eulerExplicit();
 
 double getError();
 
-void setqbnd();
+void setBoundary();
 void setBurningArea();
 
 void mainLoop();

@@ -422,7 +422,7 @@ double getError() {
 	return error;
 }
 
-void setqbnd() {
+void setBoundary() {
 	connectivityMatrixNodeBoundary = array<vector<int>, 2>({vector<int>(numTriangles), vector<int>(numTriangles)});
 
 	numBoundaryEdge = 0;
