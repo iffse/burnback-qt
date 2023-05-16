@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest]
-        qt: [6.2.*]
+        qt: [5.15.2]
     steps:
     - uses: actions/checkout@v3
     - name: Set up Qt ${{ matrix.qt }} on ${{ matrix.os }}
