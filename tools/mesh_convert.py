@@ -14,7 +14,6 @@ Options:
 
 output_name = ''
 filename = ''
-loops = 0
 pretty = False
 
 index = 1
