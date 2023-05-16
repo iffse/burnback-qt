@@ -270,6 +270,7 @@ void writeData(QString &filepath, QString &origin, bool &pretty) {
 	results["burningArea"] = burningArea;
 	results["timeStep"] = cfl * *min_element(height.begin(), height.end());
 	results["timeTotal"] = timeTotal;
+	results["error"] = errorIter;
 
 	try {
 		json jsonFile = json::parse(originalFile);
@@ -281,13 +282,12 @@ void writeData(QString &filepath, QString &origin, bool &pretty) {
 		else
 		file << jsonFile << endl;
 	} catch (...) {
-		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file? A file with only results is created.");
 		ofstream file(filepath.toStdString());
 		if (pretty)
 			file << setw(4) << results << endl;
 		else
 			file << results << endl;
-		return;
+		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file?\nA file with only results is created.");
 	}
 
 }
