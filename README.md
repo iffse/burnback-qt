@@ -17,6 +17,7 @@ When using Gmsh and the script, you can define boundary conditions with physical
 - `inlet 0`: The boundary is an inlet, where the propellant starts to burn. The number after the condition is the initial condition applied in that boundary.
 - `outlet`: Used for boundaries where the combustion ends, like the shell of the container.
 - `symmetry 45`: Used to indicate that a boundary defines a symmetry. Numbers after the condition is the angle of the symmetry line with respect to the x asis in degrees.
+- `condition`: Placeholder for conditions that should be changed later in Burnback GUI (will be treated as outlet).
 
 In surfaces, you can define recession velocities:
 

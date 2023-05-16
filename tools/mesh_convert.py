@@ -72,7 +72,7 @@ boundaries = []
 recessions = {}
 for field in mesh.field_data:
 	condition = field.split()
-	if condition[0] in ['inlet', 'outlet', 'symmetry']:
+	if condition[0] in ['inlet', 'outlet', 'symmetry', 'condition']:
 		boundaries.append(mesh.field_data[field][0])
 	elif condition[0] == 'recession':
 		recessions[mesh.field_data[field][0]] = float(condition[1])
@@ -98,6 +98,12 @@ for field in mesh.field_data:
 				'type': 'symmetry',
 				'value': float(condition[1]),
 				'description': condition[2:] if len(condition) > 2 else ''
+			})
+		case 'condition':
+			conditions['boundary'].append({
+				'tag': condition_code,
+				'type': 'condition',
+				'description': condition[1:] if len(condition) > 1 else ''
 			})
 
 print('Assining conditions to boundaries and recession nodes...')
