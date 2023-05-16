@@ -386,8 +386,9 @@ void boundaryFlux() {
 }
 
 void eulerExplicit() {
-	// const auto &dtMin = *min_element(dt.begin(), dt.end());
-	const auto dtMin = cfl * *min_element(height.begin(), height.end());
+	const auto &minHeight = *min_element(height.begin(), height.end());
+	const auto &maxRecession = *min_element(recession.begin(), recession.end());
+	const auto dtMin = cfl * minHeight / maxRecession;
 
 	for (uint node = 0; node < numNodes; ++node) {
 		auto diffWeight = diffusiveWeight;
