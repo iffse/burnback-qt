@@ -18,6 +18,7 @@ inline uint minIter;
 inline uint maxIter;
 inline uint currentIter;
 inline double tolerance;
+inline std::vector<double> errorIter;
 
 inline std::vector<int> meshData;
 inline std::vector<double> x;
