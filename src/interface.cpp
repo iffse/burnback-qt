@@ -214,6 +214,7 @@ void Actions::worker() {
 		eps = vector<double>(numNodes);
 		currentIter = 0;
 	}
+	errorIter.resize(maxIter);
 
 	double error = tolerance + 1;
 	QString linesToPrint = "";
@@ -228,7 +229,8 @@ void Actions::worker() {
 		}
 		++currentIter;
 		Iterations::subIteration();
-		error = getError();
+		errorIter[currentIter - 1] = getError();
+		error = errorIter[currentIter - 1];
 
 		if (linesToPrint != "")
 			linesToPrint += "\n";
@@ -269,6 +271,7 @@ void Actions::afterWorker() {
 	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
 
 	emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
+	emit graphErrorIter(errorIter, *max_element(errorIter.begin(), errorIter.end()));
 	drawIsocontourLines(isocontourSize, numIsocontourLines);
 }
 
