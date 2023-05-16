@@ -26,8 +26,19 @@ ScrollView {
 					ctx.lineTo(list[i+2], canvas.height - list[i+3]);
 				}
 
-				if (Material.theme == Material.Dark && color === "#000000") {
-					color = "#ffffff"
+				if (Material.theme == Material.Dark) {
+					if (color === "#000000") {
+						color = "#ffffff";
+					}
+					else if (color.indexOf("hsl") == 0) {
+						var hsl = color.split(",");
+						console.log(hsl[1]);
+						if (hsl[1] != " 0%") {
+							hsl[2] = " 75%)";
+						}
+						color = hsl.join(",");
+						console.log(color);
+					}
 				}
 				ctx.strokeStyle = color;
 				ctx.stroke();
