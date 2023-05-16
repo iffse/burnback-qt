@@ -2,7 +2,7 @@
 
 Analysis of 2D burn surfaces (3D only when axisymmetric) for solid propellant rockets using Time Marching Method as an alternative of the Level Set Method.
 
-Built binaries for Windows and MacOS can be found at [releases](https://github.com/iffse/burnback-qt/releases). For Linux is advisable to compile from source due to Qt has no compatibility across different distributions.
+Built binaries for Windows and MacOS can be found at [releases](https://github.com/iffse/burnback-qt/releases). For Linux is advisable to compile from source as Qt has no compatibility across different distributions (it is also possible to run the Windows binary through Wine, with minor flickers).
 
 Supports both light and dark theme. Should use accordingly to your system theme. If you want dark theme, and it isn't, add `QT_QUICK_CONTROLS_MATERIAL_THEME=Dark` to your environment variables.
 
@@ -16,7 +16,7 @@ When using Gmsh and the script, you can define boundary conditions with physical
 
 - `inlet 0`: The boundary is an inlet, where the propellant starts to burn. The number after the condition is the initial condition applied in that boundary.
 - `outlet`: Used for boundaries where the combustion ends, like the shell of the container.
-- `symmetry 45`: Used to indicate that a boundary defines a symmetry. Numbers after the condition is the angle of the symmetry line with respect to the x asis.
+- `symmetry 45`: Used to indicate that a boundary defines a symmetry. Numbers after the condition is the angle of the symmetry line with respect to the x asis in degrees.
 
 In surfaces, you can define recession velocities:
 
