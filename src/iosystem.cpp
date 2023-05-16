@@ -205,7 +205,7 @@ void readMesh(QString &filepath) {
 
 	try {
 		auto &mesh = json["mesh"];
-		edgeData = edgeData = mesh["edges"];
+		edgeData = mesh["edges"];
 	} catch (...) {
 		throw std::invalid_argument("Unable to read edge connectivity from JSON file. Missing edges field or wrong format?");
 		return;
@@ -231,7 +231,7 @@ void readMesh(QString &filepath) {
 					uBoundaryData.insert(pair<int, double>(boundaryTag, condition["value"]));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 1));
 					break;
-				case 1: case 3: // outlet
+				case 1: case 3: // outlet or undefined
 					uBoundaryData.insert(pair<int, double>(boundaryTag, 0));
 					connectivityMatrixBoundaryConditions.insert(pair<int, int>(boundaryTag, 2));
 					break;

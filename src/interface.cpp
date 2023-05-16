@@ -120,31 +120,6 @@ void Actions::readMeshWorker(QString filepath) {
 		emit readFinished(false);
 		return;
 	}
-
-	emit newOutput("--> Creating connectivity matrix");
-	ConnectivityMatrix::NodeTriangles();
-	ConnectivityMatrix::TriangleEdge();
-	ConnectivityMatrix::NodeEdge();
-
-	emit newOutput("--> Creating vertex-edge matrix");
-	ConnectivityMatrix::createVertexEdge();
-
-	emit newOutput("--> Reordering");
-	ConnectivityMatrix::reorder();
-	regenerateMeshData();
-
-	emit newOutput("--> Recreating connectivity matrix");
-	ConnectivityMatrix::NodeTriangles();
-	ConnectivityMatrix::TriangleEdge();
-	ConnectivityMatrix::NodeEdge();
-
-	emit newOutput("--> Creating boundary matrix");
-	setBoundaryConditions();
-	emit newOutput("--> Creating angles matrix");
-	setAngles();
-	emit newOutput("--> Creating metric matrix");
-	setMetric();
-
 	emit readFinished(true);
 }
 
@@ -203,8 +178,31 @@ void Actions::worker() {
 	#ifdef DEBUG
 	std::feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 	#endif
-	emit newOutput("--> Starting subiteration loop");
 	if (!resume) {
+		emit newOutput("--> Creating connectivity matrix");
+		ConnectivityMatrix::NodeTriangles();
+		ConnectivityMatrix::TriangleEdge();
+		ConnectivityMatrix::NodeEdge();
+
+		emit newOutput("--> Creating vertex-edge matrix");
+		ConnectivityMatrix::createVertexEdge();
+
+		emit newOutput("--> Reordering");
+		ConnectivityMatrix::reorder();
+		regenerateMeshData();
+
+		emit newOutput("--> Recreating connectivity matrix");
+		ConnectivityMatrix::NodeTriangles();
+		ConnectivityMatrix::TriangleEdge();
+		ConnectivityMatrix::NodeEdge();
+
+		emit newOutput("--> Creating boundary matrix");
+		setBoundaryConditions();
+		emit newOutput("--> Creating angles matrix");
+		setAngles();
+		emit newOutput("--> Creating metric matrix");
+		setMetric();
+
 		uVertex = vector<double>(numNodes, uInit);
 
 		duVertex.fill(vector<double>(numNodes));
@@ -214,6 +212,7 @@ void Actions::worker() {
 		eps = vector<double>(numNodes);
 		currentIter = 0;
 	}
+	emit newOutput("--> Starting subiteration loop");
 	errorIter.resize(maxIter);
 
 	double error = tolerance + 1;
@@ -240,14 +239,14 @@ void Actions::worker() {
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
 			clock = now;
 			emit newOutput(linesToPrint);
-			updateProgress(currentIter, maxIter);
+            emit updateProgress(currentIter, maxIter);
 			linesToPrint = "";
 		}
 	}
 
 	if (linesToPrint != "") {
 		emit newOutput(linesToPrint);
-		updateProgress(currentIter, maxIter);
+        emit updateProgress(currentIter, maxIter);
 	}
 
 	emit newOutput("--> Subiteration ended");
@@ -276,12 +275,6 @@ void Actions::afterWorker() {
 }
 
 void Actions::exportData(QString filepath, bool pretty) {
-#ifdef _WIN32
-	const QString substring = "file:///";
-#else
-	const QString substring = "file://";
-#endif
-
 	auto origin = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
 
 	clearSubstring(filepath);
@@ -350,13 +343,6 @@ void Actions::updateBoundaries(bool saveToFile, bool pretty) {
 	appendOutput("Boundaries updated");
 
 	if (saveToFile){
-#ifdef _WIN32
-		const QString substring = "file:///";
-#else
-		const QString substring = "file://";
-#endif
-
-
 		auto filepath = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
 		clearSubstring(filepath);
 
