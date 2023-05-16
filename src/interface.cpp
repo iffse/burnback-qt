@@ -282,15 +282,20 @@ void Actions::worker() {
 
 void Actions::afterWorker() {
 	root->findChild<QObject*>("runButton")->setProperty("text", "Run");
-	double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
-	double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
+	drawIsocontourLines(isocontourSize, numIsocontourLines);
 
-	emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax);
 	emit graphErrorIter(
 		vector<double>(errorIter.begin(), errorIter.begin() + currentIter),
-		*max_element(errorIter.begin(), errorIter.end())
+		*max_element(errorIter.begin(), errorIter.begin() + currentIter) * 1.05
 	);
-	drawIsocontourLines(isocontourSize, numIsocontourLines);
+
+	if (numberArea == 0)
+		emit graphBurningArea(QVariantList(), 1, 1);
+	else {
+		double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
+		double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
+		emit graphBurningArea(plotData::burningAreaData(), burningWayMax * 1.05, burningAreaMax * 1.05);
+	}
 }
 
 void Actions::exportData(QString filepath, bool pretty) {

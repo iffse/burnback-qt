@@ -446,6 +446,9 @@ void setBoundary() {
 void setBurningArea() {
 	burningArea = vector<double>(numberArea);
 	burningWay = vector<double>(numberArea);
+	if (numberArea == 0)
+		return;
+
 	auto epsilon = 0.001;
 	auto uMin = *min_element(uVertex.begin(), uVertex.end());
 	auto uMax = *max_element(uVertex.begin(), uVertex.end());

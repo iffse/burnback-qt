@@ -17,7 +17,6 @@ void subIteration() {
 }
 
 tuple<double, double> mainLoop() {
-	double areaMDF = 0.0;
 	double areaGeometric = 0.0;
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
@@ -34,6 +33,10 @@ tuple<double, double> mainLoop() {
 		areaGeometric += cellArea;
 	}
 
+	if (numberArea == 0)
+		return {areaGeometric, 0};
+
+	double areaMDF = 0.0;
 	for (uint area = 0; area < numberArea - 1; ++area)
 		areaMDF += 0.5 * (burningArea[area] + burningArea[area + 1]) * (burningWay[area + 1] - burningWay[area]);
 

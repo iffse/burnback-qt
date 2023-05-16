@@ -58,7 +58,7 @@ ScrollView {
 				LabelInput {
 					text: "Number of areas"
 					placeholderText: "Enter a number"
-					toolTipText: "Number of areas used to graph the burning area\n\nLeave empty to not graph the burning area"
+					toolTipText: "Number of areas used toa calculate the error with respect to the minimum distance function and the burning area area\n\nLeave empty to disable"
 					objName: "areas"
 					decimals: false
 					negative: false

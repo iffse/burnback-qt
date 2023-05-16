@@ -36,17 +36,14 @@ Item {
 				id: series
 				axisX: xAxis
 				axisY: yAxis
-
-				XYPoint { x: 0; y: 0 }
-
 			}
 
 			Connections {
 				target: actions
 				function onGraphBurningArea(points, xMax, yMax) {
 					series.clear();
-					xAxis.max = xMax * 1.05;
-					yAxis.max = yMax * 1.05;
+					xAxis.max = xMax;
+					yAxis.max = yMax;
 					for (var i = 0; i < points.length; ++i) {
 						var point = points[i];
 						series.append(point.x, point.y);
@@ -67,8 +64,8 @@ Item {
 
 			ValueAxis {
 				id: errorXAxis
-				min: 0
-				max: 1
+				min: 1
+				max: 5
 				labelFormat: "%i"
 			}
 
@@ -83,20 +80,17 @@ Item {
 				id: errorSeries
 				axisX: errorXAxis
 				axisY: errorYAxis
-
-				XYPoint { x: 0; y: 0 }
-
 			}
 
 			Connections {
 				target: actions
 				function onGraphErrorIter(points, errorMax) {
 					errorSeries.clear();
-					errorYAxis.max = errorMax * 1.05;
-					errorXAxis.max = Math.ceil(points.length * 1.05);
+					errorYAxis.max = errorMax;
+					errorXAxis.max = points.length;
 
 					for (var i = 0; i < points.length; ++i) {
-						errorSeries.append(i+1,points[i]);
+						errorSeries.append(i+1, points[i]);
 					}
 				}
 			}
