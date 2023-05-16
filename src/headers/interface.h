@@ -32,4 +32,7 @@ public slots:
 	std::vector<QString> getBoundaries();
 	void updateBoundaries(bool saveToFile, bool pretty);
 	void contourDataPreviewGenerate(int width);
+	QString getRecession();
+	QString getRecession(QString filepath);
+	void drawIsocontourLines(uint maxSize, uint numLines);
 };
