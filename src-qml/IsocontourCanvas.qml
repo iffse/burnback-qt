@@ -32,12 +32,10 @@ ScrollView {
 					}
 					else if (color.indexOf("hsl") == 0) {
 						var hsl = color.split(",");
-						console.log(hsl[1]);
 						if (hsl[1] != " 0%") {
 							hsl[2] = " 75%)";
 						}
 						color = hsl.join(",");
-						console.log(color);
 					}
 				}
 				ctx.strokeStyle = color;
