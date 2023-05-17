@@ -1,4 +1,3 @@
-import numpy as np
 import sys
 import json
 import meshio
@@ -14,6 +13,7 @@ Options:
 
 output_name = ''
 filename = ''
+filename = 'gmsh/conocyl-light.msh'
 pretty = False
 
 index = 1
@@ -134,12 +134,6 @@ data['edge'] = [list(node) + [*entries] for node, entries in edges.items()]
 
 # index corrections
 print('Correcting indices')
-for triangle in data['triangle']:
-	triangle = list(map(lambda x: x+1, triangle))
-
-for tetra in data['tetra']:
-	tetra = list(map(lambda x: x+1, tetra))
-
 for edge in data['edge']:
 	edge[0:2] = list(map(lambda x: x+1, edge[0:2]))
 	edge[2:4] = list(map(lambda x: x+1 if x >= 0 else x, edge[2:4]))
