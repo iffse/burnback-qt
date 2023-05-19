@@ -23,7 +23,7 @@ void Reader::readInput() {//{{{
 	cflViscous = root->findChild<QObject*>("viscousCFL")->property("text").toDouble();
 	targetIter = root->findChild<QObject*>("targetIter")->property("text").toInt();
 	if (targetIter == 0)
-		targetIter = numeric_limits<uint>::max();
+		targetIter = 300;
 
 	diffusiveWeight = root->findChild<QObject*>("diffusiveWeight")->property("text").toDouble();
 	diffusiveMethod = root->findChild<QObject*>("diffusiveMethod")->property("currentIndex").toInt();

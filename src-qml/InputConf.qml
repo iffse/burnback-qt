@@ -114,7 +114,7 @@ ScrollView {
 				LabelInput {
 					text: "Target iterations"
 					placeholderText: "Enter a number"
-					toolTipText: "Maximum number of iterations to perform\n\nLeave empty to iterate to the infinity"
+					toolTipText: "Maximum number of iterations to perform\n\nDefault: 300"
 					defaultInput: "300"
 					objName: "targetIter"
 					negative: false
