@@ -72,7 +72,6 @@ void Actions::readMeshWorker(QString filepath) {
 	numTriangles = 0;
 	numEdges = 0;
 	numTriangleEdge = 0;
-	meshData.clear();
 	connectivityMatrixBoundaryConditions.clear();
 	uBoundaryData.clear();
 	boundaryDescriptions.clear();
@@ -218,25 +217,23 @@ void Actions::worker() {
 	if (currentIter < targetIter)
 		errorIter.resize(targetIter);
 
-	double error = tolerance + 1;
 	QString linesToPrint = "";
 	auto clock = std::chrono::system_clock::now();
 	timeTotal = 0;
 
-	while (currentIter < targetIter && error > tolerance) {
-		++currentIter;
+	for (; currentIter < targetIter; ++currentIter) {
 		Iterations::subIteration();
-		errorIter[currentIter - 1] = getError();
-		error = errorIter[currentIter - 1];
+		auto error = getError();
+		errorIter[currentIter] = error;
 
 		if (linesToPrint != "")
 			linesToPrint += "\n";
-		linesToPrint += "Iteration: " + QString::number(currentIter) + " Time: " + QString::number(timeTotal) + " Error: " + QString::number(error * 100) + "%";
+		linesToPrint += "Iteration: " + QString::number(currentIter + 1) + " Time: " + QString::number(timeTotal) + " Error: " + QString::number(error * 100) + "%";
 
 		if (error > 1) {
 			if (linesToPrint != "") {
 				emit newOutput(linesToPrint);
-				emit updateProgress(currentIter, targetIter);
+				emit updateProgress(currentIter + 1, targetIter);
 			}
 			emit newOutput("Error: Divergence detected. Stopping. Try reducing the CFL.");
 			emit newOutput("--> Stopped");
@@ -250,7 +247,7 @@ void Actions::worker() {
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(now - clock).count() > 10) {
 			clock = now;
 			emit newOutput(linesToPrint);
-			emit updateProgress(currentIter, targetIter);
+			emit updateProgress(currentIter + 1, targetIter);
 			linesToPrint = "";
 			if (!running) {
 				emit newOutput("--> Stopped");
@@ -264,7 +261,7 @@ void Actions::worker() {
 
 	if (linesToPrint != "") {
 		emit newOutput(linesToPrint);
-		emit updateProgress(currentIter, targetIter);
+		emit updateProgress(currentIter + 1, targetIter);
 	}
 
 	emit newOutput("--> Subiteration ended");

@@ -16,10 +16,8 @@ inline double cfl;
 inline double cflViscous;
 inline uint targetIter;
 inline uint currentIter;
-inline double tolerance;
 inline std::vector<double> errorIter;
 
-inline std::vector<int> meshData;
 inline std::vector<double> x;
 inline std::vector<double> y;
 inline std::vector<double> connectivityMatrixEdges;

@@ -62,6 +62,7 @@ ScrollView {
 					objName: "areas"
 					decimals: false
 					negative: false
+					defaultInput: "30"
 				}
 
 				LabelInput {
@@ -106,23 +107,16 @@ ScrollView {
 					placeholderText: "Enter a number"
 					toolTipText: "Non-dimensional time. The smaller the more accurate the solution but the longer the computation time\n\nUse a value between 0 and 0.5 (both non-inclusive) for a stable and monotonous solution\nException: Zhang and Shu's scheme is stable for CFL < 2.5 (empirical value) when the diffusive weight is 1. Resulting in a very fast computation with high precision"
 					objName: "cfl"
+					defaultInput: "1"
 					decimals: true
 				}
 
 				LabelInput {
 					text: "Target iterations"
 					placeholderText: "Enter a number"
-					toolTipText: "Maximum number of iterations to perform"
+					toolTipText: "Maximum number of iterations to perform\n\nLeave empty to iterate to the infinity"
+					defaultInput: "300"
 					objName: "targetIter"
-					negative: false
-				}
-
-				LabelInput {
-					text: "Tolerance"
-					placeholderText: "Enter a number"
-					toolTipText: "Tolerance for the convergence of the solution.\nThe computation will stop before reaching the target iterations if the error of the solution at the end of the iteration is less than the tolerance\n\nLeave empty to disable this feature"
-					objName: "tolerance"
-					decimals: true
 					negative: false
 				}
 			}

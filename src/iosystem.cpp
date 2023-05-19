@@ -22,7 +22,8 @@ void Reader::readInput() {//{{{
 	cfl = root->findChild<QObject*>("cfl")->property("text").toDouble();
 	cflViscous = root->findChild<QObject*>("viscousCFL")->property("text").toDouble();
 	targetIter = root->findChild<QObject*>("targetIter")->property("text").toInt();
-	tolerance = root->findChild<QObject*>("tolerance")->property("text").toDouble();
+	if (targetIter == 0)
+		targetIter = numeric_limits<uint>::max();
 
 	diffusiveWeight = root->findChild<QObject*>("diffusiveWeight")->property("text").toDouble();
 	diffusiveMethod = root->findChild<QObject*>("diffusiveMethod")->property("currentIndex").toInt();
@@ -77,9 +78,7 @@ void readBoundaryConditions(QTextStream &in) {
 }
 
 void readMeshData(QTextStream &in) {
-	if (meshData.size() < 10)
-		meshData = vector<int>(10);
-
+	auto	meshData = vector<int>(10);
 	for (int i = 0; i < 9; ++i)
 		meshData[i] = in.readLine().simplified().toInt();
 
