@@ -369,18 +369,26 @@ void boundaryFlux() {
 			// freeBoundaries
 			case outlet: case free2: {
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				flux[1][node] *= 2;
+				flux[1][node] = 0;
 				break;
 			}
 			// symmetryBoundaries
-			case symmetry: case outletSymmetry: case symmetry2: {
+			case symmetry: case symmetry2: {
 				auto duVer = duVertex[0][node] * cos(uBoundaryData[boundary]) + duVertex[1][node] * sin(uBoundaryData[boundary]);
 
 				duVertex[0][node] = duVer * cos(uBoundaryData[boundary]);
 				duVertex[1][node] = duVer * sin(uBoundaryData[boundary]);
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				flux[1][node] *= 2;
+				// flux[1][node] *= 2;
 				break;
+			}
+			case outletSymmetry: {
+				auto duVer = duVertex[0][node] * cos(uBoundaryData[boundary]) + duVertex[1][node] * sin(uBoundaryData[boundary]);
+
+				duVertex[0][node] = duVer * cos(uBoundaryData[boundary]);
+				duVertex[1][node] = duVer * sin(uBoundaryData[boundary]);
+				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
+				flux[1][node] = 0;
 			}
 			default:
 				break;
