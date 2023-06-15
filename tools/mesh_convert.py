@@ -13,7 +13,7 @@ Options:
 
 output_name = ''
 filename = ''
-filename = 'gmsh/conocyl-light.msh'
+# filename = 'gmsh/conocyl-light.msh'
 pretty = False
 
 index = 1
@@ -150,7 +150,7 @@ meshOut = {
 	},
 	'mesh': {
 		'nodes': data['point'],
-		# 'triangles': data['triangle'],
+		'triangles': data['triangle'],
 		# 'tetrahedra': data['tetra'],
 		'edges': data['edge']
 	},
