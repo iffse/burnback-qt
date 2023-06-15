@@ -109,7 +109,13 @@ void setAngles() {
 	sector = vector<double>(numNodes);
 	thetaEdge.fill(vector<double>(numEdges));
 	betaEdge.fill(vector<double>(numEdges));
-	directionEdge.fill(vector<double>(numEdges));
+	if (diffusiveMethod == Tizon) {
+		normalEdge.fill(vector<double>(numEdges));
+		directionEdge.fill(vector<double>(0));
+	} else {
+		normalEdge.fill(vector<double>(0));
+		directionEdge.fill(vector<double>(numEdges));
+	}
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
 		auto node1 = connectivityMatrixNodeEdge[0][edge] - 1;
@@ -124,8 +130,18 @@ void setAngles() {
 		vertexX1 /= vertexV1;
 		vertexY1 /= vertexV1;
 
-		directionEdge[0][edge] = vertexX1;
-		directionEdge[1][edge] = vertexY1;
+		if (diffusiveMethod != Tizon) {
+			directionEdge[0][edge] = vertexX1;
+			directionEdge[1][edge] = vertexY1;
+		}
+
+		auto bisection = [](double x1, double y1, double x2, double y2) {
+			auto x = (x1 + x2) / 2;
+			auto y = (y1 + y2) / 2;
+			auto v = abs(complex<double>(x, y));
+
+			return make_pair(x / v, y / v);
+		};
 
 		if (nodeVertex1 >= 0) {
 			auto vertexX2 = x[nodeVertex1] - x[node1];
@@ -146,6 +162,16 @@ void setAngles() {
 
 			thetaEdge[0][edge] = acos(vertexX1 * vertexX2 + vertexY1 * vertexY2);
 			thetaEdge[2][edge] = acos(-vertexX1 * vertexX5 - vertexY1 * vertexY5);
+			if (diffusiveMethod == Tizon) {
+				auto normal1 = bisection(vertexX1, vertexY1, vertexX2, vertexY2);
+				auto normal2 = bisection(- vertexX1, - vertexY1, vertexX5, vertexY5);
+
+				normalEdge[0][edge] = normal1.first;
+				normalEdge[1][edge] = normal1.second;
+				normalEdge[4][edge] = normal2.first;
+				normalEdge[5][edge] = normal2.second;
+
+			}
 		}
 
 		if (nodeVertex2 >= 0) {
@@ -163,6 +189,16 @@ void setAngles() {
 
 			thetaEdge[1][edge] = acos(vertexX1 * vertexX3 + vertexY1 * vertexY3);
 			thetaEdge[3][edge] = acos(-vertexX1 * vertexX4 - vertexY1 * vertexY4);
+
+			if (diffusiveMethod == Tizon) {
+				auto normal1 = bisection(vertexX1, vertexY1, vertexX3, vertexY3);
+				auto normal2 = bisection(- vertexX1, - vertexY1, vertexX4, vertexY4);
+
+				normalEdge[2][edge] = normal1.first;
+				normalEdge[3][edge] = normal1.second;
+				normalEdge[6][edge] = normal2.first;
+				normalEdge[7][edge] = normal2.second;
+			}
 		}
 
 		// setting angular sector of each node
@@ -181,11 +217,11 @@ void setAngles() {
 		}
 
 		if (diffusiveMethod == Tizon) {
-			betaEdge[0][edge] = 2 * sin(thetaEdge[0][edge] / 2);
-			betaEdge[1][edge] = 2 * sin(thetaEdge[2][edge] / 2);
+			betaEdge[0][edge] = sin(thetaEdge[0][edge] / 2);
+			betaEdge[1][edge] = sin(thetaEdge[2][edge] / 2);
 		} else {
-			betaEdge[0][edge] = tan( 0.5 * thetaEdge[0][edge] ) + tan( 0.5 * thetaEdge[1][edge] );
-			betaEdge[1][edge] = tan( 0.5 * thetaEdge[2][edge] ) + tan( 0.5 * thetaEdge[3][edge] );
+			betaEdge[0][edge] = tan(thetaEdge[0][edge] / 2) + tan(thetaEdge[1][edge] / 2);
+			betaEdge[1][edge] = tan(thetaEdge[2][edge] / 2) + tan(thetaEdge[3][edge] / 2);
 		}
 	}
 
@@ -226,10 +262,10 @@ void setMetric() {
 }
 
 void setduVarriable() {
-	if (diffusiveMethod == ZhangShu)
-		maxDuEdge.fill(vector<double>(numNodes));
-	else
-		maxDuEdge.fill(vector<double>(0));
+	// if (diffusiveMethod == ZhangShu)
+	// 	maxDuEdge.fill(vector<double>(numNodes));
+	// else
+	// 	maxDuEdge.fill(vector<double>(0));
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
 
@@ -250,25 +286,25 @@ void setduVarriable() {
 		duVariable[0][triangle] = rr * (u21 * y31 - u31 * y21);
 		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
 
-		if (diffusiveMethod != ZhangShu)
-			continue;
+		// if (diffusiveMethod != ZhangShu)
+		// 	continue;
 
-		for (uint i = 0; i < 3; ++i) {
-			auto node = connectivityMatrixNodeTriangle[i][triangle] - 1;
+		// for (uint i = 0; i < 3; ++i) {
+		// 	auto node = connectivityMatrixNodeTriangle[i][triangle] - 1;
 
-			auto &ux = duVariable[0][triangle];
-			auto &uy = duVariable[1][triangle];
+		// 	auto &ux = duVariable[0][triangle];
+		// 	auto &uy = duVariable[1][triangle];
 
-			auto uMod = abs(complex<double>(ux, uy));
+		// 	auto uMod = abs(complex<double>(ux, uy));
 
-			if (uMod == 0)
-				continue;
+		// 	if (uMod == 0)
+		// 		continue;
 
-			if (abs(ux/uMod) > maxDuEdge[0][node])
-				maxDuEdge[0][node] = abs(ux/uMod);
-			if (abs(uy/uMod) > maxDuEdge[1][node])
-				maxDuEdge[1][node] = abs(uy/uMod);
-		}
+		// 	if (abs(ux/uMod) > maxDuEdge[0][node])
+		// 		maxDuEdge[0][node] = abs(ux/uMod);
+		// 	if (abs(uy/uMod) > maxDuEdge[1][node])
+		// 		maxDuEdge[1][node] = abs(uy/uMod);
+		// }
 
 	}
 }
@@ -299,8 +335,8 @@ void setFlux() {
 			dux += duVariable[0][triangle1];
 			duy += duVariable[1][triangle1];
 
-			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 			if (diffusiveMethod == Abgrall) {
+				auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 				if (duMod > lipschitz[node1])
 					lipschitz[node1] = duMod;
 				if (duMod > lipschitz[node2])
@@ -317,9 +353,8 @@ void setFlux() {
 			dux += duVariable[0][triangle2];
 			duy += duVariable[1][triangle2];
 
-			// ?
-			auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 			if (diffusiveMethod == Abgrall) {
+				auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
 				if (duMod > lipschitz[node1])
 					lipschitz[node1] = duMod;
 				if (duMod > lipschitz[node2])
@@ -328,7 +363,36 @@ void setFlux() {
 
 		}
 
-		// Uj and Uj+1 * n
+		if (diffusiveMethod == Tizon) {
+			if (triangle1 >= 0) {
+				auto &dux = duVariable[0][triangle1];
+				auto &duy = duVariable[1][triangle1];
+
+				auto &normal1x = normalEdge[0][edge];
+				auto &normal1y = normalEdge[1][edge];
+				auto &normal2x = normalEdge[4][edge];
+				auto &normal2y = normalEdge[5][edge];
+
+				flux[1][node1] += (dux * normal1x + duy * normal1y) * betaEdge[0][edge];
+				flux[1][node2] += (dux * normal2x + duy * normal2y) * betaEdge[1][edge];
+			}
+
+			if (triangle2 >= 0) {
+				auto &dux = duVariable[0][triangle2];
+				auto &duy = duVariable[1][triangle2];
+
+				auto &normal1x = normalEdge[2][edge];
+				auto &normal1y = normalEdge[3][edge];
+				auto &normal2x = normalEdge[6][edge];
+				auto &normal2y = normalEdge[7][edge];
+
+				flux[1][node1] += (dux * normal1x + duy * normal1y) * betaEdge[0][edge];
+				flux[1][node2] += (dux * normal2x + duy * normal2y) * betaEdge[1][edge];
+			}
+			continue;
+		}
+
+		// Uj and Uj+1 * nj+1/2
 		dux *= 0.5 * directionEdge[0][edge];
 		duy *= 0.5 * directionEdge[1][edge];
 
@@ -410,12 +474,13 @@ void eulerExplicit() {
 				break;
 			}
 			case ZhangShu: {
-				auto alf = recession[node] * max(maxDuEdge[0][node], maxDuEdge[1][node]);
-				diffWeight *= alf;
+				// auto alf = recession[node] * max(maxDuEdge[0][node], maxDuEdge[1][node]);
+				diffWeight *= recession[node];
 				break;
 			}
 			case Tizon: {
-				diffWeight *= cflViscous / cfl;
+				// diffWeight *= cflViscous / cfl;
+				diffWeight *= recession[node];
 				break;
 			}
 		}

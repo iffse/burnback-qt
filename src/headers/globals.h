@@ -47,6 +47,7 @@ inline std::array<std::vector<double>, 4> thetaEdge;
 // contribution of angles in each node of a edge
 inline std::array<std::vector<double>, 2> betaEdge;
 inline std::array<std::vector<double>, 2> directionEdge;
+inline std::array<std::vector<double>, 8> normalEdge;
 inline std::vector<double> sector;
 inline std::vector<double> area;
 inline std::vector<double> height;
