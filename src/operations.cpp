@@ -312,10 +312,6 @@ void setduVarriable() {
 void setFlux() {
 	flux[1] = vector<double>(numNodes);
 	duVertex.fill(vector<double>(numNodes));
-	auto lipschitz = vector<double>();
-	if (diffusiveMethod == Abgrall) {
-		lipschitz = vector<double>(numNodes, 1);
-	}
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
 		const auto triangle1 = connectivityMatrixTriangleEdge[0][edge] - 1;
@@ -323,25 +319,11 @@ void setFlux() {
 		const auto node1 = connectivityMatrixNodeEdge[0][edge] - 1;
 		const auto node2 = connectivityMatrixNodeEdge[1][edge] - 1;
 
-		auto dux = 0.0;
-		auto duy = 0.0;
-
 		if (triangle1 >= 0) {
 			duVertex[0][node1] += thetaEdge[0][edge] * duVariable[0][triangle1];
 			duVertex[1][node1] += thetaEdge[0][edge] * duVariable[1][triangle1];
 			duVertex[0][node2] += thetaEdge[2][edge] * duVariable[0][triangle1];
 			duVertex[1][node2] += thetaEdge[2][edge] * duVariable[1][triangle1];
-
-			dux += duVariable[0][triangle1];
-			duy += duVariable[1][triangle1];
-
-			if (diffusiveMethod == Abgrall) {
-				auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
-				if (duMod > lipschitz[node1])
-					lipschitz[node1] = duMod;
-				if (duMod > lipschitz[node2])
-					lipschitz[node2] = duMod;
-			}
 		}
 
 		if (triangle2 >= 0) {
@@ -349,19 +331,19 @@ void setFlux() {
 			duVertex[1][node1] += thetaEdge[1][edge] * duVariable[1][triangle2];
 			duVertex[0][node2] += thetaEdge[3][edge] * duVariable[0][triangle2];
 			duVertex[1][node2] += thetaEdge[3][edge] * duVariable[1][triangle2];
-
-			dux += duVariable[0][triangle2];
-			duy += duVariable[1][triangle2];
-
-			if (diffusiveMethod == Abgrall) {
-				auto duMod = 1 + abs(complex<double>(duVariable[0][triangle1], duVariable[1][triangle1]));
-				if (duMod > lipschitz[node1])
-					lipschitz[node1] = duMod;
-				if (duMod > lipschitz[node2])
-					lipschitz[node2] = duMod;
-			}
-
 		}
+	}
+
+	for (uint node = 0; node < numNodes; ++node) {
+		duVertex[0][node] /= 2;
+		duVertex[1][node] /= 2;
+	}
+
+	for (uint edge = 0; edge < numEdges; ++edge) {
+		const auto triangle1 = connectivityMatrixTriangleEdge[0][edge] - 1;
+		const auto triangle2 = connectivityMatrixTriangleEdge[1][edge] - 1;
+		const auto node1 = connectivityMatrixNodeEdge[0][edge] - 1;
+		const auto node2 = connectivityMatrixNodeEdge[1][edge] - 1;
 
 		if (diffusiveMethod == Tizon) {
 			if (triangle1 >= 0) {
@@ -373,8 +355,15 @@ void setFlux() {
 				auto &normal2x = normalEdge[4][edge];
 				auto &normal2y = normalEdge[5][edge];
 
-				flux[1][node1] += (dux * normal1x + duy * normal1y) * betaEdge[0][edge];
-				flux[1][node2] += (dux * normal2x + duy * normal2y) * betaEdge[1][edge];
+				const auto &condition = nodeBoundaryConditions[0][node1];
+				const auto &boundary = nodeBoundaryConditions[1][node1];
+
+				// if (condition == symmetry || condition == symmetry) {
+				// TODO
+				// }
+
+				flux[1][node1] += ((dux - duVertex[0][node1]) * normal1x + (duy - duVertex[1][node1]) * normal1y) * betaEdge[0][edge];
+				flux[1][node2] += ((dux - duVertex[0][node2]) * normal2x + (duy - duVertex[1][node2]) * normal2y) * betaEdge[1][edge];
 			}
 
 			if (triangle2 >= 0) {
@@ -386,26 +375,40 @@ void setFlux() {
 				auto &normal2x = normalEdge[6][edge];
 				auto &normal2y = normalEdge[7][edge];
 
-				flux[1][node1] += (dux * normal1x + duy * normal1y) * betaEdge[0][edge];
-				flux[1][node2] += (dux * normal2x + duy * normal2y) * betaEdge[1][edge];
+				flux[1][node1] += ((dux - duVertex[0][node1]) * normal1x + (duy - duVertex[1][node1]) * normal1y) * betaEdge[0][edge];
+				flux[1][node2] += ((dux - duVertex[0][node2]) * normal2x + (duy - duVertex[1][node2]) * normal2y) * betaEdge[1][edge];
 			}
 			continue;
 		}
 
 		// Uj and Uj+1 * nj+1/2
-		dux *= 0.5 * directionEdge[0][edge];
-		duy *= 0.5 * directionEdge[1][edge];
+		auto dux = 0.0;
+		auto duy = 0.0;
 
-		flux[1][node1] += betaEdge[0][edge] * (dux + duy);
-		flux[1][node2] -= betaEdge[1][edge] * (dux + duy);
+		if (triangle1 >= 0) {
+			dux += duVariable[0][triangle1];
+			duy += duVariable[1][triangle1];
+		}
+		if (triangle2 >= 0) {
+			dux += duVariable[0][triangle2];
+			duy += duVariable[1][triangle2];
+		}
+
+		dux /= 2;
+		duy /= 2;
+
+		auto dux1 = (dux - duVertex[0][node1]) * directionEdge[0][edge];
+		auto duy1 = (duy - duVertex[1][node1]) * directionEdge[1][edge];
+
+		auto dux2 = (dux - duVertex[0][node2]) * directionEdge[0][edge];
+		auto duy2 = (duy - duVertex[1][node2]) * directionEdge[1][edge];
+
+		flux[1][node1] += betaEdge[0][edge] * (dux1 + duy1);
+		flux[1][node2] -= betaEdge[1][edge] * (dux2 + duy2);
 	}
 
 	for (uint node = 0; node < numNodes; ++node) {
-		if (diffusiveMethod == Abgrall)
-			flux[1][node] *= lipschitz[node];
 		flux[1][node] /= 2 * M_PI;
-		duVertex[0][node] *= 0.5;
-		duVertex[1][node] *= 0.5;
 	}
 
 }
@@ -433,7 +436,7 @@ void boundaryFlux() {
 			// freeBoundaries
 			case outlet: case free2: {
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				flux[1][node] = 0;
+				// flux[1][node] = 0;
 				break;
 			}
 			// symmetryBoundaries
@@ -452,7 +455,7 @@ void boundaryFlux() {
 				duVertex[0][node] = duVer * cos(uBoundaryData[boundary]);
 				duVertex[1][node] = duVer * sin(uBoundaryData[boundary]);
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				flux[1][node] = 0;
+				// flux[1][node] = 0;
 			}
 			default:
 				break;
