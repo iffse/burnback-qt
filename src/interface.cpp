@@ -263,7 +263,7 @@ void Actions::worker() {
 
 	if (linesToPrint != "") {
 		emit newOutput(linesToPrint);
-		emit updateProgress(currentIter + 1, targetIter);
+		emit updateProgress(currentIter, targetIter);
 	}
 
 	emit newOutput("--> Subiteration ended");
