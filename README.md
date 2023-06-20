@@ -10,7 +10,7 @@ Supports both light and dark theme. Should use accordingly to your system theme.
 
 ## Usage
 
-First, you will need a mesh in order to use the program for analysis. For instance, [Gmsh](https://gmsh.info/) is an open source meshing software that can generate 2D and 3D finite element mesh. The input files for Gmsh is preferably in the `.brep` format (which most of the CAD software supports). Note that to place your mesh in the XY plane as the Z coordinate will not be reading by Burnback.
+First, you will need a mesh in order to use the program for analysis. For instance, [Gmsh](https://gmsh.info/) is an open source meshing software that can generate 2D and 3D finite element mesh. The input files for Gmsh is preferably in the `.brep` or `.stp` formats (which most of the CAD software supports). Be sure to place your mesh in the XY plane as the Z coordinate will not be read by Burnback.
 
 Once you have the mesh, you will have to convert it into a Json file with edge based information. A python script that converts Gmsh mesh to this format using [meshio](https://github.com/nschloe/meshio) can be found at tools directory: [mesh_convert.py](./tools/mesh_convert.py). The script is optimized for speed and can convert a mesh with 200K nodes in seconds. If you are using another meshing tool, feel free to edit it (probable you will only need to change the cell names).
 
@@ -26,6 +26,8 @@ In surfaces, you can define recession velocities:
 - `recession 1` (optional): Used to indicate the recession velocity of a node, defaults to 1.
 
 Everything after the names above will be added to a description field.
+
+When using the axisymmetric option, the axis is the horizontal line (`y = 0`).
 
 Example files of Gmsh can be found at [examples/gmsh](./examples/gmsh). The commands to be executed to obtain the Json file are:
 ```shell
