@@ -20,7 +20,6 @@ void Reader::readInput() {//{{{
 	axisymmetric = root->findChild<QObject*>("axisymmetric")->property("checked").toBool();
 	resume = root->findChild<QObject*>("resume")->property("checked").toBool();
 	cfl = root->findChild<QObject*>("cfl")->property("text").toDouble();
-	cflViscous = root->findChild<QObject*>("viscousCFL")->property("text").toDouble();
 	targetIter = root->findChild<QObject*>("targetIter")->property("text").toInt();
 	if (targetIter == 0)
 		targetIter = 300;

@@ -26,9 +26,8 @@ enum boundaryConditions {
 };
 
 enum diffusiveMethods {
-	Abgrall,
-	Tizon,
-	ZhangShu
+	TriangleBased,
+	EdgeBased
 };
 
 
@@ -109,7 +108,7 @@ void setAngles() {
 	sector = vector<double>(numNodes);
 	thetaEdge.fill(vector<double>(numEdges));
 	betaEdge.fill(vector<double>(numEdges));
-	if (diffusiveMethod == Tizon) {
+	if (diffusiveMethod == TriangleBased) {
 		normalEdge.fill(vector<double>(numEdges));
 		directionEdge.fill(vector<double>(0));
 	} else {
@@ -130,7 +129,7 @@ void setAngles() {
 		vertexX1 /= vertexV1;
 		vertexY1 /= vertexV1;
 
-		if (diffusiveMethod != Tizon) {
+		if (diffusiveMethod != TriangleBased) {
 			directionEdge[0][edge] = vertexX1;
 			directionEdge[1][edge] = vertexY1;
 		}
@@ -162,7 +161,7 @@ void setAngles() {
 
 			thetaEdge[0][edge] = acos(vertexX1 * vertexX2 + vertexY1 * vertexY2);
 			thetaEdge[2][edge] = acos(-vertexX1 * vertexX5 - vertexY1 * vertexY5);
-			if (diffusiveMethod == Tizon) {
+			if (diffusiveMethod == TriangleBased) {
 				auto normal1 = bisection(vertexX1, vertexY1, vertexX2, vertexY2);
 				auto normal2 = bisection(- vertexX1, - vertexY1, vertexX5, vertexY5);
 
@@ -190,7 +189,7 @@ void setAngles() {
 			thetaEdge[1][edge] = acos(vertexX1 * vertexX3 + vertexY1 * vertexY3);
 			thetaEdge[3][edge] = acos(-vertexX1 * vertexX4 - vertexY1 * vertexY4);
 
-			if (diffusiveMethod == Tizon) {
+			if (diffusiveMethod == TriangleBased) {
 				auto normal1 = bisection(vertexX1, vertexY1, vertexX3, vertexY3);
 				auto normal2 = bisection(- vertexX1, - vertexY1, vertexX4, vertexY4);
 
@@ -216,7 +215,7 @@ void setAngles() {
 			thetaEdge[3][edge] = thetaEdge[2][edge];
 		}
 
-		if (diffusiveMethod == Tizon) {
+		if (diffusiveMethod == TriangleBased) {
 			betaEdge[0][edge] = sin(thetaEdge[0][edge] / 2);
 			betaEdge[1][edge] = sin(thetaEdge[2][edge] / 2);
 		} else {
@@ -262,11 +261,6 @@ void setMetric() {
 }
 
 void setduVarriable() {
-	// if (diffusiveMethod == ZhangShu)
-	// 	maxDuEdge.fill(vector<double>(numNodes));
-	// else
-	// 	maxDuEdge.fill(vector<double>(0));
-
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
 
 		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
@@ -285,27 +279,6 @@ void setduVarriable() {
 		auto rr = 1 / (y31 * x21 - y21 * x31);
 		duVariable[0][triangle] = rr * (u21 * y31 - u31 * y21);
 		duVariable[1][triangle] = rr * (u31 * x21 - u21 * x31);
-
-		// if (diffusiveMethod != ZhangShu)
-		// 	continue;
-
-		// for (uint i = 0; i < 3; ++i) {
-		// 	auto node = connectivityMatrixNodeTriangle[i][triangle] - 1;
-
-		// 	auto &ux = duVariable[0][triangle];
-		// 	auto &uy = duVariable[1][triangle];
-
-		// 	auto uMod = abs(complex<double>(ux, uy));
-
-		// 	if (uMod == 0)
-		// 		continue;
-
-		// 	if (abs(ux/uMod) > maxDuEdge[0][node])
-		// 		maxDuEdge[0][node] = abs(ux/uMod);
-		// 	if (abs(uy/uMod) > maxDuEdge[1][node])
-		// 		maxDuEdge[1][node] = abs(uy/uMod);
-		// }
-
 	}
 }
 
@@ -335,8 +308,19 @@ void setFlux() {
 	}
 
 	for (uint node = 0; node < numNodes; ++node) {
+		duVertex[0][node] /= sector[node];
+		duVertex[1][node] /= sector[node];
 		duVertex[0][node] /= 2;
 		duVertex[1][node] /= 2;
+
+		const auto &condition = nodeBoundaryConditions[0][node];
+		const auto &boundary = nodeBoundaryConditions[1][node];
+		if (condition == symmetry || condition == symmetry2 || condition == outletSymmetry) {
+			auto duVer = duVertex[0][node] * cos(uBoundaryData[boundary]) + duVertex[1][node] * sin(uBoundaryData[boundary]);
+			duVertex[0][node] = duVer * cos(uBoundaryData[boundary]);
+			duVertex[1][node] = duVer * sin(uBoundaryData[boundary]);
+		}
+
 	}
 
 	for (uint edge = 0; edge < numEdges; ++edge) {
@@ -345,7 +329,7 @@ void setFlux() {
 		const auto node1 = connectivityMatrixNodeEdge[0][edge] - 1;
 		const auto node2 = connectivityMatrixNodeEdge[1][edge] - 1;
 
-		if (diffusiveMethod == Tizon) {
+		if (diffusiveMethod == TriangleBased) {
 			if (triangle1 >= 0) {
 				auto &dux = duVariable[0][triangle1];
 				auto &duy = duVariable[1][triangle1];
@@ -354,13 +338,6 @@ void setFlux() {
 				auto &normal1y = normalEdge[1][edge];
 				auto &normal2x = normalEdge[4][edge];
 				auto &normal2y = normalEdge[5][edge];
-
-				const auto &condition = nodeBoundaryConditions[0][node1];
-				const auto &boundary = nodeBoundaryConditions[1][node1];
-
-				// if (condition == symmetry || condition == symmetry) {
-				// TODO
-				// }
 
 				flux[1][node1] += ((dux - duVertex[0][node1]) * normal1x + (duy - duVertex[1][node1]) * normal1y) * betaEdge[0][edge];
 				flux[1][node2] += ((dux - duVertex[0][node2]) * normal2x + (duy - duVertex[1][node2]) * normal2y) * betaEdge[1][edge];
@@ -416,10 +393,6 @@ void setFlux() {
 void boundaryFlux() {
 	for (uint node = 0; node < numNodes; ++node) {
 		const auto &condition = nodeBoundaryConditions[0][node];
-		const auto boundary = nodeBoundaryConditions[1][node];
-
-		duVertex[0][node] /= sector[node];
-		duVertex[1][node] /= sector[node];
 
 		switch (condition) {
 			// not a boundary
@@ -436,26 +409,15 @@ void boundaryFlux() {
 			// freeBoundaries
 			case outlet: case free2: {
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				// flux[1][node] = 0;
 				break;
 			}
 			// symmetryBoundaries
 			case symmetry: case symmetry2: {
-				auto duVer = duVertex[0][node] * cos(uBoundaryData[boundary]) + duVertex[1][node] * sin(uBoundaryData[boundary]);
-
-				duVertex[0][node] = duVer * cos(uBoundaryData[boundary]);
-				duVertex[1][node] = duVer * sin(uBoundaryData[boundary]);
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				// flux[1][node] *= 2;
 				break;
 			}
 			case outletSymmetry: {
-				auto duVer = duVertex[0][node] * cos(uBoundaryData[boundary]) + duVertex[1][node] * sin(uBoundaryData[boundary]);
-
-				duVertex[0][node] = duVer * cos(uBoundaryData[boundary]);
-				duVertex[1][node] = duVer * sin(uBoundaryData[boundary]);
 				flux[0][node] = 1 - recession[node] * abs(complex<double>(duVertex[0][node], duVertex[1][node]));
-				// flux[1][node] = 0;
 			}
 			default:
 				break;
@@ -470,24 +432,7 @@ void eulerExplicit() {
 	const auto dtMin = cfl * minHeight / maxRecession;
 
 	for (uint node = 0; node < numNodes; ++node) {
-		auto diffWeight = diffusiveWeight;
-
-		switch (diffusiveMethod) {
-			case Abgrall: {
-				break;
-			}
-			case ZhangShu: {
-				// auto alf = recession[node] * max(maxDuEdge[0][node], maxDuEdge[1][node]);
-				diffWeight *= recession[node];
-				break;
-			}
-			case Tizon: {
-				// diffWeight *= cflViscous / cfl;
-				diffWeight *= recession[node];
-				break;
-			}
-		}
-
+		auto diffWeight = diffusiveWeight * recession[node];
 		uVertex[node] += dtMin * (flux[0][node] + diffWeight * flux[1][node]);
 	}
 

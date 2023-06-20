@@ -20,11 +20,10 @@ ScrollView {
 					id: diffusiveMethod
 					objectName: "diffusiveMethod"
 					width: parent.width
-					currentIndex: 2
+					currentIndex: 0
 					model: [
-						"Abgrall",
-						"Tizón",
-						"Zhang and Shu"
+						"Triangle Based",
+						"Edge Based"
 					]
 				}
 
@@ -34,18 +33,6 @@ ScrollView {
 					placeholderText: "Enter a number"
 					toolTipText: "Weight of the diffusive term. The higher the weight, the more diffusive the method is.\n\nDiffusion must be applied, therefore the weight must be greater than 0."
 					objName: "diffusiveWeight"
-					defaultInput: "1"
-					decimals: true
-					negative: false
-				}
-
-				LabelInput {
-					visible: diffusiveMethod.currentIndex == 1
-					width: parent.width
-					text: "Viscous CFL, only used in Tizón's method"
-					placeholderText: "Enter a number"
-					toolTipText: "Viscous CFL number."
-					objName: "viscousCFL"
 					defaultInput: "1"
 					decimals: true
 					negative: false
