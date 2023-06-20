@@ -2,6 +2,8 @@
 
 Analysis of 2D burn surfaces (3D only when axisymmetric) for solid propellant rockets using Time Marching Method as an alternative of the Level Set Method.
 
+For 3D meshes, see [burnback-3d](https://codeberg.org/iff/burnback-3d). It is also advisable to use the 3D version for study purposes, as code is much more cleaner and simpler due to the tetrahedra based implementation.
+
 Built binaries for Windows and MacOS can be found at [releases](https://github.com/iffse/burnback-qt/releases). For Linux is advisable to compile from source as Qt has no compatibility across different distributions (it is also possible to run the Windows binary through Wine, with minor flickers).
 
 Supports both light and dark theme. Should use accordingly to your system theme. If you want dark theme, and it isn't, add `QT_QUICK_CONTROLS_MATERIAL_THEME=Dark` to your environment variables.
@@ -28,7 +30,7 @@ Everything after the names above will be added to a description field.
 Example files of Gmsh can be found at [examples/gmsh](./examples/gmsh). The commands to be executed to obtain the Json file are:
 ```shell
 gmsh -2 mesh.geo
-python meth_convert.py mesh.msh
+python mesh_convert.py mesh.msh
 ```
 
 ## Compiling
