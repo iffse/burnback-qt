@@ -6,12 +6,12 @@ CONFIG += c++17
 CONFIG(sanitizer) {
 	message("Sanitizer enabled")
 	CONFIG += sanitizer sanitize_address sanitize_undefined sanitize_leak
-	QMAKE_LINK=clang++
-	QMAKE_CXX = clang++
 }
 
 
 CONFIG(debug, debug|release) {
+	QMAKE_CXX = clang++
+	QMAKE_LINK = clang++
 	DESTDIR = target/debug
 } else {
 	DESTDIR = target/release
