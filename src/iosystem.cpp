@@ -261,10 +261,13 @@ void writeData(QString &filepath, QString &origin, bool &pretty) {
 		file << jsonFile << endl;
 	} catch (...) {
 		ofstream file(filepath.toStdString());
+		json jsonFile;
+		jsonFile["burnbackResults"] = results;
+
 		if (pretty)
-			file << setw(4) << results << endl;
+			file << setw(4) << jsonFile << endl;
 		else
-			file << results << endl;
+			file << jsonFile << endl;
 		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file?\nA file with only results is created.");
 	}
 
