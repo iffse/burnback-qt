@@ -126,6 +126,7 @@ void Actions::readMesh(QString filepath) {
 	running = false;
 	root->findChild<QObject*>("runButton")->setProperty("enabled", false);
 	root->findChild<QObject*>("resume")->setProperty("enabled", false);
+	root->findChild<QObject*>("resume")->setProperty("checked", false);
 	appendOutput("--> Reading mesh");
 	if (filepath.isEmpty()) {
 		appendOutput("Error: No file selected");
