@@ -23,7 +23,7 @@ When using Gmsh and the script, you can define boundary conditions with physical
 
 In surfaces, you can define recession velocities:
 
-- `recession 1` (optional): Used to indicate the recession velocity of a node, defaults to 1.
+- `recession 1 [0.5 45]` (optional): Used to indicate the recession velocity of a node, defaults to 1. When 3 number are specified, the recession is considered to be anisotropic. The first 2 numbers are the recession velocity in the `x` and `y` direction respectively, and the last is the rotation of the angle (counterclockwise) in degrees.
 
 Everything after the names above will be added to a description field.
 
