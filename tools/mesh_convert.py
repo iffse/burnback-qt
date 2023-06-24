@@ -74,7 +74,7 @@ for field in mesh.field_data:
 	if condition[0] in ['inlet', 'outlet', 'symmetry', 'condition']:
 		boundaries.append(mesh.field_data[field][0])
 	elif condition[0] == 'recession':
-		recessions[mesh.field_data[field][0]] = float(condition[1])
+		recessions[mesh.field_data[field][0]] = [float(i) for i in condition[1:]]
 
 	condition_code = mesh.field_data[field][0].item()
 	match condition[0]:
@@ -118,7 +118,7 @@ for cell in mesh.cell_data_dict['gmsh:physical']:
 			triangle[condition] = triangle.get(condition, []) + [data['triangle'][entry]]
 
 if recessions != {}:
-	conditions['recession'] = [1] * len(data['point'])
+	conditions['recession'] = [[1]] * len(data['point'])
 	for condition in triangle:
 		nodes = list(set([node for triangle in triangle[condition] for node in triangle]))
 		for node in nodes:

@@ -390,6 +390,18 @@ void setFlux() {
 
 }
 
+void computeRecession() {
+	for (uint node = 0; node < numNodes; ++node) {
+		array<array<double, 1>, 2> flowDirection = {{
+			{duVertex[0][node]},
+			{duVertex[1][node]}
+		}};
+		auto &matrix = recessionMatrix[node];
+		auto effectiveRecession = matrixMultiplication(matrix, flowDirection);
+		recession[node] = sqrt(pow(effectiveRecession[0][0], 2) + pow(effectiveRecession[1][0], 2));
+	}
+}
+
 void boundaryFlux() {
 	for (uint node = 0; node < numNodes; ++node) {
 		const auto &condition = nodeBoundaryConditions[0][node];
@@ -428,7 +440,6 @@ void boundaryFlux() {
 
 void eulerExplicit() {
 	const auto &minHeight = *min_element(height.begin(), height.end());
-	const auto &maxRecession = *min_element(recession.begin(), recession.end());
 	const auto dtMin = cfl * minHeight / maxRecession;
 
 	for (uint node = 0; node < numNodes; ++node) {
@@ -466,7 +477,7 @@ void setBoundary() {
 
 void setBurningArea() {
 	burningArea = vector<double>(numberArea);
-	burningWay = vector<double>(numberArea);
+	burningDepth = vector<double>(numberArea);
 	if (numberArea == 0)
 		return;
 
@@ -477,14 +488,12 @@ void setBurningArea() {
 	uMin += (uMax - uMin) * epsilon;
 	uMax -= (uMax - uMin) * epsilon;
 
-	double orderedNode1;
-	double orderedNode2;
-	double orderedNode3;
+	uint orderedNode1;
+	uint orderedNode2;
+	uint orderedNode3;
 
-	for (uint area = 0; area < numberArea; ++area) {
-		auto uCut = uMin + area * (uMax - uMin) / (numberArea - 1);
-		burningWay[area] = uCut;
-	}
+	for (uint area = 0; area < numberArea; ++area)
+		burningDepth[area] = uMin + area * (uMax - uMin) / (numberArea);
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
 		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
@@ -524,7 +533,7 @@ void setBurningArea() {
 		}
 
 		for (uint area = 0; area < numberArea; ++area) {
-			auto &uCut = burningWay[area];
+			auto &uCut = burningDepth[area];
 
 			if (uCut < uVertex[orderedNode1] && uCut > uVertex[orderedNode3]) {
 				double factor;
@@ -556,4 +565,47 @@ void setBurningArea() {
 			}
 		}
 	}
+}
+
+void calculateAnisotropicMatrix() {
+	recessionMatrix = vector<array<array<double, 2>, 2>>(numNodes);
+	for (uint node = 0; node < numNodes; ++node) {
+		auto &recession = recessionAnisotropic[node];
+		auto &recession1 = recession[0];
+		auto &recession2 = recession[1];
+		auto rotation = recession[2] * M_PI / 180;
+
+		array<array<double, 2>, 2> rotationMatrix = {{
+			{cos(rotation), -sin(rotation)},
+			{sin(rotation), cos(rotation)}
+		}};
+
+		array<array<double, 2>, 2> rec = {{
+			{recession1, 0},
+			{0, recession2}
+		}};
+
+		auto rotationMatrixT = matrixTranspose(rotationMatrix);
+
+		auto _op = matrixMultiplication(rotationMatrixT, rec);
+		recessionMatrix[node] = matrixMultiplication(_op, rotationMatrix);
+	}
+}
+
+double getMaxRecession() {
+	double maxRecession = 0;
+	if (anisotropic) {
+		for (auto &recession : recessionAnisotropic) {
+			auto &recession1 = recession[0];
+			auto &recession2 = recession[1];
+
+			maxRecession = max(maxRecession, max(recession1, recession2));
+		}
+	} else {
+		for (auto &rec : recession) {
+			if (rec > maxRecession)
+				maxRecession = rec;
+		}
+	}
+	return maxRecession;
 }

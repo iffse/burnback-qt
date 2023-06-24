@@ -178,7 +178,7 @@ void Actions::stop() {
 
 void Actions::worker() {
 	#ifdef DEBUG
-	std::feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+	feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
 	#endif
 	if (!resume) {
 		emit newOutput("--> Creating connectivity matrix");
@@ -206,9 +206,14 @@ void Actions::worker() {
 		setMetric();
 		emit newOutput("--> Creating boundary matrix");
 		setBoundary();
+		if (anisotropic) {
+			emit newOutput("--> Creating anisotropic matrix");
+			calculateAnisotropicMatrix();
+		}
+		emit newOutput("--> Getting maximum recession");
+		maxRecession = getMaxRecession();
 
 		uVertex = vector<double>(numNodes, uInit);
-
 		duVertex.fill(vector<double>(numNodes));
 		duVariable.fill(vector<double>(numTriangles));
 		maxDuEdge.fill(vector<double>(numNodes));
@@ -292,7 +297,7 @@ void Actions::afterWorker() {
 	if (numberArea == 0)
 		emit graphBurningArea(QVariantList(), 1, 1);
 	else {
-		double &burningWayMax = *max_element(burningWay.begin(), burningWay.end());
+		double &burningWayMax = *max_element(burningDepth.begin(), burningDepth.end());
 		double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
 		emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax * 1.05);
 	}
@@ -401,8 +406,72 @@ void Actions::contourDataPreviewGenerate(int width) {
 	return;
 }
 
+void Actions::updateRecessions(QString recessions, bool save, bool pretty) {
+	try {
+		if (recessions == "") {
+			recession = vector<double>(numNodes, 1);
+			anisotropic = false;
+			appendOutput("Recessions updated to 1");
+			return;
+		}
+		auto recessionsList = recessions.split("\n");
+		if (recessionsList[0].split(" ").size() == 3) {
+			recessionAnisotropic = vector<array<double, 3>>(numNodes, {0, 0, 0});
+			anisotropic = true;
+			for (uint node = 0; node < numNodes; ++node) {
+				auto values = recessionsList[node].split(" ");
+				recessionAnisotropic[node][0] = values[0].toDouble();
+				recessionAnisotropic[node][1] = values[1].toDouble();
+				recessionAnisotropic[node][2] = values[2].toDouble();
+			}
+			appendOutput("Recessions updated to anisotropic");
+			return;
+		} else if (recessionsList[0].split(" ").size() == 1) {
+			recession = vector<double>(numNodes);
+			anisotropic = false;
+			for (uint node = 0; node < numNodes; ++node) {
+				recession[node] = recessionsList[node].toDouble();
+			}
+			appendOutput("Recessions updated to isotropic");
+			return;
+		} else {
+			appendOutput("Error while updating recessions: wrong format");
+			return;
+		}
+	} catch (...) {
+		appendOutput("Error while updating recessions");
+	}
+
+	try {
+		if (save){
+			auto filepath = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
+			clearSubstring(filepath);
+
+			try {
+				Writer::Json::updateRecessions(filepath, pretty);
+				appendOutput("Updated to " + filepath);
+			} catch (const std::exception &e) {
+				appendOutput("Error while updating boundaries: " + QString(e.what()));
+			} catch (...) {
+				appendOutput("Error while updating boundaries");
+			}
+		}
+	}catch(...) {
+		
+	}
+}
+
 QString Actions::getRecession() {
 	QString output = "";
+	if (anisotropic) {
+		for (const auto &value: recessionAnisotropic) {
+			for (const auto &value2: value)
+				output +=  QString::number(value2) + " ";
+			output += "\n";
+		}
+		output.chop(1);
+		return output;
+	}
 	for (const auto &value: recession) {
 		output +=  QString::number(value) + "\n";
 	}

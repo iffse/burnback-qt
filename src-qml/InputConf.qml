@@ -55,16 +55,6 @@ ScrollView {
 				width: parent.width
 
 				LabelInput {
-					text: "Number of areas"
-					placeholderText: "Enter a number"
-					toolTipText: "Number of areas used toa calculate the error with respect to the minimum distance function and the burning area area\n\nLeave empty to disable"
-					objName: "areas"
-					decimals: false
-					negative: false
-					defaultInput: "30"
-				}
-
-				LabelInput {
 					text: "Initial condition"
 					placeholderText: "Enter a number"
 					toolTipText: "The initial value used for the model"

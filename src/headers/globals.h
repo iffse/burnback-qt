@@ -11,6 +11,7 @@ inline bool running = false;
 inline uint numberArea;
 inline bool axisymmetric;
 inline bool resume;
+inline bool anisotropic;
 
 inline double cfl;
 inline double cflViscous;
@@ -58,9 +59,12 @@ inline std::array<std::vector<double>, 2> duVertex; // gradient in the vertex
 inline std::array<std::vector<double>, 2> maxDuEdge;
 inline std::array<std::vector<double>, 2> flux;
 inline std::vector<double> recession;
+inline std::vector<std::array<std::array<double, 2>, 2>> recessionMatrix;
+inline std::vector<std::array<double, 3>> recessionAnisotropic;
+inline double maxRecession;
 
 inline std::vector<double> burningArea;
-inline std::vector<double> burningWay;
+inline std::vector<double> burningDepth;
 
 inline double timeTotal;
 

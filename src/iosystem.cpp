@@ -85,7 +85,7 @@ void readMeshData(QTextStream &in) {
 	numTriangles = meshData[2];
 	numEdges = meshData[3];
 	recession = vector<double>(numNodes, 1);
-
+	anisotropic = false;
 
 	x = vector<double>(numNodes);
 	y = vector<double>(numNodes);
@@ -226,10 +226,21 @@ void readMesh(QString &filepath) {
 	}
 	try {
 		auto &recessionCondition = conditions["recession"];
+		recession = vector<double>(numNodes);
+		anisotropic = false;
 		if (recessionCondition.size() == 0)
 			recession = vector<double>(numNodes, 1);
-		else
-			recession = recessionCondition.get<vector<double>>();
+		else if (recessionCondition[0].size() == 1) {
+			for (uint i = 0; i < numNodes; ++i)
+				recession[i] = recessionCondition[i][0];
+		} else if (recessionCondition[0].size() == 3) {
+			anisotropic = true;
+			for (uint i = 0; i < numNodes; ++i)
+				recessionAnisotropic = recessionCondition;
+		} else {
+			throw std::invalid_argument("Unable to read recession from JSON file. Wrong format?");
+			return;
+		}
 	} catch(...) {
 		throw std::invalid_argument("Unable to read recession from JSON file. Missing recession field or wrong format?");
 		return;
@@ -311,6 +322,30 @@ void updateBoundaries(QString &filepath, bool &pretty) {
 	else
 		file << jsonFile << endl;
 }
+
+void updateRecessions(QString &filepath, bool &pretty) {
+	fstream originalFile(filepath.toStdString());
+	json jsonFile;
+	try {
+		jsonFile = json::parse(originalFile);
+	} catch (...) {
+		throw std::invalid_argument("Unable to parse JSON file. Invalid JSON file?");
+		return;
+	}
+
+	json updatedRecessions;
+	if (anisotropic) {
+		updatedRecessions = recessionAnisotropic;
+	} else {
+		updatedRecessions = recession;
+	}
+	jsonFile["conditions"]["recession"] = updatedRecessions;
+
+	ofstream file(filepath.toStdString());
+	if (pretty)
+		file << setw(4) << jsonFile << endl;
+	else
+		file << jsonFile << endl;
+}
 }
 //}}}
-
