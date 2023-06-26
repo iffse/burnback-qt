@@ -154,7 +154,11 @@ void readMesh(QString &filepath) {
 		json = json::parse(file);
 	} catch (...) {
 		throw std::invalid_argument("Unable to parse Json file. Invalid JSON file?");
-		return;
+	}
+
+	for (auto &key : {"metaData", "mesh", "conditions"}) {
+		if (json.find(key) == json.end())
+			throw std::invalid_argument("Unable to read mesh data from JSON file. Missing " + string(key) + " field.");
 	}
 
 	try {
@@ -164,7 +168,6 @@ void readMesh(QString &filepath) {
 		numEdges = metaData["edges"];
 	} catch (...) {
 		throw std::invalid_argument("Unable to read mesh data from JSON file. Missing data field?");
-		return;
 	}
 
 	try {
@@ -177,7 +180,6 @@ void readMesh(QString &filepath) {
 		}
 	} catch (...) {
 		throw std::invalid_argument("Unable to read node coordinates from JSON file. Missing nodes field or wrong format?");
-		return;
 	}
 
 	try {
@@ -185,7 +187,6 @@ void readMesh(QString &filepath) {
 		edgeData = mesh["edges"];
 	} catch (...) {
 		throw std::invalid_argument("Unable to read edge connectivity from JSON file. Missing edges field or wrong format?");
-		return;
 	}
 
 	auto &conditions = json["conditions"];
@@ -222,7 +223,6 @@ void readMesh(QString &filepath) {
 		}
 	} catch(...) {
 		throw std::invalid_argument("Unable to read boundary conditions from JSON file. Missing boundary field or wrong format?");
-		return;
 	}
 	if (conditions.find("recession") != conditions.end()) {
 		try {
