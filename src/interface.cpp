@@ -415,18 +415,18 @@ void Actions::updateRecessions(QString recessions, bool save, bool pretty) {
 			return;
 		}
 		auto recessionsList = recessions.split("\n");
-		if (recessionsList[0].split(" ").size() == 3) {
+		if (recessionsList[0].simplified().split(" ").size() == 3) {
 			recessionAnisotropic = vector<array<double, 3>>(numNodes, {0, 0, 0});
 			anisotropic = true;
 			for (uint node = 0; node < numNodes; ++node) {
-				auto values = recessionsList[node].split(" ");
+				auto values = recessionsList[node].simplified().split(" ");
 				recessionAnisotropic[node][0] = values[0].toDouble();
 				recessionAnisotropic[node][1] = values[1].toDouble();
 				recessionAnisotropic[node][2] = values[2].toDouble();
 			}
 			appendOutput("Recessions updated to anisotropic");
 			return;
-		} else if (recessionsList[0].split(" ").size() == 1) {
+		} else if (recessionsList[0].simplified().split(" ").size() == 1) {
 			recession = vector<double>(numNodes);
 			anisotropic = false;
 			recessionAnisotropic.clear();
@@ -444,22 +444,18 @@ void Actions::updateRecessions(QString recessions, bool save, bool pretty) {
 		appendOutput("Error while updating recessions");
 	}
 
-	try {
-		if (save){
-			auto filepath = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
-			clearSubstring(filepath);
+	if (save){
+		auto filepath = root->findChild<QObject*>("fileDialog")->property("fileUrl").toString();
+		clearSubstring(filepath);
 
-			try {
-				Writer::Json::updateRecessions(filepath, pretty);
-				appendOutput("Updated to " + filepath);
-			} catch (const std::exception &e) {
-				appendOutput("Error while updating boundaries: " + QString(e.what()));
-			} catch (...) {
-				appendOutput("Error while updating boundaries");
-			}
+		try {
+			Writer::Json::updateRecessions(filepath, pretty);
+			appendOutput("Updated to " + filepath);
+		} catch (const std::exception &e) {
+			appendOutput("Error while updating boundaries: " + QString(e.what()));
+		} catch (...) {
+			appendOutput("Error while updating boundaries");
 		}
-	}catch(...) {
-		
 	}
 }
 
