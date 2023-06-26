@@ -477,7 +477,7 @@ void setBoundary() {
 
 void setBurningArea() {
 	burningArea = vector<double>(numberArea);
-	burningDepth = vector<double>(numberArea);
+	burningTime = vector<double>(numberArea);
 	if (numberArea == 0)
 		return;
 
@@ -493,7 +493,7 @@ void setBurningArea() {
 	uint orderedNode3;
 
 	for (uint area = 0; area < numberArea; ++area)
-		burningDepth[area] = uMin + area * (uMax - uMin) / (numberArea);
+		burningTime[area] = uMin + area * (uMax - uMin) / (numberArea);
 
 	for (uint triangle = 0; triangle < numTriangles; ++triangle) {
 		auto node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
@@ -533,7 +533,7 @@ void setBurningArea() {
 		}
 
 		for (uint area = 0; area < numberArea; ++area) {
-			auto &uCut = burningDepth[area];
+			auto &uCut = burningTime[area];
 
 			if (uCut < uVertex[orderedNode1] && uCut > uVertex[orderedNode3]) {
 				double factor;

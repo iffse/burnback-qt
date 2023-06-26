@@ -297,7 +297,7 @@ void Actions::afterWorker() {
 	if (numberArea == 0)
 		emit graphBurningArea(QVariantList(), 1, 1);
 	else {
-		double &burningWayMax = *max_element(burningDepth.begin(), burningDepth.end());
+		double &burningWayMax = *max_element(burningTime.begin(), burningTime.end());
 		double &burningAreaMax = *max_element(burningArea.begin(), burningArea.end());
 		emit graphBurningArea(plotData::burningAreaData(), burningWayMax, burningAreaMax * 1.05);
 	}

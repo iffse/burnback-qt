@@ -40,7 +40,7 @@ tuple<double, double> mainLoop() {
 
 	double areaMDF = 0.0;
 	for (uint area = 0; area < numberArea - 1; ++area)
-		areaMDF += 0.5 * (burningArea[area] + burningArea[area + 1]) * (burningDepth[area + 1] - burningDepth[area]);
+		areaMDF += 0.5 * (burningArea[area] + burningArea[area + 1]) * (burningTime[area + 1] - burningTime[area]);
 
 	return {areaGeometric, areaMDF};
 }

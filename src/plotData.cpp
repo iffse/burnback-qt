@@ -165,7 +165,7 @@ QVariant burningAreaData() {
 	QVariantList data;
 
 	for(uint area = 0; area < numberArea; ++area) {
-		data.append(QPointF(burningDepth[area], burningArea[area]));
+		data.append(QPointF(burningTime[area], burningArea[area]));
 	}
 
 	return QVariant::fromValue(data);

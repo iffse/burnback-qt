@@ -64,7 +64,7 @@ inline std::vector<std::array<double, 3>> recessionAnisotropic;
 inline double maxRecession;
 
 inline std::vector<double> burningArea;
-inline std::vector<double> burningDepth;
+inline std::vector<double> burningTime;
 
 inline double timeTotal;
 
