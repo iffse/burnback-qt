@@ -602,10 +602,7 @@ double getMaxRecession() {
 			maxRecession = max(maxRecession, max(recession1, recession2));
 		}
 	} else {
-		for (auto &rec : recession) {
-			if (rec > maxRecession)
-				maxRecession = rec;
-		}
+		maxRecession = *max_element(recession.begin(), recession.end());
 	}
 	return maxRecession;
 }

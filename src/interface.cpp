@@ -429,6 +429,8 @@ void Actions::updateRecessions(QString recessions, bool save, bool pretty) {
 		} else if (recessionsList[0].split(" ").size() == 1) {
 			recession = vector<double>(numNodes);
 			anisotropic = false;
+			recessionAnisotropic.clear();
+			recessionMatrix.clear();
 			for (uint node = 0; node < numNodes; ++node) {
 				recession[node] = recessionsList[node].toDouble();
 			}
