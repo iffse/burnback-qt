@@ -224,25 +224,31 @@ void readMesh(QString &filepath) {
 		throw std::invalid_argument("Unable to read boundary conditions from JSON file. Missing boundary field or wrong format?");
 		return;
 	}
-	try {
+	if (conditions.find("recession") != conditions.end()) {
 		try {
-			auto recessionCondition = conditions["recession"].get<vector<double>>();
-			if (recessionCondition.size() == 0)
-				recession = vector<double>(numNodes, 1);
-			else
-				recession = recessionCondition;
-			recessionAnisotropic.clear();
-			recessionMatrix.clear();
-			anisotropic = false;
-		}catch(...) {
-			auto recessionCondition = conditions["recession"].get<vector<array<double, 3>>>();
-			recession = vector<double>(numNodes);
-			recessionAnisotropic = recessionCondition;
-			anisotropic = true;
+			try {
+				auto recessionCondition = conditions["recession"].get<vector<double>>();
+				if (recessionCondition.size() == 0)
+					recession = vector<double>(numNodes, 1);
+				else
+					recession = recessionCondition;
+				recessionAnisotropic.clear();
+				recessionMatrix.clear();
+				anisotropic = false;
+			}catch(...) {
+				auto recessionCondition = conditions["recession"].get<vector<array<double, 3>>>();
+				recession = vector<double>(numNodes);
+				recessionAnisotropic = recessionCondition;
+				anisotropic = true;
+			}
+		} catch(...) {
+			throw std::invalid_argument("Unable to read recession conditions from JSON file. Wrong format?");
 		}
-	} catch(...) {
-		throw std::invalid_argument("Unable to read recession from JSON file. Missing recession field or wrong format?");
-		return;
+	} else {
+		recession = vector<double>(numNodes, 1);
+		recessionAnisotropic.clear();
+		recessionMatrix.clear();
+		anisotropic = false;
 	}
 }
 }

@@ -25,16 +25,15 @@ double getMaxRecession();
 
 template <typename T, typename V>
 auto matrixMultiplication(const T &matrix1, const V &matrix2) {
-	auto matrix3 = matrix2;
-	auto dimension = matrix1.size();
-	for (uint i = 0; i < dimension; ++i) {
-		for (uint j = 0; j < dimension; ++j) {
-			matrix3[i][j] = 0;
-			for (uint k = 0; k < dimension; ++k)
-				matrix3[i][j] += matrix1[i][k] * matrix2[k][j];
+	auto matrix = matrix1;
+	for (uint i = 0; i < matrix1.size(); ++i) {
+		for (uint j = 0; j < matrix2[0].size(); ++j) {
+			matrix[i][j] = 0;
+			for (uint k = 0; k < matrix1[0].size(); ++k)
+				matrix[i][j] += matrix1[i][k] * matrix2[k][j];
 		}
 	}
-	return matrix3;
+	return matrix;
 }
 
 template <typename T>
