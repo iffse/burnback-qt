@@ -74,7 +74,12 @@ for field in mesh.field_data:
 	if condition[0] in ['inlet', 'outlet', 'symmetry', 'condition']:
 		boundaries.append(mesh.field_data[field][0])
 	elif condition[0] == 'recession':
-		recessions[mesh.field_data[field][0]] = [float(i) for i in condition[1:]]
+		if len(condition) == 1:
+			recessions[mesh.field_data[field][0]] = 1
+		if len(condition) == 2:
+			recessions[mesh.field_data[field][0]] = float(condition[1])
+		if len(condition) > 2:
+			recessions[mesh.field_data[field][0]] = [float(i) for i in condition[1:]]
 
 	condition_code = mesh.field_data[field][0].item()
 	match condition[0]:
@@ -135,8 +140,8 @@ data['edge'] = [list(node) + [*entries] for node, entries in edges.items()]
 # index corrections
 print('Correcting indices')
 for edge in data['edge']:
-	edge[0:2] = list(map(lambda x: x+1, edge[0:2]))
-	edge[2:4] = list(map(lambda x: x+1 if x >= 0 else x, edge[2:4]))
+	edge[0:2] = list(map(lambda x: x + 1, edge[0:2]))
+	edge[2:4] = list(map(lambda x: x + 1 if x >= 0 else x, edge[2:4]))
 
 meshOut = {
 	'metaData': {
@@ -168,4 +173,3 @@ with open(output_name, 'w') as file:
 		json.dump(meshOut, file)
 
 print('Mesh converted to ' + output_name + ' successfully')
-

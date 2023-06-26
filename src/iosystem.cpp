@@ -9,6 +9,7 @@
 
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <typeinfo>
 
 using namespace std;
 using json = nlohmann::json;
@@ -225,21 +226,18 @@ void readMesh(QString &filepath) {
 		return;
 	}
 	try {
-		auto &recessionCondition = conditions["recession"];
-		recession = vector<double>(numNodes);
-		anisotropic = false;
-		if (recessionCondition.size() == 0)
-			recession = vector<double>(numNodes, 1);
-		else if (recessionCondition[0].size() == 1) {
-			for (uint i = 0; i < numNodes; ++i)
-				recession[i] = recessionCondition[i][0];
-		} else if (recessionCondition[0].size() == 3) {
+		try {
+			auto recessionCondition = conditions["recession"].get<vector<double>>();
+			if (recessionCondition.size() == 0)
+				recession = vector<double>(numNodes, 1);
+			else
+				recession = recessionCondition;
+			anisotropic = false;
+		}catch(...) {
+			auto recessionCondition = conditions["recession"].get<vector<array<double, 3>>>();
+			recession = vector<double>(numNodes);
 			anisotropic = true;
-			for (uint i = 0; i < numNodes; ++i)
-				recessionAnisotropic = recessionCondition;
-		} else {
-			throw std::invalid_argument("Unable to read recession from JSON file. Wrong format?");
-			return;
+			recessionAnisotropic = recessionCondition;
 		}
 	} catch(...) {
 		throw std::invalid_argument("Unable to read recession from JSON file. Missing recession field or wrong format?");
