@@ -39,9 +39,7 @@ results = data['burnbackResults']
 
 # correcting index
 print('Correcting index')
-triangle = mesh['triangles']
-for tri in triangle:
-	tri = list(map(lambda x: x - 1, tri))
+triangle = [[node - 1 for node in tri] for tri in mesh['triangles']]
 
 point = mesh['nodes']
 cells = [
