@@ -44,6 +44,13 @@ gmsh -2 mesh.geo
 python mesh_convert.py mesh.msh
 ```
 
+If you want to use the exported results to another format other than Json (for instance `.CGNS`, or `.dat` for TecPlot/ParaView, etc.) you can use the [result_convert.py](./tools/result_convert.py) script. Usage is:
+```shell
+python result_convert.py result.json output.extension
+```
+You can provide only the extension name for the output file. In this case the name is inferred from the input file.
+
+
 ## Compiling
 
 Can be compiled by either using command line or using the QtCreator. Binaries should be found at `<Project Dir>/target/debug|release`. When building with QtCreator, `<Project Dir>` equals to where the build location is set.
