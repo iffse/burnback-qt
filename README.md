@@ -1,12 +1,21 @@
 # Burnback-qt
 
-Analysis of 2D burn surfaces (3D only when axisymmetric) for solid propellant rockets using Time Marching Method as an alternative of the Level Set Method.
+Analysis of 2D burn surfaces (3D only when axisymmetric) for solid propellant rockets using Time Marching Method as an alternative of the Level Set Method. Key features:
+
+- Combustion time computation with triangular meshes for solid propellant rockets
+- Choose from triangle based or edge based computation
+- Supports per node configuration of the recession speed
+- Supports isotropic and anisotropic propellants
+- Graphical interface to evaluate the results
+- Import and export data of any mesh formats with a python script
 
 For 3D meshes, see [burnback-3d](https://codeberg.org/iff/burnback-3d). It is also advisable to use the 3D version for study purposes, as code is much more cleaner and simpler due to the tetrahedra based implementation.
 
 Built binaries for Windows and MacOS can be found at [releases](https://github.com/iffse/burnback-qt/releases). For Linux is advisable to compile from source as Qt has no compatibility across different distributions (it is also possible to run the Windows binary through Wine, with minor flickers).
 
 Supports both light and dark theme. Should use accordingly to your system theme. If you want dark theme, and it isn't, add `QT_QUICK_CONTROLS_MATERIAL_THEME=Dark` to your environment variables.
+
+![burnback-qt interface](img/interface.png)
 
 ## Usage
 
