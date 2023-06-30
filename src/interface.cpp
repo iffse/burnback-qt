@@ -214,8 +214,8 @@ void Actions::worker() {
 		maxRecession = getMaxRecession();
 
 		uVertex = vector<double>(numNodes, uInit);
-		duVertex.fill(vector<double>(numNodes));
-		duVariable.fill(vector<double>(numTriangles));
+		duVertex.clear();
+		duVariable = vector<array<double, 2>>(numTriangles);
 		maxDuEdge.fill(vector<double>(numNodes));
 		flux.fill(vector<double>(numNodes));
 		currentIter = 0;

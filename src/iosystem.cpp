@@ -258,12 +258,13 @@ void writeData(QString &filepath, QString &origin, bool &pretty) {
 	fstream originalFile(origin.toStdString());
 	json results;
 	results["uVertex"] = uVertex;
-	results["duVertex"] = duVertex;
+	// results["duVertex"] = duVertex;
+	results["gradient"] = duVariable;
 	results["fluxes"] = flux;
 	results["burningArea"] = burningArea;
 	results["timeStep"] = cfl * *min_element(height.begin(), height.end());
 	results["timeTotal"] = timeTotal;
-	results["error"] = errorIter;
+	results["error"] = errorIter.back();
 
 	try {
 		json jsonFile = json::parse(originalFile);

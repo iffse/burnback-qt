@@ -142,6 +142,8 @@ print('Correcting indices')
 for edge in data['edge']:
 	edge[0:2] = list(map(lambda x: x + 1, edge[0:2]))
 	edge[2:4] = list(map(lambda x: x + 1 if x >= 0 else x, edge[2:4]))
+for triangle in data['triangle']:
+	triangle = list(map(lambda x: x + 1, triangle))
 
 meshOut = {
 	'metaData': {
