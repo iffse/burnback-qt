@@ -148,6 +148,9 @@ void Actions::afterReadMesh(bool sucess) {
 
 	root->findChild<QObject*>("runButton")->setProperty("enabled", true);
 	appendOutput("--> Mesh read sucessfully");
+	appendOutput("Nodes: " + QString::number(numNodes));
+	appendOutput("Edges: " + QString::number(numEdges));
+	appendOutput("Triangles: " + QString::number(numTriangles));
 }
 
 void Actions::run() {

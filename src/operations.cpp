@@ -248,10 +248,10 @@ void setMetric() {
 		auto vertexV2 = abs(complex<double>(vertexX2, vertexY2));
 		auto vertexV3 = abs(complex<double>(vertexX3, vertexY3));
 
-		auto sup = [](double x1, double y1, double x2, double y2, double x3, double y3) {
+		auto surface = [](double x1, double y1, double x2, double y2, double x3, double y3) {
 			return 0.5 * abs(x2 * y3 + x3 * y1 + x1 * y2 - x3 * y2 - x1 * y3 - x2 * y1);
 		};
-		area[triangle] = sup( x[node1], y[node1], x[node2], y[node2], x[node3], y[node3] );
+		area[triangle] = surface( x[node1], y[node1], x[node2], y[node2], x[node3], y[node3] );
 
 		// max of the three vertices
 		auto vertexVMax = max(max(vertexV1, vertexV2), vertexV3);

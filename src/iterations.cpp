@@ -25,12 +25,13 @@ tuple<double, double> mainLoop() {
 		int node1 = connectivityMatrixNodeTriangle[0][triangle] - 1;
 		int node2 = connectivityMatrixNodeTriangle[1][triangle] - 1;
 		int node3 = connectivityMatrixNodeTriangle[2][triangle] - 1;
-		double yCharacteristic = (y[node1] + y[node2] + y[node3]) / 3;
 
 		double cellArea = area[triangle];
 
-		if (axisymmetric)
+		if (axisymmetric) {
+			double yCharacteristic = (y[node1] + y[node2] + y[node3]) / 3;
 			cellArea *= yCharacteristic;
+		}
 
 		areaGeometric += cellArea;
 	}
